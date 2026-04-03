@@ -1,7 +1,5 @@
 # OPSX 工作流
 
-> 欢迎在 [Discord](https://discord.gg/YctCnvvshC) 上反馈意见。
-
 ## 它是什么？
 
 OPSX 现在是 OpenSpec 的标准工作流。
@@ -641,4 +639,4 @@ openspec-cn schema validate my-workflow
 
 这还比较粗糙。这是有意为之——我们正在学习什么有效。
 
-发现了错误？有想法？在 [Discord](https://discord.gg/YctCnvvshC) 上加入我们或在 [GitHub](https://github.com/Fission-AI/openspec/issues) 上提交问题。
+发现了错误？有想法？直接在当前仓库调整工作流文件，或运行 `openspec-cn feedback "标题" --body "详细说明"` 生成本地反馈记录。

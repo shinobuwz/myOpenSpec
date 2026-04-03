@@ -73,7 +73,6 @@
 
             meta = with pkgs.lib; {
               description = "AI-native system for spec-driven development";
-              homepage = "https://github.com/studyzy/OpenSpec-cn";
               license = licenses.mit;
               maintainers = [ ];
               mainProgram = "openspec-cn";

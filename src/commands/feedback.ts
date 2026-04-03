@@ -1,34 +1,9 @@
-import { execSync, execFileSync } from 'child_process';
 import { createRequire } from 'module';
+import { existsSync, mkdirSync, writeFileSync } from 'fs';
 import os from 'os';
+import path from 'path';
 
 const require = createRequire(import.meta.url);
-
-/**
- * Check if gh CLI is installed and available in PATH
- * Uses platform-appropriate command: 'where' on Windows, 'which' on Unix/macOS
- */
-function isGhInstalled(): boolean {
-  try {
-    const command = process.platform === 'win32' ? 'where gh' : 'which gh';
-    execSync(command, { stdio: 'pipe' });
-    return true;
-  } catch {
-    return false;
-  }
-}
-
-/**
- * Check if gh CLI is authenticated
- */
-function isGhAuthenticated(): boolean {
-  try {
-    execSync('gh auth status', { stdio: 'pipe' });
-    return true;
-  } catch {
-    return false;
-  }
-}
 
 /**
  * Get OpenSpec version from package.json
@@ -95,90 +70,48 @@ function formatBody(bodyText?: string): string {
 }
 
 /**
- * Generate a pre-filled GitHub issue URL for manual submission
+ * Resolve a local directory for storing feedback files
  */
-function generateManualSubmissionUrl(title: string, body: string): string {
-  const repo = 'studyzy/OpenSpec-cn';
-  const encodedTitle = encodeURIComponent(title);
-  const encodedBody = encodeURIComponent(body);
-  const encodedLabels = encodeURIComponent('feedback');
-
-  return `https://github.com/${repo}/issues/new?title=${encodedTitle}&body=${encodedBody}&labels=${encodedLabels}`;
+function resolveFeedbackDir(): string {
+  const cwd = process.cwd();
+  const projectOpenSpecDir = path.join(cwd, 'openspec');
+  if (existsSync(projectOpenSpecDir)) {
+    return path.join(projectOpenSpecDir, 'feedback');
+  }
+  return path.join(cwd, '.openspec', 'feedback');
 }
 
 /**
- * Display formatted feedback content for manual submission
+ * Generate a filesystem-safe slug from the title
  */
-function displayFormattedFeedback(title: string, body: string): void {
-  console.log('\n--- 格式化后的反馈内容 ---');
-  console.log(`标题: ${title}`);
-  console.log(`标签: feedback`);
-  console.log('\n正文:');
-  console.log(body);
-  console.log('--- 反馈结束 ---\n');
+function slugifyTitle(title: string): string {
+  const slug = title
+    .toLowerCase()
+    .replace(/[^a-z0-9\u4e00-\u9fff]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 48);
+
+  return slug || 'feedback';
 }
 
 /**
- * Submit feedback via gh CLI
- * Uses execFileSync to prevent shell injection vulnerabilities
+ * Persist feedback to a local markdown file
  */
-function submitViaGhCli(title: string, body: string): void {
-  try {
-    const result = execFileSync(
-      'gh',
-      [
-        'issue',
-        'create',
-        '--repo',
-        'studyzy/OpenSpec-cn',
-        '--title',
-        title,
-        '--body',
-        body,
-        '--label',
-        'feedback',
-      ],
-      { encoding: 'utf-8', stdio: 'pipe' }
-    );
+function writeFeedbackFile(title: string, body: string): string {
+  const feedbackDir = resolveFeedbackDir();
+  mkdirSync(feedbackDir, { recursive: true });
 
-    const issueUrl = result.trim();
-    console.log(`\n✓ 反馈提交成功！`);
-    console.log(`Issue 链接: ${issueUrl}\n`);
-  } catch (error: any) {
-    // Display the error output from gh CLI
-    if (error.stderr) {
-      console.error(error.stderr.toString());
-    } else if (error.message) {
-      console.error(error.message);
-    }
+  const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+  const filename = `${timestamp}-${slugifyTitle(title)}.md`;
+  const outputPath = path.join(feedbackDir, filename);
 
-    // Exit with the same code as gh CLI
-    process.exit(error.status ?? 1);
-  }
-}
+  const content = `# ${title}
 
-/**
- * Handle fallback when gh CLI is not available or not authenticated
- */
-function handleFallback(title: string, body: string, reason: 'missing' | 'unauthenticated'): void {
-  if (reason === 'missing') {
-    console.log('⚠️  未找到 GitHub CLI。需要手动提交。');
-  } else {
-    console.log('⚠️  GitHub 未认证。需要手动提交。');
-  }
+${body}
+`;
 
-  displayFormattedFeedback(title, body);
-
-  const manualUrl = generateManualSubmissionUrl(title, body);
-  console.log('请手动提交您的反馈:');
-  console.log(manualUrl);
-
-  if (reason === 'unauthenticated') {
-    console.log('\n若要将来自动提交，请运行: gh auth login');
-  }
-
-  // Exit with success code (fallback is successful)
-  process.exit(0);
+  writeFileSync(outputPath, content, 'utf-8');
+  return outputPath;
 }
 
 /**
@@ -186,23 +119,10 @@ function handleFallback(title: string, body: string, reason: 'missing' | 'unauth
  */
 export class FeedbackCommand {
   async execute(message: string, options?: { body?: string }): Promise<void> {
-    // Format title and body once for all code paths
     const title = formatTitle(message);
     const body = formatBody(options?.body);
-
-    // Check if gh CLI is installed
-    if (!isGhInstalled()) {
-      handleFallback(title, body, 'missing');
-      return;
-    }
-
-    // Check if gh CLI is authenticated
-    if (!isGhAuthenticated()) {
-      handleFallback(title, body, 'unauthenticated');
-      return;
-    }
-
-    // Submit via gh CLI
-    submitViaGhCli(title, body);
+    const outputPath = writeFeedbackFile(title, body);
+    console.log(`\n✓ 反馈已写入本地文件`);
+    console.log(`路径: ${outputPath}\n`);
   }
 }

@@ -9,8 +9,8 @@ import type { SkillTemplate } from '../types.js';
 export function getFeedbackSkillTemplate(): SkillTemplate {
   return {
     name: 'feedback',
-    description: '收集并提交有关 OpenSpec 的用户反馈，包含上下文增强和匿名化。',
-    instructions: `帮助用户提交有关 OpenSpec 的反馈。
+    description: '收集并记录有关 OpenSpec 的用户反馈，包含上下文增强和匿名化。',
+    instructions: `帮助用户记录有关 OpenSpec 的反馈。
 
 **目标**：引导用户完成收集、增强和提交反馈的过程，同时通过匿名化确保隐私。
 
@@ -44,10 +44,10 @@ export function getFeedbackSkillTemplate(): SkillTemplate {
    - 在提交前征求明确的批准
    - 允许用户要求修改
 
-5. **确认后提交**
+5. **确认后写入本地反馈文件**
    - 使用 \`openspec-cn feedback\` 命令进行提交
    - 格式：\`openspec-cn feedback "标题" --body "正文内容"\`
-   - 该命令将自动添加元数据（版本、平台、时间戳）
+   - 该命令将自动添加元数据（版本、平台、时间戳）并写入当前项目
 
 **草案示例**
 

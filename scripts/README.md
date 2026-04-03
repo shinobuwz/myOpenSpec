@@ -32,6 +32,6 @@ git commit -m "chore: update flake.nix dependency hash"
 
 Post-installation script that runs after package installation.
 
-## pack-version-check.mjs
+## install-local.sh
 
-Validates package version consistency before publishing.
+Builds the CLI from the current checkout and links `openspec-cn` into your local npm global bin.

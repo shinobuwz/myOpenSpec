@@ -239,38 +239,6 @@ jobs:
         if: always()
         run: git checkout -- flake.nix || true
 
-  validate-changesets:
-    name: Validate Changesets
-    runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request'
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 9
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'pnpm'
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Validate changesets
-        run: |
-          if command -v changeset &> /dev/null; then
-            pnpm exec changeset status --since=origin/main
-          else
-            echo "Changesets not configured, skipping validation"
-          fi
-
   required-checks-pr:
     name: All checks passed
     runs-on: ubuntu-latest

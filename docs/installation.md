@@ -4,53 +4,41 @@
 
 - **Node.js 20.19.0 或更高版本** —— 查看版本：`node --version`
 
-## 包管理器
+## 本地安装
 
-### npm
-
-```bash
-npm install -g @fission-ai/openspec@latest
-```
-
-### pnpm
+在当前仓库根目录执行：
 
 ```bash
-pnpm add -g @fission-ai/openspec@latest
+./scripts/install-local.sh
 ```
 
-### yarn
+该脚本会：
 
-```bash
-yarn global add @fission-ai/openspec@latest
-```
-
-### bun
-
-```bash
-bun add -g @fission-ai/openspec@latest
-```
+- 安装依赖
+- 构建 CLI
+- 使用 `npm link` 把 `openspec-cn` 链接到全局命令
 
 ## Nix
 
-无需安装，直接运行 OpenSpec：
+如果你更偏向 Nix，也可以直接从当前仓库运行：
 
 ```bash
-nix run github:Fission-AI/OpenSpec -- init
+nix run . -- init
 ```
 
 或者安装到 profile：
 
 ```bash
-nix profile install github:Fission-AI/OpenSpec
+nix profile install .
 ```
 
-或者在 `flake.nix` 中加入到开发环境：
+或者在其他项目的 `flake.nix` 中通过本地路径引入：
 
 ```nix
 {
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-    openspec.url = "github:Fission-AI/OpenSpec";
+    openspec.url = "path:/path/to/OpenSpec-cn";
   };
 
   outputs = { nixpkgs, openspec, ... }: {

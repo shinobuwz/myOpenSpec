@@ -714,10 +714,9 @@ export class InitCommand {
       console.log("完成。运行 'openspec-cn config profile' 配置您的工作流程。");
     }
 
-    // Links
     console.log();
-    console.log(`了解更多：${chalk.cyan('https://github.com/studyzy/OpenSpec-cn')}`);
-    console.log(`反馈：   ${chalk.cyan('https://github.com/studyzy/OpenSpec-cn/issues')}`);
+    console.log(`更多命令：${chalk.cyan('openspec-cn --help')}`);
+    console.log(`记录反馈：${chalk.cyan('openspec-cn feedback "标题" --body "详细说明"')}`);
 
     // Restart instruction if any tools were configured
     if (results.createdTools.length > 0 || results.refreshedTools.length > 0) {

@@ -568,6 +568,5 @@ project/
 
 ## 获取帮助
 
-- **Discord**：[discord.gg/YctCnvvshC](https://discord.gg/YctCnvvshC)
-- **GitHub Issues**：[github.com/Fission-AI/OpenSpec/issues](https://github.com/Fission-AI/OpenSpec/issues)
 - **文档**：[docs/opsx.md](opsx.md) 用于完整的 OPSX 参考
+- **本地反馈**：运行 `openspec-cn feedback "标题" --body "详细说明"` 生成反馈文件

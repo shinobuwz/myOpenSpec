@@ -11,17 +11,9 @@
     "ai",
     "development"
   ],
-  "homepage": "https://github.com/studyzy/OpenSpec-cn",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/studyzy/OpenSpec-cn"
-  },
   "license": "MIT",
   "author": "OpenSpec Contributors",
   "type": "module",
-  "publishConfig": {
-    "access": "public"
-  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -51,19 +43,12 @@
     "test:coverage": "vitest --coverage",
     "test:postinstall": "node scripts/postinstall.js",
     "prepare": "pnpm run build",
-    "prepublishOnly": "pnpm run build",
-    "postinstall": "node scripts/postinstall.js",
-    "check:pack-version": "node scripts/pack-version-check.mjs",
-    "release": "pnpm run release:ci",
-    "release:ci": "pnpm run check:pack-version && pnpm exec changeset publish",
-    "changeset": "changeset"
+    "postinstall": "node scripts/postinstall.js"
   },
   "engines": {
     "node": ">=20.19.0"
   },
   "devDependencies": {
-    "@changesets/changelog-github": "^0.5.2",
-    "@changesets/cli": "^2.27.7",
     "@types/node": "^24.2.0",
     "@vitest/ui": "^3.2.4",
     "eslint": "^9.39.2",

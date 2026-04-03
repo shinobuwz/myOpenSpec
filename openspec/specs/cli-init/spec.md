@@ -89,7 +89,7 @@ The command SHALL provide clear, actionable next steps upon successful initializ
   - `/opsx:new` - Start a new change
   - `/opsx:continue` - Create the next artifact
   - `/opsx:apply` - Implement tasks
-- **AND** display links to documentation and feedback
+- **AND** display local guidance for help and feedback recording
 
 #### Scenario: Displaying restart instruction
 
