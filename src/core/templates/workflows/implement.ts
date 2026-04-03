@@ -16,8 +16,9 @@ export function getImplementSkillTemplate(): SkillTemplate {
 
 1. 读取当前变更的 \`tasks.md\`，获取完整任务列表
 2. 确认所有产出物（proposal/design/specs）已就绪
-3. 确认测试框架已配置并可运行
-4. 找到第一个未完成的任务
+3. 读取 \`.aiknowledge/codemap/\` 中涉及模块的文件，定位代码位置和模块边界
+4. 确认测试框架已配置并可运行
+5. 找到第一个未完成的任务
 
 ## 流程
 

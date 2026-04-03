@@ -15,8 +15,10 @@ export function getBrainstormSkillTemplate(): SkillTemplate {
 ## 启动序列
 
 1. 执行 \`openspec-cn list --json\` 检查是否有相关的活跃变更
-2. 阅读用户提出的需求或想法
-3. 如果存在相关变更，阅读其产出物获取上下文
+2. 读取 \`.aiknowledge/codemap/index.md\`（如存在），了解项目架构全貌
+3. 阅读用户提出的需求或想法
+4. 如果存在相关变更，阅读其产出物获取上下文
+5. 如果涉及特定技术领域，读取 \`.aiknowledge/pitfalls/<领域>/index.md\` 了解已知踩坑
 
 ## 硬性门控
 

@@ -34,7 +34,106 @@ export function getShipSkillTemplate(): SkillTemplate {
 - 变更从 \`openspec/changes/\` 移动到 \`openspec/archive/\`
 - 确认归档成功
 
-### 4. Git 操作
+### 4. 复利提炼（Compound Engineering）
+归档后自动提炼本次变更的经验，持久化到 \`.aiknowledge/pitfalls/\` 目录。
+
+**提炼流程：**
+1. 读取本次 change 的 git history（\`git log --oneline\` 筛选相关 commit）
+2. 扫描 fix/revert commit → 提炼为**易错点**
+3. 对比本次变更涉及的公开接口/依赖变化 → 提炼为**架构变动**
+4. 如果审查报告中有 CRITICAL/WARNING 问题，提炼为**踩坑记录**
+
+**写入规则：**
+- 按技术领域分文件，同类型经验集中在一个文档中不断追加
+- 如果已有同领域文件，追加条目；如果是新领域，创建新文件
+- 每个条目带语言/平台标签
+- 更新 \`.aiknowledge/pitfalls/index.md\` 目录索引
+
+**预定义技术领域（文件名）：**
+
+| 文件 | 覆盖范围 |
+|------|----------|
+| \`memory.md\` | 内存泄漏、OOM、循环引用、野指针 |
+| \`concurrency.md\` | 死锁、竞态条件、线程安全、异步陷阱 |
+| \`api.md\` | 接口变更、兼容性破坏、序列化问题 |
+| \`build.md\` | 编译错误、依赖冲突、链接问题、打包陷阱 |
+| \`testing.md\` | 测试陷阱、mock 泄漏、flaky test、覆盖率盲区 |
+| \`performance.md\` | 性能退化、N+1 查询、渲染卡顿 |
+| \`security.md\` | 安全漏洞、注入、权限绕过 |
+| \`platform.md\` | 平台差异（Android/iOS/Web/小程序）踩坑 |
+| \`misc.md\` | 不属于以上类别的其他经验 |
+
+新领域可按需创建，但优先归入已有类别。
+
+**目录结构（渐进式披露）：**
+\`\`\`
+.aiknowledge/pitfalls/
+├── index.md                        # 顶层目录：领域列表 + 条目数量 + 链接
+├── memory/
+│   ├── index.md                    # 领域目录：条目列表 + 一句话摘要 + 链接
+│   ├── <short-slug>.md             # 单个经验条目（独立文件）
+│   └── <short-slug>.md
+├── concurrency/
+│   ├── index.md
+│   └── ...
+└── ...
+\`\`\`
+
+每个领域是一个目录，每条经验是独立文件。AI 按需加载：先读顶层 index → 领域 index → 具体条目。
+
+**单个条目文件格式（\`<short-slug>.md\`）：**
+\`\`\`markdown
+# <简短描述>
+
+**标签**：[C++] [Android]
+
+## 现象
+出了什么问题
+
+## 根因
+为什么会出问题
+
+## 修复前
+\\\`\\\`\\\`diff
+- 问题代码（从 git diff 中提取核心片段）
+\\\`\\\`\\\`
+
+## 修复后
+\\\`\\\`\\\`diff
++ 修复代码（对应的修复片段）
+\\\`\\\`\\\`
+
+## 要点
+一句话总结教训，方便 index 引用
+
+## 来源
+<change-name>（YYYY-MM-DD）| commit: <short-sha>
+\`\`\`
+
+**diff 提取规则：**
+- 从 fix/revert 的 git diff 中提取**核心变更片段**，不要贴整个文件
+- 保留足够上下文（前后各 3-5 行）让读者理解代码位置
+- 如果修复涉及多处，只保留最关键的 1-2 处
+
+- 如果 \`.aiknowledge/pitfalls/\` 不存在，创建它
+- 提炼内容由 AI 自动生成，但写入前提议用户确认
+
+### 5. 项目地图更新（Codemap）
+归档后更新 \`.aiknowledge/codemap/\`，反映本次变更带来的架构变化。
+
+**更新流程：**
+1. 读取 \`.aiknowledge/codemap/index.md\`（如不存在则创建）
+2. 对比本次变更涉及的模块，判断是否有新模块或模块边界变化
+3. 更新/创建对应模块目录下的文件（overview.md、dependencies.md 等）
+4. 如果模块间链路关系有变化，更新 \`connections.md\`
+5. 更新 \`index.md\` 目录索引
+
+**写入原则：**
+- 地图而非百科：只记录"是什么"和"怎么连接"
+- 只更新本次变更涉及的模块，不全量重写
+- 写入前提议用户确认
+
+### 6. Git 操作
 - 提交归档变更
 - 如果需要，创建 tag 标记版本
 - 如果需要，推送到远程仓库
@@ -43,11 +142,14 @@ export function getShipSkillTemplate(): SkillTemplate {
 
 - Delta specs 已同步
 - 变更已归档
+- 复利提炼已写入 \`.aiknowledge/pitfalls/\`
+- 项目地图已更新 \`.aiknowledge/codemap/\`
 - 所有 git 操作完成
 
 ## 退出契约
 
 - 输出上线摘要，包含变更名称、归档路径和 git 状态
+- 输出知识更新摘要（新增踩坑条目数、更新模块数）
 - 确认工作流完整闭环`,
     license: 'MIT',
     compatibility: '需要 openspec CLI。',

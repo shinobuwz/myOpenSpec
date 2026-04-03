@@ -16,13 +16,16 @@ export function getPlanSkillTemplate(): SkillTemplate {
 
 1. 确认需求已经过脑暴或探索阶段的澄清
 2. 执行 \`openspec-cn list --json\` 检查是否已有相关变更
-3. 收集必要的上下文信息
+3. 读取 \`.aiknowledge/codemap/\` 中涉及模块的 overview.md 和 dependencies.md，了解模块边界和依赖
+4. 读取 \`.aiknowledge/pitfalls/\` 中相关领域的 index.md，在设计中规避已知陷阱
+5. 收集必要的上下文信息
 
 ## 流程
 
 ### 1. 创建变更
-- 使用 \`openspec-cn new <name>\` 创建新变更
-- 变更名称应简洁、描述性强，使用 kebab-case
+- 使用 \`openspec-cn new YYYY-MM-DD-<name>\` 创建新变更
+- **变更名称必须带日期前缀**（如 \`2026-04-03-add-auth\`），便于按时间追溯
+- 名称部分简洁、描述性强，使用 kebab-case
 
 ### 2. 指令循环
 逐个生成以下产出物，每个都经过用户确认：

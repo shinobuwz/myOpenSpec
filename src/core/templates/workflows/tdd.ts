@@ -21,6 +21,7 @@ export function getTddSkillTemplate(): SkillTemplate {
 1. 确认当前任务的需求和验收标准
 2. 探测项目使用的测试框架
 3. 确认测试命令可以正常运行
+4. 读取 \`.aiknowledge/pitfalls/\` 中与当前任务相关领域的 index.md，写测试时覆盖已知易错点
 
 ## 测试框架探测
 
