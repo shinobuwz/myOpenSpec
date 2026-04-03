@@ -61,12 +61,13 @@ openspec-cn init --tools none
 
 ## 安装内容
 
-对于每个工具，OpenSpec 默认会生成完整工作流所需的 22 个技能文件：
+对于每个工具，OpenSpec 默认会生成完整工作流所需的 23 个技能文件：
 
 | 技能 | 用途 |
 |-------|---------|
 | `openspec-explore` | 探索思路的思考伙伴 |
 | `openspec-bugfix` | 精简 bugfix 工作流 |
+| `openspec-knowledge` | 独立沉淀可复用经验 |
 | `openspec-new-change` | 开始新的变更 |
 | `openspec-continue-change` | 创建下一个制品 |
 | `openspec-ff-change` | 快速跳过所有规划制品 |

@@ -64,6 +64,7 @@ const PROGRESS_SPINNER = {
 const WORKFLOW_TO_SKILL_DIR: Record<string, string> = {
   'explore': 'openspec-explore',
   'bugfix': 'openspec-bugfix',
+  'knowledge': 'openspec-knowledge',
   'new': 'openspec-new-change',
   'continue': 'openspec-continue-change',
   'apply': 'openspec-apply-change',

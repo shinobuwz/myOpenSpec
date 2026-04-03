@@ -39,7 +39,7 @@ export function getBugfixSkillTemplate(): SkillTemplate {
    - 如果修复无法被测试证明，明确说明验证依据
 
 5. **经验总结**
-   - 在 \`openspec/knowledge/pitfalls/\`、\`patterns/\` 或 \`test-recipes/\` 中补一条最小经验
+   - 直接在 \`openspec/knowledge/pitfalls/\`、\`patterns/\` 或 \`test-recipes/\` 中补一条最小经验，或调用 \`/opsx:knowledge\`
    - 至少记录：触发条件、根因、修法、验证方式、关联代码或提交
 
 ## 护栏
@@ -83,7 +83,7 @@ export function getOpsxBugfixCommandTemplate(): CommandTemplate {
    - \`[direct]\`
 3. 完成修复
 4. 运行验证
-5. 在 \`openspec/knowledge/\` 中补一条经验
+5. 在 \`openspec/knowledge/\` 中补一条经验，必要时调用 \`/opsx:knowledge\`
 
 ## 护栏
 

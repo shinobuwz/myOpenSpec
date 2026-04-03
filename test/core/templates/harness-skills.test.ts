@@ -12,6 +12,7 @@ import { getShipSkillTemplate } from '../../../src/core/templates/workflows/ship
 import { getAutoDriveSkillTemplate, getAutoDriveCommandTemplate } from '../../../src/core/templates/workflows/auto-drive.js';
 import { getPlanReviewSkillTemplate } from '../../../src/core/templates/workflows/plan-review.js';
 import { getBugfixSkillTemplate, getOpsxBugfixCommandTemplate } from '../../../src/core/templates/workflows/bugfix.js';
+import { getKnowledgeSkillTemplate, getOpsxKnowledgeCommandTemplate } from '../../../src/core/templates/workflows/knowledge.js';
 
 describe('harness workflow skill templates', () => {
   const templateGetters = [
@@ -77,6 +78,24 @@ describe('harness workflow skill templates', () => {
       expect(t.content).toContain('不强制创建 OpenSpec change 文档');
       expect(t.content).not.toContain('创建或复用一个 bugfix change');
       expect(t.content).not.toContain('运行验证与归档');
+    });
+  });
+
+  describe('knowledge workflow', () => {
+    it('should provide a standalone knowledge capture skill', () => {
+      const t = getKnowledgeSkillTemplate();
+      expect(t.name).toBe('openspec-knowledge');
+      expect(t.instructions).toContain('收集上下文 → 判断知识类型 → 写入知识条目 → 校验可复用性');
+      expect(t.instructions).toContain('不要求依赖 change/archive 才能沉淀知识');
+    });
+
+    it('should provide an independent knowledge command', () => {
+      const t = getOpsxKnowledgeCommandTemplate();
+      expect(t.name).toBe('OPSX: Knowledge');
+      expect(t.content).toContain('不要求先走 archive 或维护 change 文档');
+      expect(t.content).toContain('pitfalls');
+      expect(t.content).toContain('patterns');
+      expect(t.content).toContain('test-recipes');
     });
   });
 });

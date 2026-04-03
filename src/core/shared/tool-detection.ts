@@ -14,6 +14,7 @@ import { AI_TOOLS } from '../config.js';
 export const SKILL_NAMES = [
   'openspec-explore',
   'openspec-bugfix',
+  'openspec-knowledge',
   'openspec-new-change',
   'openspec-continue-change',
   'openspec-apply-change',
@@ -44,6 +45,7 @@ export type SkillName = (typeof SKILL_NAMES)[number];
 export const COMMAND_IDS = [
   'explore',
   'bugfix',
+  'knowledge',
   'new',
   'continue',
   'apply',

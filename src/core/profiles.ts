@@ -15,6 +15,7 @@ export const ALL_WORKFLOWS = [
   'propose',
   'explore',
   'bugfix',
+  'knowledge',
   'new',
   'continue',
   'apply',

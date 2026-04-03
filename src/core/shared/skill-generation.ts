@@ -7,6 +7,7 @@
 import {
   getExploreSkillTemplate,
   getBugfixSkillTemplate,
+  getKnowledgeSkillTemplate,
   getNewChangeSkillTemplate,
   getContinueChangeSkillTemplate,
   getApplyChangeSkillTemplate,
@@ -19,6 +20,7 @@ import {
   getOpsxProposeSkillTemplate,
   getOpsxExploreCommandTemplate,
   getOpsxBugfixCommandTemplate,
+  getOpsxKnowledgeCommandTemplate,
   getOpsxNewCommandTemplate,
   getOpsxContinueCommandTemplate,
   getOpsxApplyCommandTemplate,
@@ -70,6 +72,7 @@ export function getSkillTemplates(workflowFilter?: readonly string[]): SkillTemp
   const all: SkillTemplateEntry[] = [
     { template: getExploreSkillTemplate(), dirName: 'openspec-explore', workflowId: 'explore' },
     { template: getBugfixSkillTemplate(), dirName: 'openspec-bugfix', workflowId: 'bugfix' },
+    { template: getKnowledgeSkillTemplate(), dirName: 'openspec-knowledge', workflowId: 'knowledge' },
     { template: getNewChangeSkillTemplate(), dirName: 'openspec-new-change', workflowId: 'new' },
     { template: getContinueChangeSkillTemplate(), dirName: 'openspec-continue-change', workflowId: 'continue' },
     { template: getApplyChangeSkillTemplate(), dirName: 'openspec-apply-change', workflowId: 'apply' },
@@ -107,6 +110,7 @@ export function getCommandTemplates(workflowFilter?: readonly string[]): Command
   const all: CommandTemplateEntry[] = [
     { template: getOpsxExploreCommandTemplate(), id: 'explore' },
     { template: getOpsxBugfixCommandTemplate(), id: 'bugfix' },
+    { template: getOpsxKnowledgeCommandTemplate(), id: 'knowledge' },
     { template: getOpsxNewCommandTemplate(), id: 'new' },
     { template: getOpsxContinueCommandTemplate(), id: 'continue' },
     { template: getOpsxApplyCommandTemplate(), id: 'apply' },

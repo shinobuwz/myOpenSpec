@@ -54,6 +54,10 @@ const WORKFLOW_PROMPT_META: Record<string, WorkflowPromptMeta> = {
     name: '快速修复',
     description: '精简 bugfix 流程：定位、修复、验证、经验沉淀',
   },
+  knowledge: {
+    name: '经验沉淀',
+    description: '独立写入 pitfalls、patterns 或 test-recipes',
+  },
   new: {
     name: '新建变更',
     description: '快速创建新变更脚手架',

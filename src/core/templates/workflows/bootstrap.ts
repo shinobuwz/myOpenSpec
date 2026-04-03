@@ -21,6 +21,7 @@ export function getBootstrapSkillTemplate(): SkillTemplate {
 | Skill | 触发词 | 用途 |
 |-------|--------|------|
 | openspec-explore | 探索、调查、想一想 | 探索想法和澄清需求 |
+| openspec-knowledge | 经验、沉淀、知识库 | 独立沉淀 pitfalls、patterns、test-recipes |
 | openspec-brainstorm | 脑暴、头脑风暴、讨论方案 | 交互式需求澄清和方案设计 |
 | openspec-plan | 规划、计划、创建变更 | 创建 OpenSpec change 和 artifact |
 | openspec-plan-review | plan skill 完成后 | 规划审查：tasks↔specs 一致性 |
