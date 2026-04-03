@@ -56,6 +56,13 @@ export function getTddSkillTemplate(): SkillTemplate {
 - 代码已经过重构
 - 测试覆盖了边缘情况
 
+## 退出契约
+
+- 所有新增/修改的代码已有对应测试
+- 测试全部通过
+- 变更已 git commit
+- 输出总结：新增了哪些测试、覆盖了哪些行为
+
 ## 反模式
 
 以下行为严格禁止：

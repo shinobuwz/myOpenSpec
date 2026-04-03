@@ -49,6 +49,11 @@ export function getBrainstormSkillTemplate(): SkillTemplate {
 - 设计确认后，建议用户使用 openspec-plan 创建正式变更
 - 提供清晰的需求摘要供规划使用
 
+## 完成条件
+
+- 用户已确认设计方向
+- 明确了下一步转入哪个 skill
+
 ## 退出契约
 
 - 输出设计摘要，包含问题定义、选定方案、关键决策

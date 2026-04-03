@@ -43,6 +43,11 @@ export function getBootstrapSkillTemplate(): SkillTemplate {
 2. 执行 \`openspec-cn list --json\` 获取当前变更列表
 3. 读取现有状态，判断是否有未完成的工作流
 
+## 完成条件
+
+- skill 发现规则已注入会话上下文
+- agent 已确认可用 skill 列表
+
 ## 退出契约
 
 - 提交所有变更到 git
