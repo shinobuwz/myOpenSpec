@@ -27,6 +27,16 @@ import {
   getOpsxVerifyCommandTemplate,
   getOpsxOnboardCommandTemplate,
   getOpsxProposeCommandTemplate,
+  getBootstrapSkillTemplate,
+  getBrainstormSkillTemplate,
+  getPlanSkillTemplate,
+  getTddSkillTemplate,
+  getImplementSkillTemplate,
+  getVerifySkillTemplate,
+  getReviewSkillTemplate,
+  getShipSkillTemplate,
+  getAutoDriveSkillTemplate,
+  getAutoDriveCommandTemplate,
   type SkillTemplate,
 } from '../templates/skill-templates.js';
 import type { CommandContent } from '../command-generation/index.js';
@@ -66,6 +76,15 @@ export function getSkillTemplates(workflowFilter?: readonly string[]): SkillTemp
     { template: getVerifyChangeSkillTemplate(), dirName: 'openspec-verify-change', workflowId: 'verify' },
     { template: getOnboardSkillTemplate(), dirName: 'openspec-onboard', workflowId: 'onboard' },
     { template: getOpsxProposeSkillTemplate(), dirName: 'openspec-propose', workflowId: 'propose' },
+    { template: getBootstrapSkillTemplate(), dirName: 'openspec-bootstrap', workflowId: 'bootstrap' },
+    { template: getBrainstormSkillTemplate(), dirName: 'openspec-brainstorm', workflowId: 'brainstorm' },
+    { template: getPlanSkillTemplate(), dirName: 'openspec-plan', workflowId: 'plan' },
+    { template: getTddSkillTemplate(), dirName: 'openspec-tdd', workflowId: 'tdd' },
+    { template: getImplementSkillTemplate(), dirName: 'openspec-implement', workflowId: 'implement' },
+    { template: getVerifySkillTemplate(), dirName: 'openspec-verify-enhanced', workflowId: 'verify-enhanced' },
+    { template: getReviewSkillTemplate(), dirName: 'openspec-review', workflowId: 'review' },
+    { template: getShipSkillTemplate(), dirName: 'openspec-ship', workflowId: 'ship' },
+    { template: getAutoDriveSkillTemplate(), dirName: 'openspec-auto-drive', workflowId: 'auto-drive' },
   ];
 
   if (!workflowFilter) return all;
@@ -92,6 +111,7 @@ export function getCommandTemplates(workflowFilter?: readonly string[]): Command
     { template: getOpsxVerifyCommandTemplate(), id: 'verify' },
     { template: getOpsxOnboardCommandTemplate(), id: 'onboard' },
     { template: getOpsxProposeCommandTemplate(), id: 'propose' },
+    { template: getAutoDriveCommandTemplate(), id: 'auto-drive' },
   ];
 
   if (!workflowFilter) return all;
