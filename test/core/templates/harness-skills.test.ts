@@ -10,6 +10,7 @@ import { getVerifySkillTemplate } from '../../../src/core/templates/workflows/ve
 import { getReviewSkillTemplate } from '../../../src/core/templates/workflows/review.js';
 import { getShipSkillTemplate } from '../../../src/core/templates/workflows/ship.js';
 import { getAutoDriveSkillTemplate, getAutoDriveCommandTemplate } from '../../../src/core/templates/workflows/auto-drive.js';
+import { getPlanReviewSkillTemplate } from '../../../src/core/templates/workflows/plan-review.js';
 
 describe('harness workflow skill templates', () => {
   const templateGetters = [
@@ -22,6 +23,7 @@ describe('harness workflow skill templates', () => {
     { name: 'review', fn: getReviewSkillTemplate },
     { name: 'ship', fn: getShipSkillTemplate },
     { name: 'auto-drive', fn: getAutoDriveSkillTemplate },
+    { name: 'plan-review', fn: getPlanReviewSkillTemplate },
   ];
 
   for (const { name, fn } of templateGetters) {

@@ -65,7 +65,7 @@ export function getPlanSkillTemplate(): SkillTemplate {
 ## 退出契约
 
 - 输出变更摘要，包含所有产出物的简要描述
-- 建议用户使用 openspec-implement 开始实施`,
+- 建议转入 **openspec-plan-review** 审查规划一致性`,
     license: 'MIT',
     compatibility: '需要 openspec CLI。',
     metadata: { author: 'openspec', version: '1.0' },

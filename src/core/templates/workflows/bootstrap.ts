@@ -23,6 +23,7 @@ export function getBootstrapSkillTemplate(): SkillTemplate {
 | openspec-explore | 探索、调查、想一想 | 探索想法和澄清需求 |
 | openspec-brainstorm | 脑暴、头脑风暴、讨论方案 | 交互式需求澄清和方案设计 |
 | openspec-plan | 规划、计划、创建变更 | 创建 OpenSpec change 和 artifact |
+| openspec-plan-review | plan skill 完成后 | 规划审查：tasks↔specs 一致性 |
 | openspec-tdd | 测试、TDD、红绿重构 | 测试先行开发 |
 | openspec-implement | 实施、实现、开始编码 | 按 tasks.md 逐项实施 |
 | openspec-verify | 验证、检查、质量 | 三维验证检查 |

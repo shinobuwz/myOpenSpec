@@ -26,4 +26,5 @@ export { getImplementSkillTemplate } from './workflows/implement.js';
 export { getVerifySkillTemplate } from './workflows/verify.js';
 export { getReviewSkillTemplate } from './workflows/review.js';
 export { getShipSkillTemplate } from './workflows/ship.js';
+export { getPlanReviewSkillTemplate } from './workflows/plan-review.js';
 export { getAutoDriveSkillTemplate, getAutoDriveCommandTemplate } from './workflows/auto-drive.js';
