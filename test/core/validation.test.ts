@@ -485,5 +485,124 @@ The system MUST support mixed case delta headers.
       expect(report.summary.warnings).toBe(0);
       expect(report.summary.info).toBe(0);
     });
+
+    it('should validate spec-design-task traceability and task execution modes', async () => {
+      const changeDir = path.join(testDir, 'test-change-trace');
+      const specsDir = path.join(changeDir, 'specs', 'auth');
+      await fs.mkdir(specsDir, { recursive: true });
+
+      const deltaSpec = `# Auth Spec
+
+## 新增需求
+
+### 需求: Login validation
+**Trace**: R1
+The system SHALL reject malformed login requests before authentication.
+
+#### 场景: Missing password
+**Given** a login request without password
+**When** validation runs
+**Then** the request is rejected
+
+### 需求: Session timeout
+**Trace**: R2
+The system MUST expire inactive sessions after timeout.
+
+#### 场景: Inactive session expires
+**Given** an inactive authenticated session
+**When** the timeout window elapses
+**Then** the session is invalidated`;
+
+      const design = `## 上下文
+
+Auth hardening.
+
+## 目标 / 非目标
+
+**目标：**
+Cover validation and timeout.
+
+**非目标：**
+Do not redesign auth provider.
+
+## 需求追踪
+
+- [R1] -> [U1]
+- [R2] -> [U2]
+
+## 实施单元
+
+### [U1] Login validation
+- 关联需求: [R1]
+- 模块边界: auth/controller
+- 验证方式: request validation tests
+- 知识沉淀: malformed request guard
+
+### [U2] Session timeout
+- 关联需求: [R2]
+- 模块边界: auth/session
+- 验证方式: timeout integration test
+- 知识沉淀: timeout scheduling`;
+
+      const tasks = `## 1. Validation
+
+- [ ] 1.1 [R1][U1][test-first] 为登录参数校验添加失败测试
+- [ ] 1.2 [R1][U1][test-first] 实现登录参数校验
+
+## 2. Timeout
+
+- [ ] 2.1 [R2][U2][characterization-first] 固化现有 session 超时行为
+- [ ] 2.2 [R2][U2][test-first] 实现 session 超时失效逻辑`;
+
+      await fs.writeFile(path.join(specsDir, 'spec.md'), deltaSpec);
+      await fs.writeFile(path.join(changeDir, 'design.md'), design);
+      await fs.writeFile(path.join(changeDir, 'tasks.md'), tasks);
+
+      const validator = new Validator(true);
+      const report = await validator.validateChangeDeltaSpecs(changeDir);
+
+      expect(report.valid).toBe(true);
+      expect(report.summary.errors).toBe(0);
+      expect(report.summary.warnings).toBe(0);
+    });
+
+    it('should warn when traceability metadata or task execution modes are missing', async () => {
+      const changeDir = path.join(testDir, 'test-change-missing-trace');
+      const specsDir = path.join(changeDir, 'specs', 'auth');
+      await fs.mkdir(specsDir, { recursive: true });
+
+      const deltaSpec = `# Auth Spec
+
+## 新增需求
+
+### 需求: Login validation
+The system SHALL reject malformed login requests before authentication.
+
+#### 场景: Missing password
+**Given** a login request without password
+**When** validation runs
+**Then** the request is rejected`;
+
+      const design = `## 上下文
+
+Auth hardening.`;
+
+      const tasks = `## 1. Validation
+
+- [ ] 1.1 实现登录参数校验`;
+
+      await fs.writeFile(path.join(specsDir, 'spec.md'), deltaSpec);
+      await fs.writeFile(path.join(changeDir, 'design.md'), design);
+      await fs.writeFile(path.join(changeDir, 'tasks.md'), tasks);
+
+      const validator = new Validator(false);
+      const report = await validator.validateChangeDeltaSpecs(changeDir);
+
+      expect(report.valid).toBe(true);
+      expect(report.summary.warnings).toBeGreaterThan(0);
+      expect(report.issues.some(i => i.message.includes('缺少 Trace ID'))).toBe(true);
+      expect(report.issues.some(i => i.message.includes('缺少 `## 需求追踪` 章节'))).toBe(true);
+      expect(report.issues.some(i => i.message.includes('缺少执行方式标签'))).toBe(true);
+    });
   });
 });

@@ -7,12 +7,14 @@ import { CommandAdapterRegistry } from './command-generation/index.js';
 import { COMMAND_IDS, getConfiguredTools } from './shared/index.js';
 
 type WorkflowId = (typeof ALL_WORKFLOWS)[number];
+type CommandWorkflowId = (typeof COMMAND_IDS)[number];
 
 /**
  * Maps workflow IDs to their skill directory names.
  */
 export const WORKFLOW_TO_SKILL_DIR: Record<WorkflowId, string> = {
   'explore': 'openspec-explore',
+  'bugfix': 'openspec-bugfix',
   'new': 'openspec-new-change',
   'continue': 'openspec-continue-change',
   'apply': 'openspec-apply-change',
@@ -23,6 +25,16 @@ export const WORKFLOW_TO_SKILL_DIR: Record<WorkflowId, string> = {
   'verify': 'openspec-verify-change',
   'onboard': 'openspec-onboard',
   'propose': 'openspec-propose',
+  'bootstrap': 'openspec-bootstrap',
+  'brainstorm': 'openspec-brainstorm',
+  'plan': 'openspec-plan',
+  'plan-review': 'openspec-plan-review',
+  'tdd': 'openspec-tdd',
+  'implement': 'openspec-implement',
+  'verify-enhanced': 'openspec-verify-enhanced',
+  'review': 'openspec-review',
+  'ship': 'openspec-ship',
+  'auto-drive': 'openspec-auto-drive',
 };
 
 function toKnownWorkflows(workflows: readonly string[]): WorkflowId[] {
@@ -130,7 +142,12 @@ export function hasToolProfileOrDeliveryDrift(
   }
 
   if (shouldGenerateCommands && adapter) {
-    for (const workflow of knownDesiredWorkflows) {
+    const knownDesiredCommands = knownDesiredWorkflows.filter(
+      (workflow): workflow is CommandWorkflowId =>
+        (COMMAND_IDS as readonly string[]).includes(workflow)
+    );
+
+    for (const workflow of knownDesiredCommands) {
       const cmdPath = adapter.getFilePath(workflow);
       const fullPath = path.isAbsolute(cmdPath) ? cmdPath : path.join(projectPath, cmdPath);
       if (!fs.existsSync(fullPath)) {
@@ -139,8 +156,8 @@ export function hasToolProfileOrDeliveryDrift(
     }
 
     // Deselecting workflows in a profile should trigger sync.
-    for (const workflow of ALL_WORKFLOWS) {
-      if (desiredWorkflowSet.has(workflow)) continue;
+    for (const workflow of COMMAND_IDS) {
+      if (desiredWorkflowSet.has(workflow as WorkflowId)) continue;
       const cmdPath = adapter.getFilePath(workflow);
       const fullPath = path.isAbsolute(cmdPath) ? cmdPath : path.join(projectPath, cmdPath);
       if (fs.existsSync(fullPath)) {
@@ -148,7 +165,7 @@ export function hasToolProfileOrDeliveryDrift(
       }
     }
   } else if (!shouldGenerateCommands && adapter) {
-    for (const workflow of ALL_WORKFLOWS) {
+    for (const workflow of COMMAND_IDS) {
       const cmdPath = adapter.getFilePath(workflow);
       const fullPath = path.isAbsolute(cmdPath) ? cmdPath : path.join(projectPath, cmdPath);
       if (fs.existsSync(fullPath)) {
@@ -199,11 +216,11 @@ function getInstalledWorkflowsForTool(
   if (options.includeCommands) {
     const adapter = CommandAdapterRegistry.get(toolId);
     if (adapter) {
-      for (const workflow of ALL_WORKFLOWS) {
+      for (const workflow of COMMAND_IDS) {
         const cmdPath = adapter.getFilePath(workflow);
         const fullPath = path.isAbsolute(cmdPath) ? cmdPath : path.join(projectPath, cmdPath);
         if (fs.existsSync(fullPath)) {
-          installed.add(workflow);
+          installed.add(workflow as WorkflowId);
         }
       }
     }

@@ -50,6 +50,10 @@ const WORKFLOW_PROMPT_META: Record<string, WorkflowPromptMeta> = {
     name: '探索想法',
     description: '在实现前调查问题',
   },
+  bugfix: {
+    name: '快速修复',
+    description: '精简 bugfix 流程：定位、修复、验证、归档',
+  },
   new: {
     name: '新建变更',
     description: '快速创建新变更脚手架',
@@ -85,6 +89,46 @@ const WORKFLOW_PROMPT_META: Record<string, WorkflowPromptMeta> = {
   onboard: {
     name: '入门指南',
     description: 'OpenSpec 入门引导流程',
+  },
+  bootstrap: {
+    name: '会话引导',
+    description: '注入完整工作流优先级和使用规则',
+  },
+  brainstorm: {
+    name: '需求脑暴',
+    description: '在规划前澄清需求与方案权衡',
+  },
+  plan: {
+    name: '增强规划',
+    description: '生成带 trace 的 specs、design 和 tasks',
+  },
+  'plan-review': {
+    name: '规划审查',
+    description: '检查 spec、plan 与 task 的追踪一致性',
+  },
+  tdd: {
+    name: '测试先行',
+    description: '按任务执行 test-first 或 characterization-first',
+  },
+  implement: {
+    name: '增强实施',
+    description: '按带 trace 和执行模式的 tasks 实施',
+  },
+  'verify-enhanced': {
+    name: '增强验证',
+    description: '从完整性、正确性和一致性三维验证 change',
+  },
+  review: {
+    name: '代码审查',
+    description: '执行独立审查并输出分级问题',
+  },
+  ship: {
+    name: '归档上线',
+    description: '完成 sync、archive 和交付闭环',
+  },
+  'auto-drive': {
+    name: '自动驱动',
+    description: '让 AI 自主驱动完整工作流循环',
   },
 };
 

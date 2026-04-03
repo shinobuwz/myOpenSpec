@@ -141,6 +141,7 @@ Old instructions content
     });
 
     it('should update core profile skill files when tool is configured', async () => {
+      const { SKILL_NAMES } = await import('../../src/core/shared/tool-detection.js');
       // Set up a configured tool with one skill directory
       const skillsDir = path.join(testDir, '.claude', 'skills');
 
@@ -155,15 +156,7 @@ Old instructions content
 
       await updateCommand.execute(testDir);
 
-      // Verify core profile skill files were created/updated (propose, explore, apply, archive)
-      const coreSkillNames = [
-        'openspec-explore',
-        'openspec-apply-change',
-        'openspec-archive-change',
-        'openspec-propose',
-      ];
-
-      for (const skillName of coreSkillNames) {
+      for (const skillName of SKILL_NAMES) {
         const skillFile = path.join(skillsDir, skillName, 'SKILL.md');
         const exists = await FileSystemUtils.fileExists(skillFile);
         expect(exists).toBe(true);
@@ -172,22 +165,6 @@ Old instructions content
         expect(content).toContain('---');
         expect(content).toContain('name:');
         expect(content).toContain('description:');
-      }
-
-      // Verify non-core skills are NOT created
-      const nonCoreSkillNames = [
-        'openspec-new-change',
-        'openspec-continue-change',
-        'openspec-ff-change',
-        'openspec-sync-specs',
-        'openspec-bulk-archive-change',
-        'openspec-verify-change',
-      ];
-
-      for (const skillName of nonCoreSkillNames) {
-        const skillFile = path.join(skillsDir, skillName, 'SKILL.md');
-        const exists = await FileSystemUtils.fileExists(skillFile);
-        expect(exists).toBe(false);
       }
     });
   });
@@ -221,6 +198,7 @@ Old instructions content
     });
 
     it('should update core profile opsx commands when tool is configured', async () => {
+      const { COMMAND_IDS } = await import('../../src/core/shared/tool-detection.js');
       // Set up a configured tool
       const skillsDir = path.join(testDir, '.claude', 'skills');
       await fs.mkdir(path.join(skillsDir, 'openspec-explore'), {
@@ -233,21 +211,11 @@ Old instructions content
 
       await updateCommand.execute(testDir);
 
-      // Verify core profile commands were created (propose, explore, apply, archive)
-      const coreCommandIds = ['explore', 'apply', 'archive', 'propose'];
       const commandsDir = path.join(testDir, '.claude', 'commands', 'opsx');
-      for (const cmdId of coreCommandIds) {
+      for (const cmdId of COMMAND_IDS) {
         const cmdFile = path.join(commandsDir, `${cmdId}.md`);
         const exists = await FileSystemUtils.fileExists(cmdFile);
         expect(exists).toBe(true);
-      }
-
-      // Verify non-core commands are NOT created
-      const nonCoreCommandIds = ['new', 'continue', 'ff', 'sync', 'bulk-archive', 'verify'];
-      for (const cmdId of nonCoreCommandIds) {
-        const cmdFile = path.join(commandsDir, `${cmdId}.md`);
-        const exists = await FileSystemUtils.fileExists(cmdFile);
-        expect(exists).toBe(false);
       }
     });
   });
@@ -1304,6 +1272,7 @@ More user content after markers.
     });
 
     it('should create only effective profile skills when upgrading legacy tools', async () => {
+      const { SKILL_NAMES } = await import('../../src/core/shared/tool-detection.js');
       // Create legacy command directory
       await fs.mkdir(path.join(testDir, '.claude', 'commands', 'openspec'), { recursive: true });
       await fs.writeFile(
@@ -1315,23 +1284,12 @@ More user content after markers.
       const forceUpdateCommand = new UpdateCommand({ force: true });
       await forceUpdateCommand.execute(testDir);
 
-      // Default profile is core, so only core workflows should be generated.
-      const skillNames = [
-        'openspec-propose',
-        'openspec-explore',
-        'openspec-apply-change',
-        'openspec-archive-change',
-      ];
-
       const skillsDir = path.join(testDir, '.claude', 'skills');
-      for (const skillName of skillNames) {
+      for (const skillName of SKILL_NAMES) {
         const skillFile = path.join(skillsDir, skillName, 'SKILL.md');
         const exists = await FileSystemUtils.fileExists(skillFile);
         expect(exists).toBe(true);
       }
-
-      const nonCoreSkill = path.join(skillsDir, 'openspec-new-change', 'SKILL.md');
-      expect(await FileSystemUtils.fileExists(nonCoreSkill)).toBe(false);
     });
 
     it('should create commands when upgrading legacy tools', async () => {
@@ -1565,14 +1523,14 @@ content
     });
 
     it('should remove workflows outside profile during update sync', async () => {
-      // Set core profile (propose, explore, apply, archive)
       setMockConfig({
         featureFlags: {},
-        profile: 'core',
+        profile: 'custom',
         delivery: 'both',
+        workflows: ['explore'],
       });
 
-      // Set up tool with extra workflows beyond core profile
+      // Set up tool with extra workflows beyond configured profile
       const skillsDir = path.join(testDir, '.claude', 'skills');
       await fs.mkdir(path.join(skillsDir, 'openspec-explore'), { recursive: true });
       await fs.writeFile(path.join(skillsDir, 'openspec-explore', 'SKILL.md'), 'old');

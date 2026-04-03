@@ -63,6 +63,11 @@ describe('InitCommand', () => {
       expect(await directoryExists(path.join(openspecPath, 'specs'))).toBe(true);
       expect(await directoryExists(path.join(openspecPath, 'changes'))).toBe(true);
       expect(await directoryExists(path.join(openspecPath, 'changes', 'archive'))).toBe(true);
+      expect(await directoryExists(path.join(openspecPath, 'knowledge'))).toBe(true);
+      expect(await directoryExists(path.join(openspecPath, 'knowledge', 'pitfalls'))).toBe(true);
+      expect(await directoryExists(path.join(openspecPath, 'knowledge', 'patterns'))).toBe(true);
+      expect(await directoryExists(path.join(openspecPath, 'knowledge', 'test-recipes'))).toBe(true);
+      expect(await fileExists(path.join(openspecPath, 'knowledge', 'README.md'))).toBe(true);
     });
 
     it('should create config.yaml with default schema', async () => {
@@ -78,19 +83,12 @@ describe('InitCommand', () => {
     });
 
     it('should create core profile skills for Claude Code by default', async () => {
+      const { SKILL_NAMES } = await import('../../src/core/shared/tool-detection.js');
       const initCommand = new InitCommand({ tools: 'claude', force: true });
 
       await initCommand.execute(testDir);
 
-      // Core profile: propose, explore, apply, archive
-      const coreSkillNames = [
-        'openspec-propose',
-        'openspec-explore',
-        'openspec-apply-change',
-        'openspec-archive-change',
-      ];
-
-      for (const skillName of coreSkillNames) {
+      for (const skillName of SKILL_NAMES) {
         const skillFile = path.join(testDir, '.claude', 'skills', skillName, 'SKILL.md');
         expect(await fileExists(skillFile)).toBe(true);
 
@@ -99,54 +97,17 @@ describe('InitCommand', () => {
         expect(content).toContain('name:');
         expect(content).toContain('description:');
       }
-
-      // Non-core skills should NOT be created
-      const nonCoreSkillNames = [
-        'openspec-new-change',
-        'openspec-continue-change',
-        'openspec-ff-change',
-        'openspec-sync-specs',
-        'openspec-bulk-archive-change',
-        'openspec-verify-change',
-      ];
-
-      for (const skillName of nonCoreSkillNames) {
-        const skillFile = path.join(testDir, '.claude', 'skills', skillName, 'SKILL.md');
-        expect(await fileExists(skillFile)).toBe(false);
-      }
     });
 
     it('should create core profile commands for Claude Code by default', async () => {
+      const { COMMAND_IDS } = await import('../../src/core/shared/tool-detection.js');
       const initCommand = new InitCommand({ tools: 'claude', force: true });
 
       await initCommand.execute(testDir);
 
-      // Core profile: propose, explore, apply, archive
-      const coreCommandNames = [
-        'opsx/propose.md',
-        'opsx/explore.md',
-        'opsx/apply.md',
-        'opsx/archive.md',
-      ];
-
-      for (const cmdName of coreCommandNames) {
-        const cmdFile = path.join(testDir, '.claude', 'commands', cmdName);
+      for (const commandId of COMMAND_IDS) {
+        const cmdFile = path.join(testDir, '.claude', 'commands', 'opsx', `${commandId}.md`);
         expect(await fileExists(cmdFile)).toBe(true);
-      }
-
-      // Non-core commands should NOT be created
-      const nonCoreCommandNames = [
-        'opsx/new.md',
-        'opsx/continue.md',
-        'opsx/ff.md',
-        'opsx/sync.md',
-        'opsx/bulk-archive.md',
-        'opsx/verify.md',
-      ];
-
-      for (const cmdName of nonCoreCommandNames) {
-        const cmdFile = path.join(testDir, '.claude', 'commands', cmdName);
-        expect(await fileExists(cmdFile)).toBe(false);
       }
     });
 
@@ -507,9 +468,9 @@ describe('InitCommand - profile and detection features', () => {
     const proposeSkill = path.join(testDir, '.claude', 'skills', 'openspec-propose', 'SKILL.md');
     expect(await fileExists(proposeSkill)).toBe(true);
 
-    // Non-core skills (from the custom profile) should NOT be created
-    const newChangeSkill = path.join(testDir, '.claude', 'skills', 'openspec-new-change', 'SKILL.md');
-    expect(await fileExists(newChangeSkill)).toBe(false);
+    // Full core profile skills should be created even if they were absent from the custom profile
+    const bootstrapSkill = path.join(testDir, '.claude', 'skills', 'openspec-bootstrap', 'SKILL.md');
+    expect(await fileExists(bootstrapSkill)).toBe(true);
   });
 
   it('should reject invalid --profile values', async () => {

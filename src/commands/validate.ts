@@ -171,6 +171,8 @@ export class ValidateCommand {
     if (type === 'change') {
       bullets.push('- 确保变更在specs/中有增量：使用标题## 新增|修改|移除|重命名需求');
       bullets.push('- 每个需求必须至少包含一个#### 场景:块');
+      bullets.push('- 为每个新增/修改需求添加 `**Trace**: R<number>`，并在 design.md 的“需求追踪”里映射到实施单元');
+      bullets.push('- 在 tasks.md 中使用 `[R<number>][U<number>][test-first|characterization-first|direct]` 标签建立 plan ↔ task 追踪');
       bullets.push('- 调试解析的增量：openspec-cn change show <id> --json --deltas-only');
     } else {
       bullets.push('- 确保规范包含## 目的和## 需求部分');

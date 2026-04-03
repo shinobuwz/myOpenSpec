@@ -19,9 +19,11 @@ export function getTddSkillTemplate(): SkillTemplate {
 ## 启动序列
 
 1. 确认当前任务的需求和验收标准
-2. 探测项目使用的测试框架
-3. 确认测试命令可以正常运行
-4. 读取 \`.aiknowledge/pitfalls/\` 中与当前任务相关领域的 index.md，写测试时覆盖已知易错点
+2. 从 task 标签读取执行方式：\`[test-first]\` / \`[characterization-first]\` / \`[direct]\`
+3. 只有标注为 \`[test-first]\` 的任务强制走完整红绿重构循环；\`[characterization-first]\` 先固化旧行为；\`[direct]\` 仅用于纯样式、纯配置、纯脚手架
+4. 探测项目使用的测试框架
+5. 确认测试命令可以正常运行
+6. 读取 \`.aiknowledge/pitfalls/\` 中与当前任务相关领域的 index.md，写测试时覆盖已知易错点
 
 ## 测试框架探测
 
@@ -34,6 +36,12 @@ export function getTddSkillTemplate(): SkillTemplate {
 | *.xcodeproj | XCTest |
 
 ## 红绿重构循环
+
+在进入循环前，先判断任务模式：
+
+- \`[test-first]\`：严格执行下面的红 → 绿 → 重构
+- \`[characterization-first]\`：先写“当前行为固化测试”，确认旧行为可复现，再修改代码并补齐目标测试
+- \`[direct]\`：不调用本 skill，直接在 implement 中执行
 
 ### 红 - 写失败测试
 1. 根据需求编写一个最小的失败测试

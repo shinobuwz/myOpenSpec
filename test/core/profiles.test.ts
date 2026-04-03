@@ -8,8 +8,8 @@ import {
 
 describe('profiles', () => {
   describe('CORE_WORKFLOWS', () => {
-    it('should contain the four core workflows', () => {
-      expect(CORE_WORKFLOWS).toEqual(['propose', 'explore', 'apply', 'archive']);
+    it('should default to the full workflow set', () => {
+      expect(CORE_WORKFLOWS).toEqual(ALL_WORKFLOWS);
     });
 
     it('should be a subset of ALL_WORKFLOWS', () => {
@@ -20,14 +20,16 @@ describe('profiles', () => {
   });
 
   describe('ALL_WORKFLOWS', () => {
-    it('should contain all 11 workflows', () => {
-      expect(ALL_WORKFLOWS).toHaveLength(11);
+    it('should contain all 22 workflows', () => {
+      expect(ALL_WORKFLOWS).toHaveLength(22);
     });
 
     it('should contain expected workflow IDs', () => {
       const expected = [
-        'propose', 'explore', 'new', 'continue', 'apply',
+        'propose', 'explore', 'bugfix', 'new', 'continue', 'apply',
         'ff', 'sync', 'archive', 'bulk-archive', 'verify', 'onboard',
+        'bootstrap', 'brainstorm', 'plan', 'plan-review', 'tdd',
+        'implement', 'verify-enhanced', 'review', 'ship', 'auto-drive',
       ];
       expect([...ALL_WORKFLOWS]).toEqual(expected);
     });
@@ -45,7 +47,7 @@ describe('profiles', () => {
     });
 
     it('should return custom workflows for custom profile', () => {
-      const customWorkflows = ['explore', 'new', 'apply', 'ff'];
+      const customWorkflows = ['explore', 'new', 'apply', 'ff', 'tdd'];
       const result = getProfileWorkflows('custom', customWorkflows);
       expect(result).toEqual(customWorkflows);
     });

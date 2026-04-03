@@ -13,6 +13,7 @@ import { AI_TOOLS } from '../config.js';
  */
 export const SKILL_NAMES = [
   'openspec-explore',
+  'openspec-bugfix',
   'openspec-new-change',
   'openspec-continue-change',
   'openspec-apply-change',
@@ -23,6 +24,16 @@ export const SKILL_NAMES = [
   'openspec-verify-change',
   'openspec-onboard',
   'openspec-propose',
+  'openspec-bootstrap',
+  'openspec-brainstorm',
+  'openspec-plan',
+  'openspec-plan-review',
+  'openspec-tdd',
+  'openspec-implement',
+  'openspec-verify-enhanced',
+  'openspec-review',
+  'openspec-ship',
+  'openspec-auto-drive',
 ] as const;
 
 export type SkillName = (typeof SKILL_NAMES)[number];
@@ -32,6 +43,7 @@ export type SkillName = (typeof SKILL_NAMES)[number];
  */
 export const COMMAND_IDS = [
   'explore',
+  'bugfix',
   'new',
   'continue',
   'apply',
@@ -42,6 +54,7 @@ export const COMMAND_IDS = [
   'verify',
   'onboard',
   'propose',
+  'auto-drive',
 ] as const;
 
 export type CommandId = (typeof COMMAND_IDS)[number];

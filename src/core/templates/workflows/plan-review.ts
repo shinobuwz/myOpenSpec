@@ -4,7 +4,7 @@ export function getPlanReviewSkillTemplate(): SkillTemplate {
   return {
     name: 'openspec-plan-review',
     description: '规划审查：检查 tasks 是否完整覆盖 specs 需求、是否与 design 一致。在 plan→tasks 生成后、implement 之前使用。',
-    instructions: `# 规划审查：plan↔tasks 一致性检查
+    instructions: `# 规划审查：spec↔plan↔tasks 一致性检查
 
 ## 启动序列
 
@@ -14,9 +14,15 @@ export function getPlanReviewSkillTemplate(): SkillTemplate {
 
 ## 审查维度
 
-### 需求覆盖（specs → tasks）
+### 需求进入设计（specs → design）
 - 逐条检查 delta specs 中的每个需求
-- 每条需求必须有至少一个 task 对应
+- 每条需求都必须有 trace id（如 [R1]）
+- design.md 的 \`## 需求追踪\` 中必须存在 \`- [R1] -> [U1]\` 映射
+- 标记未进入设计的需求为 **TRACE_GAP**
+
+### 需求覆盖（design/specs → tasks）
+- 每个实施单元 [U1] 都必须落到至少一个 task
+- 每条需求必须有至少一个带 [R1] 标签的 task 对应
 - 每条 Given/When/Then 场景必须有对应的验证方式
 - 标记未覆盖的需求为 **GAP**
 
@@ -24,6 +30,7 @@ export function getPlanReviewSkillTemplate(): SkillTemplate {
 - design.md 中的架构决策是否在 tasks 中体现
 - 技术选型是否与 task 实施方式匹配
 - 模块划分是否与 task 粒度对齐
+- task 是否使用 \`[R?][U?][test-first|characterization-first|direct]\` 标签
 - 标记不一致为 **MISMATCH**
 
 ### tasks 质量检查
@@ -39,14 +46,15 @@ export function getPlanReviewSkillTemplate(): SkillTemplate {
 ## 规划审查报告
 
 ### 覆盖矩阵
-| 需求 | 对应 Task | 状态 |
-|------|----------|------|
-| ... | Task N | ✓/GAP |
+| 需求 | 实施单元 | 对应 Task | 状态 |
+|------|----------|----------|------|
+| R1 | U1 | Task N | ✓/TRACE_GAP/GAP |
 
 ### 问题列表
-[GAP] 需求 X 无对应 task
+[TRACE_GAP] 需求 X 未进入 design 实施单元
+[GAP] 需求 X / 单元 UY 无对应 task
 [MISMATCH] design 决策 Y 与 task Z 实施方式冲突
-[QUALITY] Task W 缺少验证方式
+[QUALITY] Task W 缺少 trace / 执行方式 / 验证方式
 
 ### 结论
 可实施 / 需补充后实施

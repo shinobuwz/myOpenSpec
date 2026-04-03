@@ -9,16 +9,12 @@ import type { Profile } from './global-config.js';
 
 /**
  * Core workflows included in the 'core' profile.
- * These provide the streamlined experience for new users.
- */
-export const CORE_WORKFLOWS = ['propose', 'explore', 'apply', 'archive'] as const;
-
-/**
- * All available workflows in the system.
+ * These provide the full default workflow experience for new users.
  */
 export const ALL_WORKFLOWS = [
   'propose',
   'explore',
+  'bugfix',
   'new',
   'continue',
   'apply',
@@ -28,7 +24,23 @@ export const ALL_WORKFLOWS = [
   'bulk-archive',
   'verify',
   'onboard',
+  'bootstrap',
+  'brainstorm',
+  'plan',
+  'plan-review',
+  'tdd',
+  'implement',
+  'verify-enhanced',
+  'review',
+  'ship',
+  'auto-drive',
 ] as const;
+
+/**
+ * Core workflows included in the 'core' profile.
+ * The default profile installs the complete workflow set.
+ */
+export const CORE_WORKFLOWS = [...ALL_WORKFLOWS] as const;
 
 export type WorkflowId = (typeof ALL_WORKFLOWS)[number];
 export type CoreWorkflowId = (typeof CORE_WORKFLOWS)[number];

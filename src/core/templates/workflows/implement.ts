@@ -26,12 +26,15 @@ export function getImplementSkillTemplate(): SkillTemplate {
 
 ### 1. 展示任务
 - 显示当前任务的编号、描述和验收标准
+- 解析并展示任务标签：需求 [R?]、实施单元 [U?]、执行方式 [test-first|characterization-first|direct]
 - 确认用户理解任务内容
 
 ### 2. TDD 循环
-- 调用 openspec-tdd 执行红绿重构循环
-- 确保每个验收标准都有对应的测试
-- 所有测试通过后才算任务完成
+- 如果任务是 \`[test-first]\`：调用 openspec-tdd 执行红绿重构循环
+- 如果任务是 \`[characterization-first]\`：先固化旧行为测试，再修改代码
+- 如果任务是 \`[direct]\`：仅在纯样式、纯配置、纯脚手架场景直接执行
+- 确保每个验收标准都有对应的测试或显式的“不需要测试”理由
+- 所有验证通过后才算任务完成
 
 ### 3. 标记完成
 - 在 tasks.md 中将任务标记为已完成

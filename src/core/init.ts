@@ -33,6 +33,7 @@ import {
 } from './legacy-cleanup.js';
 import {
   SKILL_NAMES,
+  COMMAND_IDS,
   getToolsWithSkillsDir,
   getToolSkillStatus,
   getToolStates,
@@ -62,6 +63,7 @@ const PROGRESS_SPINNER = {
 
 const WORKFLOW_TO_SKILL_DIR: Record<string, string> = {
   'explore': 'openspec-explore',
+  'bugfix': 'openspec-bugfix',
   'new': 'openspec-new-change',
   'continue': 'openspec-continue-change',
   'apply': 'openspec-apply-change',
@@ -72,6 +74,16 @@ const WORKFLOW_TO_SKILL_DIR: Record<string, string> = {
   'verify': 'openspec-verify-change',
   'onboard': 'openspec-onboard',
   'propose': 'openspec-propose',
+  'bootstrap': 'openspec-bootstrap',
+  'brainstorm': 'openspec-brainstorm',
+  'plan': 'openspec-plan',
+  'plan-review': 'openspec-plan-review',
+  'tdd': 'openspec-tdd',
+  'implement': 'openspec-implement',
+  'verify-enhanced': 'openspec-verify-enhanced',
+  'review': 'openspec-review',
+  'ship': 'openspec-ship',
+  'auto-drive': 'openspec-auto-drive',
 };
 
 // -----------------------------------------------------------------------------
@@ -456,33 +468,34 @@ export class InitCommand {
   // ═══════════════════════════════════════════════════════════
 
   private async createDirectoryStructure(openspecPath: string, extendMode: boolean): Promise<void> {
-    if (extendMode) {
-      // In extend mode, just ensure directories exist without spinner
-      const directories = [
-        openspecPath,
-        path.join(openspecPath, 'specs'),
-        path.join(openspecPath, 'changes'),
-        path.join(openspecPath, 'changes', 'archive'),
-      ];
-
-      for (const dir of directories) {
-        await FileSystemUtils.createDirectory(dir);
-      }
-      return;
-    }
-
-    const spinner = this.startSpinner('正在创建 OpenSpec 结构...');
-
+    const knowledgePath = path.join(openspecPath, 'knowledge');
     const directories = [
       openspecPath,
       path.join(openspecPath, 'specs'),
       path.join(openspecPath, 'changes'),
       path.join(openspecPath, 'changes', 'archive'),
+      knowledgePath,
+      path.join(knowledgePath, 'pitfalls'),
+      path.join(knowledgePath, 'patterns'),
+      path.join(knowledgePath, 'test-recipes'),
     ];
+
+    if (extendMode) {
+      // In extend mode, just ensure directories exist without spinner
+      for (const dir of directories) {
+        await FileSystemUtils.createDirectory(dir);
+      }
+      await this.ensureKnowledgeReadme(knowledgePath);
+      return;
+    }
+
+    const spinner = this.startSpinner('正在创建 OpenSpec 结构...');
 
     for (const dir of directories) {
       await FileSystemUtils.createDirectory(dir);
     }
+
+    await this.ensureKnowledgeReadme(knowledgePath);
 
     spinner.stopAndPersist({
       symbol: PALETTE.white('▌'),
@@ -736,6 +749,33 @@ export class InitCommand {
     }).start();
   }
 
+  private async ensureKnowledgeReadme(knowledgePath: string): Promise<void> {
+    const readmePath = path.join(knowledgePath, 'README.md');
+    if (fs.existsSync(readmePath)) {
+      return;
+    }
+
+    const content = `# OpenSpec Knowledge
+
+该目录用于沉淀可复用的工程经验，供后续 change 复用：
+
+- \`pitfalls/\`：易错点、踩坑记录
+- \`patterns/\`：可复用的实现模式
+- \`test-recipes/\`：测试套路、回归样例
+
+建议每次归档后补充：
+
+1. Trigger：什么场景会再次触发
+2. Symptom：当时的现象
+3. Root Cause：根因
+4. Fix Pattern：通用修法
+5. Verification：如何验证不再复发
+6. Source：对应的 change / commit
+`;
+
+    await FileSystemUtils.writeFile(readmePath, content);
+  }
+
   private async removeSkillDirs(skillsDir: string): Promise<number> {
     let removed = 0;
 
@@ -762,7 +802,7 @@ export class InitCommand {
     const adapter = CommandAdapterRegistry.get(toolId);
     if (!adapter) return 0;
 
-    for (const workflow of ALL_WORKFLOWS) {
+    for (const workflow of COMMAND_IDS) {
       const cmdPath = adapter.getFilePath(workflow);
       const fullPath = path.isAbsolute(cmdPath) ? cmdPath : path.join(projectPath, cmdPath);
 

@@ -1,5 +1,5 @@
 import { z, ZodError } from 'zod';
-import { readFileSync, promises as fs } from 'fs';
+import { existsSync, readFileSync, promises as fs } from 'fs';
 import path from 'path';
 import { SpecSchema, ChangeSchema, Spec, Change } from '../schemas/index.js';
 import { MarkdownParser } from '../parsers/markdown-parser.js';
@@ -117,6 +117,7 @@ export class Validator {
     let totalDeltas = 0;
     const missingHeaderSpecs: string[] = [];
     const emptySectionSpecs: Array<{ path: string; sections: string[] }> = [];
+    const specTraceIds = new Set<string>();
 
     try {
       const entries = await fs.readdir(specsDir, { withFileTypes: true });
@@ -124,6 +125,7 @@ export class Validator {
         if (!entry.isDirectory()) continue;
         const specName = entry.name;
         const specFile = path.join(specsDir, specName, 'spec.md');
+        const missingTraceLevel = this.getMissingTraceLevel(changeDir);
         let content: string | undefined;
         try {
           content = await fs.readFile(specFile, 'utf-8');
@@ -169,6 +171,16 @@ export class Validator {
           const scenarioCount = this.countScenarios(block.raw);
           if (scenarioCount < 1) {
             issues.push({ level: 'ERROR', path: entryPath, message: `新增需求 "${block.name}" 必须至少包含一个场景` });
+          } else if (scenarioCount > 3) {
+            issues.push({ level: 'WARNING', path: entryPath, message: `新增需求 "${block.name}" 包含 ${scenarioCount} 个场景，建议继续拆分为更细的需求切片` });
+          }
+          const traceId = this.extractTraceId(block.raw);
+          if (!traceId) {
+            if (missingTraceLevel) {
+              issues.push({ level: missingTraceLevel, path: entryPath, message: `新增需求 "${block.name}" 缺少 Trace ID。请添加一行 \`**Trace**: R<number>\` 以支持 spec ↔ plan ↔ task 追踪` });
+            }
+          } else {
+            specTraceIds.add(traceId);
           }
         }
 
@@ -190,6 +202,16 @@ export class Validator {
           const scenarioCount = this.countScenarios(block.raw);
           if (scenarioCount < 1) {
             issues.push({ level: 'ERROR', path: entryPath, message: `修改需求 "${block.name}" 必须至少包含一个场景` });
+          } else if (scenarioCount > 3) {
+            issues.push({ level: 'WARNING', path: entryPath, message: `修改需求 "${block.name}" 包含 ${scenarioCount} 个场景，建议继续拆分为更细的需求切片` });
+          }
+          const traceId = this.extractTraceId(block.raw);
+          if (!traceId) {
+            if (missingTraceLevel) {
+              issues.push({ level: missingTraceLevel, path: entryPath, message: `修改需求 "${block.name}" 缺少 Trace ID。请添加一行 \`**Trace**: R<number>\` 以支持 spec ↔ plan ↔ task 追踪` });
+            }
+          } else {
+            specTraceIds.add(traceId);
           }
         }
 
@@ -268,6 +290,8 @@ export class Validator {
     if (totalDeltas === 0) {
       issues.push({ level: 'ERROR', path: 'file', message: this.enrichTopLevelError('change', VALIDATION_MESSAGES.CHANGE_NO_DELTAS) });
     }
+
+    issues.push(...this.validateChangeTraceability(changeDir, specTraceIds));
 
     return this.createReport(issues);
   }
@@ -435,9 +459,176 @@ export class Validator {
     return /\b(SHALL|MUST|必须|禁止)\b/.test(text) || /(?:必须|禁止)/.test(text);
   }
 
+  private extractTraceId(blockRaw: string): string | undefined {
+    const match = blockRaw.match(/^\*\*(?:Trace|Trace ID|追踪|追踪ID)\*\*:\s*(R\d+)\s*$/im);
+    return match?.[1];
+  }
+
   private countScenarios(blockRaw: string): number {
     const matches = blockRaw.match(/^####\s+/gm);
     return matches ? matches.length : 0;
+  }
+
+  private validateChangeTraceability(changeDir: string, specTraceIds: ReadonlySet<string>): ValidationIssue[] {
+    const issues: ValidationIssue[] = [];
+    const designPath = path.join(changeDir, 'design.md');
+    const tasksPath = path.join(changeDir, 'tasks.md');
+
+    const designExists = existsSync(designPath);
+    const tasksExists = existsSync(tasksPath);
+
+    const designContent = designExists ? readFileSync(designPath, 'utf-8') : '';
+    const tasksContent = tasksExists ? readFileSync(tasksPath, 'utf-8') : '';
+
+    const requirementToUnits = this.extractRequirementToUnitMappings(designContent);
+    const mappedRequirementIds = new Set(requirementToUnits.map((mapping) => mapping.requirementId));
+    const unitIds = new Set(this.extractUnitIds(designContent));
+    const taskTrace = this.extractTaskTrace(tasksContent);
+
+      if (designExists) {
+      if (!/^##\s+(Requirements Trace|需求追踪)(?:\s|$)/m.test(designContent)) {
+        issues.push({
+          level: 'WARNING',
+          path: 'design.md',
+          message: 'design.md 缺少 `## 需求追踪` 章节。建议使用 `- [R1] -> [U1]` 形式建立 spec ↔ plan 映射',
+        });
+      }
+
+      for (const traceId of specTraceIds) {
+        if (!mappedRequirementIds.has(traceId)) {
+          issues.push({
+            level: 'WARNING',
+            path: 'design.md',
+            message: `需求 ${traceId} 尚未映射到任何实施单元。请在 \`## 需求追踪\` 中添加如 \`- [${traceId}] -> [U1]\` 的条目`,
+          });
+        }
+      }
+    }
+
+    if (tasksExists) {
+      if (taskTrace.taskCount === 0) {
+        issues.push({
+          level: 'WARNING',
+          path: 'tasks.md',
+          message: 'tasks.md 中未解析到任何任务条目。请使用 `- [ ] X.Y ...` 复选框格式',
+        });
+      }
+
+      if (taskTrace.tasksWithoutRequirement.length > 0) {
+        issues.push({
+          level: 'WARNING',
+          path: 'tasks.md',
+          message: `以下任务缺少需求追踪标签 [R<number>]：${taskTrace.tasksWithoutRequirement.join('、')}`,
+        });
+      }
+
+      if (taskTrace.tasksWithoutUnit.length > 0) {
+        issues.push({
+          level: 'WARNING',
+          path: 'tasks.md',
+          message: `以下任务缺少实施单元标签 [U<number>]：${taskTrace.tasksWithoutUnit.join('、')}`,
+        });
+      }
+
+      if (taskTrace.tasksWithoutMode.length > 0) {
+        issues.push({
+          level: 'WARNING',
+          path: 'tasks.md',
+          message: `以下任务缺少执行方式标签 [test-first] / [characterization-first] / [direct]：${taskTrace.tasksWithoutMode.join('、')}`,
+        });
+      }
+
+      for (const traceId of specTraceIds) {
+        if (!taskTrace.requirementIds.has(traceId)) {
+          issues.push({
+            level: 'WARNING',
+            path: 'tasks.md',
+            message: `需求 ${traceId} 没有任何 task 覆盖。请至少添加一个带 [${traceId}] 标签的任务`,
+          });
+        }
+      }
+
+      for (const unitId of unitIds) {
+        if (!taskTrace.unitIds.has(unitId)) {
+          issues.push({
+            level: 'WARNING',
+            path: 'tasks.md',
+            message: `实施单元 ${unitId} 尚未落到 tasks.md。请添加至少一个带 [${unitId}] 标签的任务`,
+          });
+        }
+      }
+    }
+
+    return issues;
+  }
+
+  private getMissingTraceLevel(changeDir: string): ValidationLevel | undefined {
+    const designPath = path.join(changeDir, 'design.md');
+    const tasksPath = path.join(changeDir, 'tasks.md');
+    return existsSync(designPath) || existsSync(tasksPath) ? 'WARNING' : undefined;
+  }
+
+  private extractRequirementToUnitMappings(content: string): Array<{ requirementId: string; unitId: string }> {
+    const mappings: Array<{ requirementId: string; unitId: string }> = [];
+    const regex = /-\s*\[(R\d+)\]\s*->\s*\[(U\d+)\]/g;
+
+    let match: RegExpExecArray | null;
+    while ((match = regex.exec(content)) !== null) {
+      mappings.push({ requirementId: match[1], unitId: match[2] });
+    }
+
+    return mappings;
+  }
+
+  private extractUnitIds(content: string): string[] {
+    const matches = content.match(/\[(U\d+)\]/g);
+    if (!matches) return [];
+    return [...new Set(matches.map((match) => match.slice(1, -1)))];
+  }
+
+  private extractTaskTrace(content: string): {
+    taskCount: number;
+    requirementIds: Set<string>;
+    unitIds: Set<string>;
+    tasksWithoutRequirement: string[];
+    tasksWithoutUnit: string[];
+    tasksWithoutMode: string[];
+  } {
+    const requirementIds = new Set<string>();
+    const unitIds = new Set<string>();
+    const tasksWithoutRequirement: string[] = [];
+    const tasksWithoutUnit: string[] = [];
+    const tasksWithoutMode: string[] = [];
+    let taskCount = 0;
+
+    const lines = content.split('\n');
+    for (const line of lines) {
+      const match = line.match(/^\s*-\s+\[(?: |x|X)\]\s+([0-9.]+)\s+(.*)$/);
+      if (!match) continue;
+
+      taskCount++;
+      const taskId = match[1];
+      const body = match[2];
+      const requirementMatches = body.match(/\[(R\d+)\]/g) ?? [];
+      const unitMatches = body.match(/\[(U\d+)\]/g) ?? [];
+      const hasMode = /\[(test-first|characterization-first|direct)\]/.test(body);
+
+      if (requirementMatches.length === 0) tasksWithoutRequirement.push(taskId);
+      if (unitMatches.length === 0) tasksWithoutUnit.push(taskId);
+      if (!hasMode) tasksWithoutMode.push(taskId);
+
+      requirementMatches.forEach((token) => requirementIds.add(token.slice(1, -1)));
+      unitMatches.forEach((token) => unitIds.add(token.slice(1, -1)));
+    }
+
+    return {
+      taskCount,
+      requirementIds,
+      unitIds,
+      tasksWithoutRequirement,
+      tasksWithoutUnit,
+      tasksWithoutMode,
+    };
   }
 
   private formatSectionList(sections: string[]): string {

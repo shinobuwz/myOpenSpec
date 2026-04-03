@@ -61,11 +61,12 @@ openspec-cn init --tools none
 
 ## 安装内容
 
-对于每个工具，OpenSpec 会生成 10 个驱动 OPSX 工作流的技能文件：
+对于每个工具，OpenSpec 默认会生成完整工作流所需的 22 个技能文件：
 
 | 技能 | 用途 |
 |-------|---------|
 | `openspec-explore` | 探索思路的思考伙伴 |
+| `openspec-bugfix` | 精简 bugfix 工作流 |
 | `openspec-new-change` | 开始新的变更 |
 | `openspec-continue-change` | 创建下一个制品 |
 | `openspec-ff-change` | 快速跳过所有规划制品 |
@@ -75,8 +76,18 @@ openspec-cn init --tools none
 | `openspec-archive-change` | 归档已完成的变更 |
 | `openspec-bulk-archive-change` | 一次归档多个变更 |
 | `openspec-onboard` | 通过完整工作流周期的引导式入职 |
+| `openspec-bootstrap` | 会话启动时的工作流引导 |
+| `openspec-brainstorm` | 需求澄清与方案脑暴 |
+| `openspec-plan` | 生成带 trace 的增强规划制品 |
+| `openspec-plan-review` | 校验 spec、plan、task 的一致性 |
+| `openspec-tdd` | 测试先行与特征固化策略 |
+| `openspec-implement` | 按 trace 和执行模式逐项实施 |
+| `openspec-verify-enhanced` | 增强版三维验证检查 |
+| `openspec-review` | 独立代码审查 |
+| `openspec-ship` | 归档上线闭环 |
+| `openspec-auto-drive` | 自动驱动完整工作流 |
 
-这些技能通过斜杠命令调用，如 `/opsx:new`、`/opsx:apply` 等。完整列表请参阅[命令](commands.md)。
+这些技能中，OPSX 命令对应的 slash command 仍然通过 `/opsx:new`、`/opsx:apply` 等触发；其余增强型 skill 作为默认安装的工作流能力存在，用于补足更细粒度的规划、TDD、审查与交付闭环。完整列表请参阅[命令](commands.md)。
 
 ## 添加新工具
 

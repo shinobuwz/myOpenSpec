@@ -8,9 +8,9 @@ import {
 
 describe('skill-generation', () => {
   describe('getSkillTemplates', () => {
-    it('should return all 21 skill templates', () => {
+    it('should return all 22 skill templates', () => {
       const templates = getSkillTemplates();
-      expect(templates).toHaveLength(21);
+      expect(templates).toHaveLength(22);
     });
 
     it('should have unique directory names', () => {
@@ -24,7 +24,8 @@ describe('skill-generation', () => {
       const templates = getSkillTemplates();
       const dirNames = templates.map(t => t.dirName);
 
-  expect(dirNames).toContain('openspec-explore');
+      expect(dirNames).toContain('openspec-explore');
+      expect(dirNames).toContain('openspec-bugfix');
       expect(dirNames).toContain('openspec-new-change');
       expect(dirNames).toContain('openspec-continue-change');
       expect(dirNames).toContain('openspec-apply-change');
@@ -67,11 +68,12 @@ describe('skill-generation', () => {
     });
 
     it('should filter by workflow IDs when provided', () => {
-      const filtered = getSkillTemplates(['propose', 'explore', 'apply', 'archive']);
-      expect(filtered).toHaveLength(4);
+      const filtered = getSkillTemplates(['propose', 'explore', 'bugfix', 'apply', 'archive']);
+      expect(filtered).toHaveLength(5);
       const ids = filtered.map(t => t.workflowId);
       expect(ids).toContain('propose');
       expect(ids).toContain('explore');
+      expect(ids).toContain('bugfix');
       expect(ids).toContain('apply');
       expect(ids).toContain('archive');
       expect(ids).not.toContain('new');
@@ -98,9 +100,9 @@ describe('skill-generation', () => {
   });
 
   describe('getCommandTemplates', () => {
-    it('should return all 12 command templates', () => {
+    it('should return all 13 command templates', () => {
       const templates = getCommandTemplates();
-      expect(templates).toHaveLength(12);
+      expect(templates).toHaveLength(13);
     });
 
     it('should have unique IDs', () => {
@@ -115,6 +117,7 @@ describe('skill-generation', () => {
       const ids = templates.map(t => t.id);
 
       expect(ids).toContain('explore');
+      expect(ids).toContain('bugfix');
       expect(ids).toContain('new');
       expect(ids).toContain('continue');
       expect(ids).toContain('apply');
@@ -129,11 +132,12 @@ describe('skill-generation', () => {
     });
 
     it('should filter by workflow IDs when provided', () => {
-      const filtered = getCommandTemplates(['propose', 'explore', 'apply', 'archive']);
-      expect(filtered).toHaveLength(4);
+      const filtered = getCommandTemplates(['propose', 'explore', 'bugfix', 'apply', 'archive']);
+      expect(filtered).toHaveLength(5);
       const ids = filtered.map(t => t.id);
       expect(ids).toContain('propose');
       expect(ids).toContain('explore');
+      expect(ids).toContain('bugfix');
       expect(ids).toContain('apply');
       expect(ids).toContain('archive');
       expect(ids).not.toContain('new');
@@ -153,9 +157,9 @@ describe('skill-generation', () => {
   });
 
   describe('getCommandContents', () => {
-    it('should return all 12 command contents', () => {
+    it('should return all 13 command contents', () => {
       const contents = getCommandContents();
-      expect(contents).toHaveLength(12);
+      expect(contents).toHaveLength(13);
     });
 
     it('should have valid content structure', () => {
