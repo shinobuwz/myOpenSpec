@@ -11,6 +11,7 @@ import { getReviewSkillTemplate } from '../../../src/core/templates/workflows/re
 import { getShipSkillTemplate } from '../../../src/core/templates/workflows/ship.js';
 import { getAutoDriveSkillTemplate, getAutoDriveCommandTemplate } from '../../../src/core/templates/workflows/auto-drive.js';
 import { getPlanReviewSkillTemplate } from '../../../src/core/templates/workflows/plan-review.js';
+import { getBugfixSkillTemplate, getOpsxBugfixCommandTemplate } from '../../../src/core/templates/workflows/bugfix.js';
 
 describe('harness workflow skill templates', () => {
   const templateGetters = [
@@ -57,6 +58,25 @@ describe('harness workflow skill templates', () => {
       expect(t.category).toBe('工作流');
       expect(t.tags).toContain('auto');
       expect(t.content).toBeTruthy();
+    });
+  });
+
+  describe('bugfix workflow', () => {
+    it('should keep bugfix lightweight and knowledge-focused', () => {
+      const t = getBugfixSkillTemplate();
+      expect(t.name).toBe('openspec-bugfix');
+      expect(t.instructions).toContain('定位问题 → 判断是否需要写测试 → 修复 → 验证 → 经验总结');
+      expect(t.instructions).toContain('不为简单 bugfix 强行创建 proposal / specs / design / tasks');
+      expect(t.instructions).not.toContain('运行 `/opsx:archive` 对应流程');
+    });
+
+    it('should describe command flow without archive or change scaffolding', () => {
+      const t = getOpsxBugfixCommandTemplate();
+      expect(t.description).toContain('经验');
+      expect(t.content).toContain('定位问题 → 判断测试策略 → 修复 → 验证 → 经验总结');
+      expect(t.content).toContain('不强制创建 OpenSpec change 文档');
+      expect(t.content).not.toContain('创建或复用一个 bugfix change');
+      expect(t.content).not.toContain('运行验证与归档');
     });
   });
 });

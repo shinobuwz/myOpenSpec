@@ -52,7 +52,7 @@ const WORKFLOW_PROMPT_META: Record<string, WorkflowPromptMeta> = {
   },
   bugfix: {
     name: '快速修复',
-    description: '精简 bugfix 流程：定位、修复、验证、归档',
+    description: '精简 bugfix 流程：定位、修复、验证、经验沉淀',
   },
   new: {
     name: '新建变更',

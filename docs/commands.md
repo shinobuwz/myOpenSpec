@@ -95,14 +95,13 @@ AI：随时可以开始。运行 /opsx:new add-jwt-auth 来开始。
 | `bug description` | 否 | 缺陷现象、复现线索或期望行为 |
 
 **功能：**
-- 创建或复用一个 bugfix change
-- 用最小合规方式生成 proposal / specs / design / tasks
 - 判断任务应使用 `test-first`、`characterization-first` 还是 `direct`
-- 完成修复、验证、归档和经验沉淀
+- 完成修复、验证和经验沉淀
 
 **适合：**
 - 明确、边界较清晰的 bug 修复
 - 不需要先做大范围脑暴或复杂方案比较的缺陷
+- 不值得为其额外维护 proposal / specs / design / tasks 的轻量修复
 
 **不适合：**
 - 范围已经升级为新功能开发
