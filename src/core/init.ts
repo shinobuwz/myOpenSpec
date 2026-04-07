@@ -82,7 +82,6 @@ const WORKFLOW_TO_SKILL_DIR: Record<string, string> = {
   'implement': 'openspec-implement',
   'verify-enhanced': 'openspec-verify-enhanced',
   'review': 'openspec-review',
-  'ship': 'openspec-ship',
   'auto-drive': 'openspec-auto-drive',
 };
 

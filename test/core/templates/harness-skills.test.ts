@@ -7,7 +7,6 @@ import { getTddSkillTemplate } from '../../../src/core/templates/workflows/tdd.j
 import { getImplementSkillTemplate } from '../../../src/core/templates/workflows/implement.js';
 import { getVerifySkillTemplate } from '../../../src/core/templates/workflows/verify.js';
 import { getReviewSkillTemplate } from '../../../src/core/templates/workflows/review.js';
-import { getShipSkillTemplate } from '../../../src/core/templates/workflows/ship.js';
 import { getAutoDriveSkillTemplate, getAutoDriveCommandTemplate } from '../../../src/core/templates/workflows/auto-drive.js';
 import { getPlanReviewSkillTemplate } from '../../../src/core/templates/workflows/plan-review.js';
 import { getTaskAnalyzeSkillTemplate } from '../../../src/core/templates/workflows/task-analyze.js';
@@ -22,7 +21,6 @@ describe('harness workflow skill templates', () => {
     { name: 'implement', fn: getImplementSkillTemplate },
     { name: 'verify', fn: getVerifySkillTemplate },
     { name: 'review', fn: getReviewSkillTemplate },
-    { name: 'ship', fn: getShipSkillTemplate },
     { name: 'auto-drive', fn: getAutoDriveSkillTemplate },
     { name: 'plan-review', fn: getPlanReviewSkillTemplate },
     { name: 'task-analyze', fn: getTaskAnalyzeSkillTemplate },

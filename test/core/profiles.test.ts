@@ -20,8 +20,8 @@ describe('profiles', () => {
   });
 
   describe('ALL_WORKFLOWS', () => {
-    it('should contain all 22 workflows', () => {
-      expect(ALL_WORKFLOWS).toHaveLength(22);
+    it('should contain all 21 workflows', () => {
+      expect(ALL_WORKFLOWS).toHaveLength(21);
     });
 
     it('should contain expected workflow IDs', () => {
@@ -29,7 +29,7 @@ describe('profiles', () => {
         'explore', 'bugfix', 'knowledge', 'new', 'continue', 'apply',
         'ff', 'sync', 'archive', 'bulk-archive', 'verify', 'onboard',
         'bootstrap', 'plan', 'plan-review', 'task-analyze', 'tdd',
-        'implement', 'verify-enhanced', 'review', 'ship', 'auto-drive',
+        'implement', 'verify-enhanced', 'review', 'auto-drive',
       ];
       expect([...ALL_WORKFLOWS]).toEqual(expected);
     });

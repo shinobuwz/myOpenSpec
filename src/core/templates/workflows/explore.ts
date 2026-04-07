@@ -358,7 +358,7 @@ openspec-cn list --json
 - 不要中断探索去写文档——先完成思考
 
 **探索结束时：**
-- 不主动写入 codemap（写入统一在 ship 归档时执行）
+- 不主动写入 codemap（写入统一在 archive 归档时执行）
 - 但如果用户明确要求记录，可以提议写入
 
 地图文档的原则：
@@ -559,6 +559,6 @@ openspec-cn list --json
 
 ## 渐进式披露
 
-进入时读取 \`.aiknowledge/codemap/index.md\` 作为起点，避免重复发现已知脉络。写入统一在 ship 归档时执行。`
+进入时读取 \`.aiknowledge/codemap/index.md\` 作为起点，避免重复发现已知脉络。写入统一在 archive 归档时执行。`
   };
 }

@@ -48,7 +48,7 @@ export function getReviewSkillTemplate(): SkillTemplate {
 ## 退出契约
 
 - 输出审查报告，包含质量指标和问题列表
-- 如果没有 CRITICAL 问题，建议用户使用 openspec-ship 归档上线
+- 如果没有 CRITICAL 问题，建议用户使用 openspec-archive-change 归档
 - 如果有 CRITICAL 问题，列出必须修复的项目`,
     license: 'MIT',
     compatibility: '需要 openspec CLI。',

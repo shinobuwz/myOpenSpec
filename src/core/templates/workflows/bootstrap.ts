@@ -21,7 +21,7 @@ export function getBootstrapSkillTemplate(): SkillTemplate {
 | Skill | 触发词 | 用途 |
 |-------|--------|------|
 | openspec-explore | 探索、调查、脑暴、讨论方案 | 探索想法、澄清需求、方案对比与设计收敛 |
-| openspec-knowledge | 经验、沉淀、知识库 | 独立沉淀 pitfalls、patterns、test-recipes |
+| openspec-knowledge | 经验、沉淀、知识库 | 独立沉淀 pitfalls；**归档后强制执行** |
 | openspec-plan | 规划、计划、创建变更 | 创建 OpenSpec change 和 artifact |
 | openspec-plan-review | plan skill 完成后 | 规划审查：spec↔plan 一致性 |
 | openspec-task-analyze | tasks 生成后 | 任务分析：plan↔tasks 一致性 |
@@ -29,7 +29,7 @@ export function getBootstrapSkillTemplate(): SkillTemplate {
 | openspec-implement | 实施、实现、开始编码 | 按 tasks.md 逐项实施 |
 | openspec-verify | 验证、检查、质量 | 三维验证检查 |
 | openspec-review | 审查、代码审查、review | 独立代码审查 |
-| openspec-ship | 发布、上线、归档 | 归档上线 |
+| openspec-archive-change | 归档、上线、发布 | 归档 + knowledge + codemap + git |
 | openspec-auto-drive | 自动驱动、auto、优化 | AI 自主驱动完整工作流 |
 
 ## 强制流程链
@@ -37,7 +37,7 @@ export function getBootstrapSkillTemplate(): SkillTemplate {
 以下流程链中的 **[方括号]** 关卡是强制的，不可跳过：
 
 \`\`\`
-explore → plan → [plan-review] → tasks → [task-analyze] → implement → [verify] → review → ship
+explore → plan → [plan-review] → tasks → [task-analyze] → implement → [verify] → review → archive
                     spec↔plan               plan↔tasks                   tasks↔code
 \`\`\`
 

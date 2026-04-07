@@ -122,10 +122,6 @@ const WORKFLOW_PROMPT_META: Record<string, WorkflowPromptMeta> = {
     name: '代码审查',
     description: '执行独立审查并输出分级问题',
   },
-  ship: {
-    name: '归档上线',
-    description: '完成 sync、archive 和交付闭环',
-  },
   'auto-drive': {
     name: '自动驱动',
     description: '让 AI 自主驱动完整工作流循环',

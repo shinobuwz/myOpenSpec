@@ -35,7 +35,6 @@ import {
   getImplementSkillTemplate,
   getVerifySkillTemplate,
   getReviewSkillTemplate,
-  getShipSkillTemplate,
   getPlanReviewSkillTemplate,
   getTaskAnalyzeSkillTemplate,
   getAutoDriveSkillTemplate,
@@ -88,7 +87,6 @@ export function getSkillTemplates(workflowFilter?: readonly string[]): SkillTemp
     { template: getImplementSkillTemplate(), dirName: 'openspec-implement', workflowId: 'implement' },
     { template: getVerifySkillTemplate(), dirName: 'openspec-verify-enhanced', workflowId: 'verify-enhanced' },
     { template: getReviewSkillTemplate(), dirName: 'openspec-review', workflowId: 'review' },
-    { template: getShipSkillTemplate(), dirName: 'openspec-ship', workflowId: 'ship' },
     { template: getAutoDriveSkillTemplate(), dirName: 'openspec-auto-drive', workflowId: 'auto-drive' },
   ];
 

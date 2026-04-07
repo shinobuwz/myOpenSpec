@@ -114,7 +114,6 @@ describe('config profile interactive flow', () => {
       'openspec-implement',
       'openspec-verify-enhanced',
       'openspec-review',
-      'openspec-ship',
       'openspec-auto-drive',
     ];
     for (const dirName of coreSkillDirs) {

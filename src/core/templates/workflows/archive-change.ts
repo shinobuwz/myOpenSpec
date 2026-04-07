@@ -105,6 +105,41 @@ export function getArchiveChangeSkillTemplate(): SkillTemplate {
 所有产出物已完成。所有任务已完成。
 \`\`\`
 
+**归档后强制执行（按序）**
+
+归档目录移动成功后，依次执行以下步骤，**全部强制，不可跳过**：
+
+**7. 知识沉淀（强制）**
+
+调用 **openspec-knowledge** skill，将本次变更的可复用经验写入 \`.aiknowledge/pitfalls/\`。
+
+使用 Task tool（subagent_type: "general-purpose"）：
+> "Use Skill tool to invoke openspec-knowledge. Context: just archived change '<name>'. Extract reusable lessons from this change's implementation, fixes, and review findings."
+
+**8. Codemap 更新（强制）**
+
+更新 \`.aiknowledge/codemap/\`，反映本次变更带来的架构变化：
+1. 读取 \`.aiknowledge/codemap/index.md\`（如不存在则创建）
+2. 对比本次变更涉及的模块，判断是否有新模块或模块边界变化
+3. 更新/创建对应模块目录下的文件（overview.md、dependencies.md 等）
+4. 如模块间链路有变化，更新 \`connections.md\`
+5. 更新 \`index.md\` 目录索引
+
+原则：只更新本次变更涉及的模块，不全量重写。写入前提议用户确认。
+
+**9. Git 操作（强制）**
+
+\`\`\`bash
+git add -A
+git commit -m "archive: <change-name>"
+\`\`\`
+
+如果用户需要打 tag 或推送远程：
+\`\`\`bash
+git tag <version>          # 可选，询问用户
+git push                   # 可选，询问用户是否推送
+\`\`\`
+
 **防护措施**
 - 如果未提供变更，始终提示选择
 - 使用产出物图（openspec-cn status --json）进行完成度检查
@@ -112,7 +147,8 @@ export function getArchiveChangeSkillTemplate(): SkillTemplate {
 - 移动到归档时保留 .openspec.yaml（它与目录一起移动）
 - 显示清晰的操作摘要
 - 如果请求同步，使用 openspec-sync-specs 方法（代理驱动）
-- 如果存在增量规格说明，始终运行同步评估并在提示前显示综合摘要`,
+- 如果存在增量规格说明，始终运行同步评估并在提示前显示综合摘要
+- **归档后三步（knowledge → codemap → git）是强制序列**`,
     license: 'MIT',
     compatibility: '需要 openspec CLI。',
     metadata: { author: 'openspec', version: '1.0' },
@@ -267,6 +303,20 @@ export function getOpsxArchiveCommandTemplate(): CommandTemplate {
 3. 等待不同的日期再归档
 \`\`\`
 
+**归档后强制执行（按序）**
+
+归档目录移动成功后，依次执行，**全部强制**：
+
+**7. 知识沉淀** — 调用 openspec-knowledge，提炼本次变更的可复用经验到 \`.aiknowledge/pitfalls/\`
+
+**8. Codemap 更新** — 更新 \`.aiknowledge/codemap/\` 中涉及模块的 overview/dependencies，仅更新变更涉及部分
+
+**9. Git 操作**
+\`\`\`bash
+git add -A && git commit -m "archive: <change-name>"
+\`\`\`
+询问用户是否需要 \`git tag\` 和 \`git push\`
+
 **防护措施**
 - 如果未提供变更，始终提示选择
 - 使用产出物图（openspec-cn status --json）进行完成度检查
@@ -274,6 +324,7 @@ export function getOpsxArchiveCommandTemplate(): CommandTemplate {
 - 移动到归档时保留 .openspec.yaml（它与目录一起移动）
 - 显示清晰的操作摘要
 - 如果请求同步，使用 Skill tool 调用 \`openspec-sync-specs\`（代理驱动）
-- 如果存在增量规格说明，请始终运行同步评估，并在提示前显示综合摘要`
+- 如果存在增量规格说明，请始终运行同步评估，并在提示前显示综合摘要
+- **归档后三步（knowledge → codemap → git）是强制序列**`
   };
 }

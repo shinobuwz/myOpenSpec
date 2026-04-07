@@ -32,7 +32,6 @@ export const ALL_WORKFLOWS = [
   'implement',
   'verify-enhanced',
   'review',
-  'ship',
   'auto-drive',
 ] as const;
 

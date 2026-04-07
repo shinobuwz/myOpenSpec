@@ -32,7 +32,6 @@ export const SKILL_NAMES = [
   'openspec-implement',
   'openspec-verify-enhanced',
   'openspec-review',
-  'openspec-ship',
   'openspec-auto-drive',
 ] as const;
 

@@ -28,7 +28,7 @@ describe('tool-detection', () => {
 
   describe('SKILL_NAMES', () => {
     it('should contain all skill names matching COMMAND_IDS', () => {
-      expect(SKILL_NAMES).toHaveLength(22);
+      expect(SKILL_NAMES).toHaveLength(21);
       expect(SKILL_NAMES).toContain('openspec-explore');
       expect(SKILL_NAMES).toContain('openspec-bugfix');
       expect(SKILL_NAMES).toContain('openspec-knowledge');
@@ -49,7 +49,7 @@ describe('tool-detection', () => {
       expect(SKILL_NAMES).toContain('openspec-implement');
       expect(SKILL_NAMES).toContain('openspec-verify-enhanced');
       expect(SKILL_NAMES).toContain('openspec-review');
-      expect(SKILL_NAMES).toContain('openspec-ship');
+      expect(SKILL_NAMES).toContain('openspec-review');
       expect(SKILL_NAMES).toContain('openspec-auto-drive');
     });
   });
