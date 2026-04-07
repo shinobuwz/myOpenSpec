@@ -7,10 +7,10 @@
 import type { SkillTemplate, CommandTemplate } from '../types.js';
 
 /**
- * Shared instructions for ff-change and propose skills.
- * Both skills perform identical artifact generation; propose adds a preamble listing artifact types.
+ * ff-change 和 propose skill 共享的指令文本。
+ * 两个 skill 执行相同的产出物生成流程，ff-change 通过引用此常量避免重复维护。
  */
-export const FF_PROPOSE_INSTRUCTIONS = `提案新变更 - 一步创建变更并生成所有产出物。
+export const PROPOSE_BASE_INSTRUCTIONS = `提案新变更 - 一步创建变更并生成所有产出物。
 
 我将创建一个包含以下产出物的变更：
 - proposal.md（什么和为什么）
@@ -114,7 +114,7 @@ export function getOpsxProposeSkillTemplate(): SkillTemplate {
   return {
     name: 'openspec-propose',
     description: '一步提案新变更并生成所有产出物。当用户想要快速描述他们想要构建的内容，并获得包含设计、规格说明和任务的完整提案以准备实现时使用。',
-    instructions: FF_PROPOSE_INSTRUCTIONS,
+    instructions: PROPOSE_BASE_INSTRUCTIONS,
     license: 'MIT',
     compatibility: '需要 openspec CLI。',
     metadata: { author: 'openspec', version: '1.0' },
