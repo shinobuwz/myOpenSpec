@@ -156,18 +156,6 @@ export const COMMAND_REGISTRY: CommandDefinition[] = [
     ],
   },
   {
-    name: 'feedback',
-    description: '提交关于 OpenSpec 的反馈',
-    acceptsPositional: true,
-    flags: [
-      {
-        name: 'body',
-        description: '反馈的详细描述',
-        takesValue: true,
-      },
-    ],
-  },
-  {
     name: 'change',
     description: '管理 OpenSpec 变更提案（已弃用）',
     flags: [],

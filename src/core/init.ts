@@ -727,7 +727,6 @@ export class InitCommand {
 
     console.log();
     console.log(`更多命令：${chalk.cyan('openspec-cn --help')}`);
-    console.log(`记录反馈：${chalk.cyan('openspec-cn feedback "标题" --body "详细说明"')}`);
 
     // Restart instruction if any tools were configured
     if (results.createdTools.length > 0 || results.refreshedTools.length > 0) {
