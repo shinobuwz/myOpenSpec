@@ -42,10 +42,6 @@ interface WorkflowPromptMeta {
 }
 
 const WORKFLOW_PROMPT_META: Record<string, WorkflowPromptMeta> = {
-  propose: {
-    name: '提议变更',
-    description: '根据请求创建提议、设计和任务',
-  },
   explore: {
     name: '探索想法',
     description: '在实现前调查问题',
@@ -98,17 +94,17 @@ const WORKFLOW_PROMPT_META: Record<string, WorkflowPromptMeta> = {
     name: '会话引导',
     description: '注入完整工作流优先级和使用规则',
   },
-  brainstorm: {
-    name: '需求脑暴',
-    description: '在规划前澄清需求与方案权衡',
-  },
   plan: {
     name: '增强规划',
     description: '生成带 trace 的 specs、design 和 tasks',
   },
   'plan-review': {
     name: '规划审查',
-    description: '检查 spec、plan 与 task 的追踪一致性',
+    description: '检查 spec↔plan 追踪一致性',
+  },
+  'task-analyze': {
+    name: '任务分析',
+    description: '检查 plan↔tasks 覆盖和一致性',
   },
   tdd: {
     name: '测试先行',

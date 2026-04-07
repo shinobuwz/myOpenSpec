@@ -18,10 +18,8 @@ export { getArchiveChangeSkillTemplate, getOpsxArchiveCommandTemplate } from './
 export { getBulkArchiveChangeSkillTemplate, getOpsxBulkArchiveCommandTemplate } from './workflows/bulk-archive-change.js';
 export { getVerifyChangeSkillTemplate, getOpsxVerifyCommandTemplate } from './workflows/verify-change.js';
 export { getOnboardSkillTemplate, getOpsxOnboardCommandTemplate } from './workflows/onboard.js';
-export { getOpsxProposeSkillTemplate, getOpsxProposeCommandTemplate } from './workflows/propose.js';
 export { getFeedbackSkillTemplate } from './workflows/feedback.js';
 export { getBootstrapSkillTemplate } from './workflows/bootstrap.js';
-export { getBrainstormSkillTemplate } from './workflows/brainstorm.js';
 export { getPlanSkillTemplate } from './workflows/plan.js';
 export { getTddSkillTemplate } from './workflows/tdd.js';
 export { getImplementSkillTemplate } from './workflows/implement.js';
@@ -29,4 +27,5 @@ export { getVerifySkillTemplate } from './workflows/verify.js';
 export { getReviewSkillTemplate } from './workflows/review.js';
 export { getShipSkillTemplate } from './workflows/ship.js';
 export { getPlanReviewSkillTemplate } from './workflows/plan-review.js';
+export { getTaskAnalyzeSkillTemplate } from './workflows/task-analyze.js';
 export { getAutoDriveSkillTemplate, getAutoDriveCommandTemplate } from './workflows/auto-drive.js';

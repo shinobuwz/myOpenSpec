@@ -63,11 +63,9 @@ describe('InitCommand', () => {
       expect(await directoryExists(path.join(openspecPath, 'specs'))).toBe(true);
       expect(await directoryExists(path.join(openspecPath, 'changes'))).toBe(true);
       expect(await directoryExists(path.join(openspecPath, 'changes', 'archive'))).toBe(true);
-      expect(await directoryExists(path.join(openspecPath, 'knowledge'))).toBe(true);
-      expect(await directoryExists(path.join(openspecPath, 'knowledge', 'pitfalls'))).toBe(true);
-      expect(await directoryExists(path.join(openspecPath, 'knowledge', 'patterns'))).toBe(true);
-      expect(await directoryExists(path.join(openspecPath, 'knowledge', 'test-recipes'))).toBe(true);
-      expect(await fileExists(path.join(openspecPath, 'knowledge', 'README.md'))).toBe(true);
+      const aiknowledgePath = path.join(testDir, '.aiknowledge', 'pitfalls');
+      expect(await directoryExists(aiknowledgePath)).toBe(true);
+      expect(await fileExists(path.join(aiknowledgePath, 'README.md'))).toBe(true);
     });
 
     it('should create config.yaml with default schema', async () => {
@@ -285,14 +283,14 @@ describe('InitCommand', () => {
       expect(content).toContain('思考伙伴');
     });
 
-    it('should include propose skill instructions', async () => {
+    it('should include ff-change skill instructions', async () => {
       const initCommand = new InitCommand({ tools: 'claude', force: true });
       await initCommand.execute(testDir);
 
-      const skillFile = path.join(testDir, '.claude', 'skills', 'openspec-propose', 'SKILL.md');
+      const skillFile = path.join(testDir, '.claude', 'skills', 'openspec-ff-change', 'SKILL.md');
       const content = await fs.readFile(skillFile, 'utf-8');
 
-      expect(content).toContain('name: openspec-propose');
+      expect(content).toContain('name: openspec-ff-change');
     });
 
     it('should include apply-change skill instructions', async () => {
@@ -465,8 +463,8 @@ describe('InitCommand - profile and detection features', () => {
     await initCommand.execute(testDir);
 
     // Core profile skills should be created
-    const proposeSkill = path.join(testDir, '.claude', 'skills', 'openspec-propose', 'SKILL.md');
-    expect(await fileExists(proposeSkill)).toBe(true);
+    const ffSkill = path.join(testDir, '.claude', 'skills', 'openspec-ff-change', 'SKILL.md');
+    expect(await fileExists(ffSkill)).toBe(true);
 
     // Full core profile skills should be created even if they were absent from the custom profile
     const bootstrapSkill = path.join(testDir, '.claude', 'skills', 'openspec-bootstrap', 'SKILL.md');
@@ -563,11 +561,11 @@ describe('InitCommand - profile and detection features', () => {
     expect(await fileExists(newChangeSkill)).toBe(true);
 
     // Non-selected skills should NOT be created
-    const proposeSkill = path.join(testDir, '.claude', 'skills', 'openspec-propose', 'SKILL.md');
-    expect(await fileExists(proposeSkill)).toBe(false);
+    const planSkill = path.join(testDir, '.claude', 'skills', 'openspec-plan', 'SKILL.md');
+    expect(await fileExists(planSkill)).toBe(false);
   });
 
-  it('should migrate commands-only extend mode to custom profile without injecting propose', async () => {
+  it('should migrate commands-only extend mode to custom profile without injecting ff', async () => {
     await fs.mkdir(path.join(testDir, 'openspec'), { recursive: true });
     await fs.mkdir(path.join(testDir, '.claude', 'commands', 'opsx'), { recursive: true });
     await fs.writeFile(path.join(testDir, '.claude', 'commands', 'opsx', 'explore.md'), '# explore\n');
@@ -581,14 +579,14 @@ describe('InitCommand - profile and detection features', () => {
     expect(config.workflows).toEqual(['explore']);
 
     const exploreCommand = path.join(testDir, '.claude', 'commands', 'opsx', 'explore.md');
-    const proposeCommand = path.join(testDir, '.claude', 'commands', 'opsx', 'propose.md');
+    const ffCommand = path.join(testDir, '.claude', 'commands', 'opsx', 'ff.md');
     expect(await fileExists(exploreCommand)).toBe(true);
-    expect(await fileExists(proposeCommand)).toBe(false);
+    expect(await fileExists(ffCommand)).toBe(false);
 
     const exploreSkill = path.join(testDir, '.claude', 'skills', 'openspec-explore', 'SKILL.md');
-    const proposeSkill = path.join(testDir, '.claude', 'skills', 'openspec-propose', 'SKILL.md');
+    const ffSkill = path.join(testDir, '.claude', 'skills', 'openspec-ff-change', 'SKILL.md');
     expect(await fileExists(exploreSkill)).toBe(false);
-    expect(await fileExists(proposeSkill)).toBe(false);
+    expect(await fileExists(ffSkill)).toBe(false);
   });
 
   it('should not prompt for confirmation when applying custom profile in interactive init', async () => {

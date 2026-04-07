@@ -12,7 +12,6 @@ import type { Profile } from './global-config.js';
  * These provide the full default workflow experience for new users.
  */
 export const ALL_WORKFLOWS = [
-  'propose',
   'explore',
   'bugfix',
   'knowledge',
@@ -26,9 +25,9 @@ export const ALL_WORKFLOWS = [
   'verify',
   'onboard',
   'bootstrap',
-  'brainstorm',
   'plan',
   'plan-review',
+  'task-analyze',
   'tdd',
   'implement',
   'verify-enhanced',

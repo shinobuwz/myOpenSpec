@@ -24,11 +24,10 @@ export const SKILL_NAMES = [
   'openspec-bulk-archive-change',
   'openspec-verify-change',
   'openspec-onboard',
-  'openspec-propose',
   'openspec-bootstrap',
-  'openspec-brainstorm',
   'openspec-plan',
   'openspec-plan-review',
+  'openspec-task-analyze',
   'openspec-tdd',
   'openspec-implement',
   'openspec-verify-enhanced',
@@ -55,7 +54,6 @@ export const COMMAND_IDS = [
   'bulk-archive',
   'verify',
   'onboard',
-  'propose',
   'auto-drive',
 ] as const;
 

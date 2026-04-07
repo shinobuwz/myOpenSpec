@@ -12,13 +12,22 @@ export function getImplementSkillTemplate(): SkillTemplate {
     description: '按 tasks.md 逐项实施，每项强制 TDD 循环。当 OpenSpec change 的 artifact 全部就绪、准备开始编码时使用。',
     instructions: `实施 Skill。按照 tasks.md 逐项实施，每项任务强制执行 TDD 循环。
 
+## 硬性门控
+
+**进入实施前必须确认以下关卡已通过：**
+1. openspec-plan-review（spec↔plan 一致性）已通过
+2. openspec-task-analyze（plan↔tasks 一致性）已通过
+
+如果任一关卡未通过，**拒绝开始实施**，提示用户先完成对应审查。
+
 ## 启动序列
 
-1. 读取当前变更的 \`tasks.md\`，获取完整任务列表
-2. 确认所有产出物（proposal/design/specs）已就绪
-3. 读取 \`.aiknowledge/codemap/\` 中涉及模块的文件，定位代码位置和模块边界
-4. 确认测试框架已配置并可运行
-5. 找到第一个未完成的任务
+1. 确认 openspec-task-analyze 已通过（检查分析报告结论为"可实施"）
+2. 读取当前变更的 \`tasks.md\`，获取完整任务列表
+3. 确认所有产出物（proposal/design/specs）已就绪
+4. 读取 \`.aiknowledge/codemap/\` 中涉及模块的文件，定位代码位置和模块边界
+5. 确认测试框架已配置并可运行
+6. 找到第一个未完成的任务
 
 ## 流程
 
@@ -65,7 +74,7 @@ export function getImplementSkillTemplate(): SkillTemplate {
 ## 退出契约
 
 - 输出实施摘要，包含完成的任务数、测试数和关键实现决策
-- 建议用户使用 openspec-verify 进行验证`,
+- **必须**转入 **openspec-verify** 进行三维验证检查。这不是建议，是强制要求。禁止跳过验证直接归档或上线。`,
     license: 'MIT',
     compatibility: '需要 openspec CLI。',
     metadata: { author: 'openspec', version: '1.0' },

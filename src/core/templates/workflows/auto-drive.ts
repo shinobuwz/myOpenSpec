@@ -32,7 +32,7 @@ export function getAutoDriveSkillTemplate(): SkillTemplate {
 
 **Phase 1 - 分析**：评估当前状态，确定改进方向
 
-**Phase 2 - 脑暴**：使用 openspec-brainstorm 探索方案
+**Phase 2 - 探索**：使用 openspec-explore 探索方案并收敛设计
 
 **Phase 3 - 规划**：使用 openspec-plan 创建变更
 

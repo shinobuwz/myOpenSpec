@@ -2,7 +2,6 @@
 import { describe, it, expect } from 'vitest';
 
 import { getBootstrapSkillTemplate } from '../../../src/core/templates/workflows/bootstrap.js';
-import { getBrainstormSkillTemplate } from '../../../src/core/templates/workflows/brainstorm.js';
 import { getPlanSkillTemplate } from '../../../src/core/templates/workflows/plan.js';
 import { getTddSkillTemplate } from '../../../src/core/templates/workflows/tdd.js';
 import { getImplementSkillTemplate } from '../../../src/core/templates/workflows/implement.js';
@@ -11,13 +10,13 @@ import { getReviewSkillTemplate } from '../../../src/core/templates/workflows/re
 import { getShipSkillTemplate } from '../../../src/core/templates/workflows/ship.js';
 import { getAutoDriveSkillTemplate, getAutoDriveCommandTemplate } from '../../../src/core/templates/workflows/auto-drive.js';
 import { getPlanReviewSkillTemplate } from '../../../src/core/templates/workflows/plan-review.js';
+import { getTaskAnalyzeSkillTemplate } from '../../../src/core/templates/workflows/task-analyze.js';
 import { getBugfixSkillTemplate, getOpsxBugfixCommandTemplate } from '../../../src/core/templates/workflows/bugfix.js';
 import { getKnowledgeSkillTemplate, getOpsxKnowledgeCommandTemplate } from '../../../src/core/templates/workflows/knowledge.js';
 
 describe('harness workflow skill templates', () => {
   const templateGetters = [
     { name: 'bootstrap', fn: getBootstrapSkillTemplate },
-    { name: 'brainstorm', fn: getBrainstormSkillTemplate },
     { name: 'plan', fn: getPlanSkillTemplate },
     { name: 'tdd', fn: getTddSkillTemplate },
     { name: 'implement', fn: getImplementSkillTemplate },
@@ -26,6 +25,7 @@ describe('harness workflow skill templates', () => {
     { name: 'ship', fn: getShipSkillTemplate },
     { name: 'auto-drive', fn: getAutoDriveSkillTemplate },
     { name: 'plan-review', fn: getPlanReviewSkillTemplate },
+    { name: 'task-analyze', fn: getTaskAnalyzeSkillTemplate },
   ];
 
   for (const { name, fn } of templateGetters) {
@@ -85,17 +85,15 @@ describe('harness workflow skill templates', () => {
     it('should provide a standalone knowledge capture skill', () => {
       const t = getKnowledgeSkillTemplate();
       expect(t.name).toBe('openspec-knowledge');
-      expect(t.instructions).toContain('收集上下文 → 判断知识类型 → 写入知识条目 → 校验可复用性');
-      expect(t.instructions).toContain('不要求依赖 change/archive 才能沉淀知识');
+      expect(t.instructions).toContain('收集上下文 → 判断技术领域 → 写入知识条目');
+      expect(t.instructions).toContain('.aiknowledge/pitfalls/');
     });
 
     it('should provide an independent knowledge command', () => {
       const t = getOpsxKnowledgeCommandTemplate();
       expect(t.name).toBe('OPSX: Knowledge');
-      expect(t.content).toContain('不要求先走 archive 或维护 change 文档');
-      expect(t.content).toContain('pitfalls');
-      expect(t.content).toContain('patterns');
-      expect(t.content).toContain('test-recipes');
+      expect(t.content).toContain('独立经验沉淀工作流');
+      expect(t.content).toContain('.aiknowledge/pitfalls/');
     });
   });
 });

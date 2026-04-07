@@ -479,7 +479,7 @@ openspec-cn archive "<name>"
 
 | 命令 | 做什么 |
 |---------|--------------|
-| \`/opsx:propose\` | 创建变更并生成所有产出物 |
+| \`/opsx:ff\` | 创建变更并生成所有产出物 |
 | \`/opsx:explore\` | 在工作之前/期间思考问题 |
 | \`/opsx:apply\` | 实现变更中的任务 |
 | \`/opsx:archive\` | 归档完成的变更 |
@@ -497,7 +497,7 @@ openspec-cn archive "<name>"
 
 ## 下一步是什么？
 
-尝试 \`/opsx:propose\` 在您实际想要构建的内容上。您现在掌握了节奏！
+尝试 \`/opsx:ff\` 在您实际想要构建的内容上。您现在掌握了节奏！
 \`\`\`
 
 ---
@@ -531,7 +531,7 @@ openspec-cn archive "<name>"
 
 | 命令 | 做什么 |
 |---------|--------------|
-| \`/opsx:propose <name>\` | 创建变更并生成所有产出物 |
+| \`/opsx:ff <name>\` | 创建变更并生成所有产出物 |
 | \`/opsx:explore\` | 思考问题（无代码更改） |
 | \`/opsx:apply <name>\` | 实现任务 |
 | \`/opsx:archive <name>\` | 完成后归档 |
@@ -545,7 +545,7 @@ openspec-cn archive "<name>"
 | \`/opsx:ff <name>\` | 快进：一次创建所有产出物 |
 | \`/opsx:verify <name>\` | 验证实现 |
 
-尝试 \`/opsx:propose\` 开始您的第一个变更。
+尝试 \`/opsx:ff\` 开始您的第一个变更。
 \`\`\`
 
 优雅退出。

@@ -81,12 +81,12 @@ describe('profile sync drift detection', () => {
   });
 
   it('detects drift when extra workflows are installed for both delivery', () => {
+    // Install full core profile, but check against a partial custom profile
     setupCoreSkills(tempDir);
     setupCoreCommands(tempDir);
-    writeSkill(tempDir, 'sync');
-    writeCommand(tempDir, 'sync');
 
-    const hasDrift = hasProjectConfigDrift(tempDir, CORE_WORKFLOWS, 'both');
+    // Custom profile with only 'explore' — core installs are extra
+    const hasDrift = hasProjectConfigDrift(tempDir, ['explore'], 'both');
     expect(hasDrift).toBe(true);
   });
 });

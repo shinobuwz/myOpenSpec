@@ -47,7 +47,7 @@ export function getBugfixSkillTemplate(): SkillTemplate {
 ## 护栏
 
 - 不为简单 bugfix 强行创建 proposal / specs / design / tasks
-- 不为简单 bugfix 强行走完整 brainstorm / plan-review / review / archive 链路，除非修复过程中暴露出更大范围风险
+- 不为简单 bugfix 强行走完整 explore / plan-review / review / archive 链路，除非修复过程中暴露出更大范围风险
 - 不因为是 bugfix 就默认跳过测试；先判断，再选择 test-first / characterization-first / direct
 - 不扩展范围；如果修着修着变成功能开发，暂停并切回常规工作流
 `,
@@ -65,7 +65,7 @@ export function getOpsxBugfixCommandTemplate(): CommandTemplate {
     tags: ['workflow', 'bugfix', 'fix'],
     content: `执行精简 bugfix 工作流。
 
-适用于明确缺陷的快速修复，不要求手动依次运行 brainstorm、plan、tdd、review 等完整前置流程。你应当在一次工作流中完成：
+适用于明确缺陷的快速修复，不要求手动依次运行 explore、plan、tdd、review 等完整前置流程。你应当在一次工作流中完成：
 
 定位问题 → 判断测试策略 → 修复 → 验证 → 经验总结
 

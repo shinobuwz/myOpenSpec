@@ -65,10 +65,17 @@ export function getPlanSkillTemplate(): SkillTemplate {
 - 所有产出物已提交到 git
 - 任务列表质量检查通过
 
+## 硬性门控
+
+**在 design.md 和 specs/ 生成后，必须转入 openspec-plan-review 进行 spec↔plan 审查。** 在 plan-review 通过之前，禁止生成 tasks.md。
+
+**在 tasks.md 生成后，必须转入 openspec-task-analyze 进行 plan↔tasks 审查。** 在 task-analyze 通过之前，禁止进入实施阶段。
+
 ## 退出契约
 
 - 输出变更摘要，包含所有产出物的简要描述
-- 建议转入 **openspec-plan-review** 审查规划一致性`,
+- **必须**转入 **openspec-plan-review** 审查 spec↔plan 一致性。这不是建议，是强制要求。
+- plan-review 通过后生成 tasks.md，再**必须**转入 **openspec-task-analyze** 审查 plan↔tasks 一致性`,
     license: 'MIT',
     compatibility: '需要 openspec CLI。',
     metadata: { author: 'openspec', version: '1.0' },

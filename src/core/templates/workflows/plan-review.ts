@@ -3,14 +3,18 @@ import type { SkillTemplate } from '../types.js';
 export function getPlanReviewSkillTemplate(): SkillTemplate {
   return {
     name: 'openspec-plan-review',
-    description: '规划审查：检查 tasks 是否完整覆盖 specs 需求、是否与 design 一致。在 plan→tasks 生成后、implement 之前使用。',
-    instructions: `# 规划审查：spec↔plan↔tasks 一致性检查
+    description: '规划审查：检查 specs 需求是否完整进入 design。在 plan 生成 design 后、生成 tasks 之前使用。',
+    instructions: `# 规划审查：spec↔plan 一致性检查
+
+## 硬性门控
+
+**这是强制关卡。** 在本 skill 输出"通过"结论之前，禁止生成 tasks.md 或进入任何后续阶段。
 
 ## 启动序列
 
 1. 确认 git 工作区干净
-2. \`openspec-cn status --change "<name>" --json\` 确认 tasks artifact 已生成
-3. 读取 change 的全部 artifact：proposal.md、design.md、specs/、tasks.md
+2. \`openspec-cn status --change "<name>" --json\` 确认 design artifact 已生成
+3. 读取 change 的 artifact：proposal.md、design.md、specs/
 
 ## 审查维度
 
@@ -20,56 +24,40 @@ export function getPlanReviewSkillTemplate(): SkillTemplate {
 - design.md 的 \`## 需求追踪\` 中必须存在 \`- [R1] -> [U1]\` 映射
 - 标记未进入设计的需求为 **TRACE_GAP**
 
-### 需求覆盖（design/specs → tasks）
-- 每个实施单元 [U1] 都必须落到至少一个 task
-- 每条需求必须有至少一个带 [R1] 标签的 task 对应
-- 每条 Given/When/Then 场景必须有对应的验证方式
-- 标记未覆盖的需求为 **GAP**
-
-### 设计一致性（design → tasks）
-- design.md 中的架构决策是否在 tasks 中体现
-- 技术选型是否与 task 实施方式匹配
-- 模块划分是否与 task 粒度对齐
-- task 是否使用 \`[R?][U?][test-first|characterization-first|direct]\` 标签
-- 标记不一致为 **MISMATCH**
-
-### tasks 质量检查
-- 每个 task 是否有精确文件路径
-- 每个 task 是否有明确的验证方式
-- task 之间是否有隐含依赖未标注
-- task 粒度是否合理（过大需拆分，过小可合并）
-- 标记问题为 **QUALITY**
+### 设计完整性（design 自洽检查）
+- design.md 中引用的 specs 需求是否都存在于 specs/ 目录
+- 实施单元 [U?] 是否都有对应的需求来源 [R?]
+- 是否存在孤立的实施单元（无需求驱动）
+- 标记不一致为 **ORPHAN**
 
 ## 输出格式
 
 \`\`\`
-## 规划审查报告
+## 规划审查报告（spec↔plan）
 
-### 覆盖矩阵
-| 需求 | 实施单元 | 对应 Task | 状态 |
+### 追踪矩阵
+| 需求 | Trace ID | 实施单元 | 状态 |
 |------|----------|----------|------|
-| R1 | U1 | Task N | ✓/TRACE_GAP/GAP |
+| ... | R1 | U1 | ✓/TRACE_GAP/ORPHAN |
 
 ### 问题列表
 [TRACE_GAP] 需求 X 未进入 design 实施单元
-[GAP] 需求 X / 单元 UY 无对应 task
-[MISMATCH] design 决策 Y 与 task Z 实施方式冲突
-[QUALITY] Task W 缺少 trace / 执行方式 / 验证方式
+[ORPHAN] 实施单元 UY 无对应需求来源
 
 ### 结论
-可实施 / 需补充后实施
+通过 / 需修正后重审
 \`\`\`
 
 ## 完成条件
 
 - 审查报告已输出
-- 覆盖矩阵已完成
-- 所有 GAP 和 MISMATCH 已列出
+- 追踪矩阵已完成
+- 所有 TRACE_GAP 和 ORPHAN 已列出
 
 ## 退出契约
 
-- 如"可实施"，建议转入 **openspec-implement**
-- 如"需补充"，建议回到 **openspec-plan** 修正 tasks.md
+- **如"通过"**：必须进入 tasks 生成阶段（openspec-plan 继续生成 tasks.md）。这不是建议，是强制要求。
+- **如"需修正"**：必须回到 **openspec-plan** 修正 design.md 和 specs/。禁止跳过直接生成 tasks。
 - 所有发现已记录在审查报告中`,
     license: 'MIT',
     compatibility: '需要 openspec CLI。',

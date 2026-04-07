@@ -1333,7 +1333,7 @@ More user content after markers.
         path.join(skillsDir, 'openspec-explore', 'SKILL.md')
       )).toBe(true);
       expect(await FileSystemUtils.fileExists(
-        path.join(skillsDir, 'openspec-propose', 'SKILL.md')
+        path.join(skillsDir, 'openspec-plan', 'SKILL.md')
       )).toBe(false);
 
       const commandsDir = path.join(testDir, '.claude', 'commands', 'opsx');
@@ -1341,7 +1341,7 @@ More user content after markers.
         path.join(commandsDir, 'explore.md')
       )).toBe(true);
       expect(await FileSystemUtils.fileExists(
-        path.join(commandsDir, 'propose.md')
+        path.join(commandsDir, 'ff.md')
       )).toBe(false);
     });
   });
@@ -1376,7 +1376,7 @@ More user content after markers.
         path.join(skillsDir, 'openspec-apply-change', 'SKILL.md')
       )).toBe(false);
       expect(await FileSystemUtils.fileExists(
-        path.join(skillsDir, 'openspec-propose', 'SKILL.md')
+        path.join(skillsDir, 'openspec-plan', 'SKILL.md')
       )).toBe(false);
     });
 
@@ -1516,7 +1516,7 @@ content
 
       // Commands should be updated/generated for the core profile
       expect(await FileSystemUtils.fileExists(
-        path.join(commandsDir, 'propose.md')
+        path.join(commandsDir, 'ff.md')
       )).toBe(true);
 
       consoleSpy.mockRestore();

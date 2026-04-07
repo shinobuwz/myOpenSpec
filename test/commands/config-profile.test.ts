@@ -94,7 +94,6 @@ describe('config profile interactive flow', () => {
   function setupSyncedCoreBothArtifacts(projectDir: string): void {
     fs.mkdirSync(path.join(projectDir, 'openspec'), { recursive: true });
     const coreSkillDirs = [
-      'openspec-propose',
       'openspec-explore',
       'openspec-bugfix',
       'openspec-knowledge',
@@ -108,9 +107,9 @@ describe('config profile interactive flow', () => {
       'openspec-verify-change',
       'openspec-onboard',
       'openspec-bootstrap',
-      'openspec-brainstorm',
       'openspec-plan',
       'openspec-plan-review',
+      'openspec-task-analyze',
       'openspec-tdd',
       'openspec-implement',
       'openspec-verify-enhanced',
@@ -124,7 +123,7 @@ describe('config profile interactive flow', () => {
       fs.writeFileSync(skillPath, `name: ${dirName}\n`, 'utf-8');
     }
 
-    const coreCommands = ['propose', 'explore', 'bugfix', 'knowledge', 'new', 'continue', 'apply', 'ff', 'sync', 'archive', 'bulk-archive', 'verify', 'onboard', 'auto-drive'];
+    const coreCommands = ['explore', 'bugfix', 'knowledge', 'new', 'continue', 'apply', 'ff', 'sync', 'archive', 'bulk-archive', 'verify', 'onboard', 'auto-drive'];
     for (const commandId of coreCommands) {
       const commandPath = path.join(projectDir, '.claude', 'commands', 'opsx', `${commandId}.md`);
       fs.mkdirSync(path.dirname(commandPath), { recursive: true });
@@ -226,7 +225,7 @@ describe('config profile interactive flow', () => {
     const { CORE_WORKFLOWS } = await import('../../src/core/profiles.js');
     saveGlobalConfig({ featureFlags: {}, profile: 'core', delivery: 'both', workflows: [...CORE_WORKFLOWS] });
     select.mockResolvedValueOnce('workflows');
-    checkbox.mockResolvedValueOnce(['propose', 'explore']);
+    checkbox.mockResolvedValueOnce(['ff', 'explore']);
 
     await runConfigCommand(['profile']);
 
@@ -240,11 +239,11 @@ describe('config profile interactive flow', () => {
         unchecked: '[ ]',
       },
     });
-    const proposeChoice = checkboxCall.choices.find((choice: { value: string }) => choice.value === 'propose');
+    const ffChoice = checkboxCall.choices.find((choice: { value: string }) => choice.value === 'ff');
     const onboardChoice = checkboxCall.choices.find((choice: { value: string }) => choice.value === 'onboard');
-    expect(proposeChoice.checked).toBe(true);
+    expect(ffChoice.checked).toBe(true);
     expect(onboardChoice.checked).toBe(true);
-    expect(getGlobalConfig().workflows).toEqual(['propose', 'explore']);
+    expect(getGlobalConfig().workflows).toEqual(['ff', 'explore']);
   });
 
   it('delivery picker should mark current option inline', async () => {
@@ -271,18 +270,13 @@ describe('config profile interactive flow', () => {
     const { CORE_WORKFLOWS } = await import('../../src/core/profiles.js');
     saveGlobalConfig({ featureFlags: {}, profile: 'core', delivery: 'both', workflows: [...CORE_WORKFLOWS] });
     select.mockResolvedValueOnce('workflows');
-    checkbox.mockResolvedValueOnce(['propose', 'explore', 'apply', 'archive']);
+    checkbox.mockResolvedValueOnce(['ff', 'explore', 'apply', 'archive']);
 
     await runConfigCommand(['profile']);
 
     const checkboxCall = checkbox.mock.calls[0][0];
     expect(checkboxCall.message).toBe('选择要启用的工作流：');
     expect(checkboxCall.choices).toEqual(expect.arrayContaining([
-      expect.objectContaining({
-        value: 'propose',
-        name: '提议变更',
-        description: '根据请求创建提议、设计和任务',
-      }),
       expect.objectContaining({
         value: 'verify',
         name: '验证变更',

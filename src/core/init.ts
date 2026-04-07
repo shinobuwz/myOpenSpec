@@ -74,11 +74,10 @@ const WORKFLOW_TO_SKILL_DIR: Record<string, string> = {
   'bulk-archive': 'openspec-bulk-archive-change',
   'verify': 'openspec-verify-change',
   'onboard': 'openspec-onboard',
-  'propose': 'openspec-propose',
   'bootstrap': 'openspec-bootstrap',
-  'brainstorm': 'openspec-brainstorm',
   'plan': 'openspec-plan',
   'plan-review': 'openspec-plan-review',
+  'task-analyze': 'openspec-task-analyze',
   'tdd': 'openspec-tdd',
   'implement': 'openspec-implement',
   'verify-enhanced': 'openspec-verify-enhanced',
@@ -717,14 +716,13 @@ export class InitCommand {
       console.log(chalk.dim(`配置：已跳过 (非交互模式)`));
     }
 
-    // Getting started (task 7.6: show propose if in profile)
     const globalCfg = getGlobalConfig();
     const activeProfile: Profile = (this.profileOverride as Profile) ?? globalCfg.profile ?? 'core';
     const activeWorkflows = [...getProfileWorkflows(activeProfile, globalCfg.workflows)];
     console.log();
-    if (activeWorkflows.includes('propose')) {
+    if (activeWorkflows.includes('ff')) {
       console.log(chalk.bold('开始使用：'));
-      console.log('  开始您的第一个变更：/opsx:propose "您的想法"');
+      console.log('  开始您的第一个变更：/opsx:ff "您的想法"');
     } else if (activeWorkflows.includes('new')) {
       console.log(chalk.bold('开始使用：'));
       console.log('  开始您的第一个变更：/opsx:new "您的想法"');
