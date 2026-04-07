@@ -6,11 +6,11 @@
  */
 import type { SkillTemplate, CommandTemplate } from '../types.js';
 
-export function getOpsxProposeSkillTemplate(): SkillTemplate {
-  return {
-    name: 'openspec-propose',
-    description: '一步提案新变更并生成所有产出物。当用户想要快速描述他们想要构建的内容，并获得包含设计、规格说明和任务的完整提案以准备实现时使用。',
-    instructions: `提案新变更 - 一步创建变更并生成所有产出物。
+/**
+ * Shared instructions for ff-change and propose skills.
+ * Both skills perform identical artifact generation; propose adds a preamble listing artifact types.
+ */
+export const FF_PROPOSE_INSTRUCTIONS = `提案新变更 - 一步创建变更并生成所有产出物。
 
 我将创建一个包含以下产出物的变更：
 - proposal.md（什么和为什么）
@@ -108,7 +108,13 @@ export function getOpsxProposeSkillTemplate(): SkillTemplate {
 - 在创建新产出物之前始终阅读依赖产出物
 - 如果上下文极其不清楚，询问用户 - 但倾向于做出合理的决定以保持势头
 - 如果同名变更已存在，询问用户是否要继续它或创建一个新的
-- 在继续下一个之前，验证写入后每个产出物文件是否存在`,
+- 在继续下一个之前，验证写入后每个产出物文件是否存在`;
+
+export function getOpsxProposeSkillTemplate(): SkillTemplate {
+  return {
+    name: 'openspec-propose',
+    description: '一步提案新变更并生成所有产出物。当用户想要快速描述他们想要构建的内容，并获得包含设计、规格说明和任务的完整提案以准备实现时使用。',
+    instructions: FF_PROPOSE_INSTRUCTIONS,
     license: 'MIT',
     compatibility: '需要 openspec CLI。',
     metadata: { author: 'openspec', version: '1.0' },
