@@ -548,7 +548,7 @@ describe('InitCommand - profile and detection features', () => {
       featureFlags: {},
       profile: 'custom',
       delivery: 'both',
-      workflows: ['explore', 'new'],
+      workflows: ['explore', 'continue'],
     });
 
     const initCommand = new InitCommand({ tools: 'claude', force: true });
@@ -556,9 +556,9 @@ describe('InitCommand - profile and detection features', () => {
 
     // Custom profile skills should be created
     const exploreSkill = path.join(testDir, '.claude', 'skills', 'openspec-explore', 'SKILL.md');
-    const newChangeSkill = path.join(testDir, '.claude', 'skills', 'openspec-new-change', 'SKILL.md');
+    const continueSkill = path.join(testDir, '.claude', 'skills', 'openspec-continue-change', 'SKILL.md');
     expect(await fileExists(exploreSkill)).toBe(true);
-    expect(await fileExists(newChangeSkill)).toBe(true);
+    expect(await fileExists(continueSkill)).toBe(true);
 
     // Non-selected skills should NOT be created
     const planSkill = path.join(testDir, '.claude', 'skills', 'openspec-plan', 'SKILL.md');
@@ -594,7 +594,7 @@ describe('InitCommand - profile and detection features', () => {
       featureFlags: {},
       profile: 'custom',
       delivery: 'both',
-      workflows: ['explore', 'new'],
+      workflows: ['explore', 'continue'],
     });
 
     const initCommand = new InitCommand({ force: true });
@@ -607,9 +607,9 @@ describe('InitCommand - profile and detection features', () => {
     expect(confirmMock).not.toHaveBeenCalled();
 
     const exploreSkill = path.join(testDir, '.claude', 'skills', 'openspec-explore', 'SKILL.md');
-    const newChangeSkill = path.join(testDir, '.claude', 'skills', 'openspec-new-change', 'SKILL.md');
+    const continueSkill = path.join(testDir, '.claude', 'skills', 'openspec-continue-change', 'SKILL.md');
     expect(await fileExists(exploreSkill)).toBe(true);
-    expect(await fileExists(newChangeSkill)).toBe(true);
+    expect(await fileExists(continueSkill)).toBe(true);
 
     const logCalls = (console.log as unknown as { mock: { calls: unknown[][] } }).mock.calls.flat().map(String);
     expect(logCalls.some((entry) => entry.includes('Applying custom profile'))).toBe(false);

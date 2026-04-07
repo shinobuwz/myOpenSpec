@@ -14,7 +14,6 @@ export { getApplyChangeSkillTemplate, getOpsxApplyCommandTemplate } from './work
 export { getFfChangeSkillTemplate, getOpsxFfCommandTemplate } from './workflows/ff-change.js';
 export { getSyncSpecsSkillTemplate, getOpsxSyncCommandTemplate } from './workflows/sync-specs.js';
 export { getArchiveChangeSkillTemplate, getOpsxArchiveCommandTemplate } from './workflows/archive-change.js';
-export { getBulkArchiveChangeSkillTemplate, getOpsxBulkArchiveCommandTemplate } from './workflows/bulk-archive-change.js';
 export { getBootstrapSkillTemplate } from './workflows/bootstrap.js';
 export { getPlanSkillTemplate } from './workflows/plan.js';
 export { getTddSkillTemplate } from './workflows/tdd.js';

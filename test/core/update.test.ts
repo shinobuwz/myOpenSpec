@@ -1348,12 +1348,12 @@ More user content after markers.
 
   describe('profile-aware updates', () => {
     it('should generate only profile workflows when custom profile is set', async () => {
-      // Set custom profile with only explore and new
+      // Set custom profile with only explore and continue
       setMockConfig({
         featureFlags: {},
         profile: 'custom',
         delivery: 'both',
-        workflows: ['explore', 'new'],
+        workflows: ['explore', 'continue'],
       });
 
       // Set up a configured tool
@@ -1363,12 +1363,12 @@ More user content after markers.
 
       await updateCommand.execute(testDir);
 
-      // Should create explore and new skills
+      // Should create explore and continue skills
       expect(await FileSystemUtils.fileExists(
         path.join(skillsDir, 'openspec-explore', 'SKILL.md')
       )).toBe(true);
       expect(await FileSystemUtils.fileExists(
-        path.join(skillsDir, 'openspec-new-change', 'SKILL.md')
+        path.join(skillsDir, 'openspec-continue-change', 'SKILL.md')
       )).toBe(true);
 
       // Should NOT create non-profile skills
@@ -1536,9 +1536,9 @@ content
       await fs.writeFile(path.join(skillsDir, 'openspec-explore', 'SKILL.md'), 'old');
 
       // Add a non-core workflow
-      await fs.mkdir(path.join(skillsDir, 'openspec-new-change'), { recursive: true });
-      await fs.writeFile(path.join(skillsDir, 'openspec-new-change', 'SKILL.md'), 'old');
-      const extraCommandFile = path.join(testDir, '.claude', 'commands', 'opsx', 'new.md');
+      await fs.mkdir(path.join(skillsDir, 'openspec-apply-change'), { recursive: true });
+      await fs.writeFile(path.join(skillsDir, 'openspec-apply-change', 'SKILL.md'), 'old');
+      const extraCommandFile = path.join(testDir, '.claude', 'commands', 'opsx', 'apply.md');
       await fs.mkdir(path.dirname(extraCommandFile), { recursive: true });
       await fs.writeFile(extraCommandFile, 'old');
 
@@ -1548,7 +1548,7 @@ content
 
       // Deselected workflow artifacts should be removed for both delivery surfaces.
       expect(await FileSystemUtils.fileExists(
-        path.join(skillsDir, 'openspec-new-change', 'SKILL.md')
+        path.join(skillsDir, 'openspec-apply-change', 'SKILL.md')
       )).toBe(false);
       expect(await FileSystemUtils.fileExists(extraCommandFile)).toBe(false);
 

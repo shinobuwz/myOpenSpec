@@ -5,13 +5,11 @@ import {
   type SkillTemplate,
   getApplyChangeSkillTemplate,
   getArchiveChangeSkillTemplate,
-  getBulkArchiveChangeSkillTemplate,
   getContinueChangeSkillTemplate,
   getExploreSkillTemplate,
   getFfChangeSkillTemplate,
   getOpsxApplyCommandTemplate,
   getOpsxArchiveCommandTemplate,
-  getOpsxBulkArchiveCommandTemplate,
   getOpsxContinueCommandTemplate,
   getOpsxExploreCommandTemplate,
   getOpsxFfCommandTemplate,
@@ -33,10 +31,8 @@ const EXPECTED_FUNCTION_HASHES: Record<string, string> = {
   getOpsxApplyCommandTemplate: '8a9375bc87023a730bd6423bfa03e083fb7f4b83af603b310ea489e4e5c1d833',
   getOpsxFfCommandTemplate: 'dc63cea6ed71c9cb3e5a7fc29a2df2054f2769ae1db69cf619d68fa368d61873',
   getArchiveChangeSkillTemplate: '912a43c7704650342e8512a6cf94c391867965de509106ce9dbab3e726d4d5da',
-  getBulkArchiveChangeSkillTemplate: '4730cd7fa0e148ecc72fca66ab92ad7bb4d8842aa4a53262d59caeeea3b22557',
   getOpsxSyncCommandTemplate: 'fe13a808ce5d2f4fd8eb4054373ce8b02e9b097d562f4921caa591fc50e5cfae',
   getOpsxArchiveCommandTemplate: 'b9252b3909536e36aeb7b51585514b74e2e0a80cb6dd1b46d2f4b2b0c7c1a76f',
-  getOpsxBulkArchiveCommandTemplate: 'ccc72708fa5afc926cf892e622566d572c7edc5297149c6b5efe7c147e1d9a8f',
   getOpsxVerifyCommandTemplate: '9a2dc98a60e2674dc08bee127b26ba96517fc887cd3eea9284a16039cf8d4b54',
 };
 
@@ -47,7 +43,6 @@ const EXPECTED_GENERATED_SKILL_CONTENT_HASHES: Record<string, string> = {
   'openspec-ff-change': '3d2ad57b7d0a7a976093182ef47343159a3389d7847df404aeeb80ed459b7726',
   'openspec-sync-specs': 'f86649dbeee82332b787f92f3f4331bc4e2c445864f042aafd9bb7e6fb4cb266',
   'openspec-archive-change': '1df84252a83bac39fe281e1a24290357f797bf5384fdbfb255076f2b93a1cf2f',
-  'openspec-bulk-archive-change': 'f9a31fd8b54c26a709a86e49d619b43d71ecc6aa3d09983a1a5bbcc0a568418c',
 };
 
 function stableStringify(value: unknown): string {
@@ -83,10 +78,8 @@ describe('skill templates split parity', () => {
       getOpsxApplyCommandTemplate,
       getOpsxFfCommandTemplate,
       getArchiveChangeSkillTemplate,
-      getBulkArchiveChangeSkillTemplate,
       getOpsxSyncCommandTemplate,
       getOpsxArchiveCommandTemplate,
-      getOpsxBulkArchiveCommandTemplate,
       getOpsxVerifyCommandTemplate,
     };
 
@@ -105,7 +98,6 @@ describe('skill templates split parity', () => {
       ['openspec-ff-change', getFfChangeSkillTemplate],
       ['openspec-sync-specs', getSyncSpecsSkillTemplate],
       ['openspec-archive-change', getArchiveChangeSkillTemplate],
-      ['openspec-bulk-archive-change', getBulkArchiveChangeSkillTemplate],
     ];
 
     const actualHashes = Object.fromEntries(

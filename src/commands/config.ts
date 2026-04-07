@@ -74,10 +74,6 @@ const WORKFLOW_PROMPT_META: Record<string, WorkflowPromptMeta> = {
     name: '归档变更',
     description: '最终确定并归档已完成的变更',
   },
-  'bulk-archive': {
-    name: '批量归档',
-    description: '一起归档多个已完成的变更',
-  },
   verify: {
     name: '验证变更',
     description: '针对变更运行验证检查',

@@ -102,7 +102,6 @@ describe('config profile interactive flow', () => {
       'openspec-ff-change',
       'openspec-sync-specs',
       'openspec-archive-change',
-      'openspec-bulk-archive-change',
       'openspec-verify',
       'openspec-bootstrap',
       'openspec-plan',
@@ -119,7 +118,7 @@ describe('config profile interactive flow', () => {
       fs.writeFileSync(skillPath, `name: ${dirName}\n`, 'utf-8');
     }
 
-    const coreCommands = ['explore', 'bugfix', 'knowledge', 'continue', 'apply', 'ff', 'sync', 'archive', 'bulk-archive', 'verify', 'auto-drive'];
+    const coreCommands = ['explore', 'bugfix', 'knowledge', 'continue', 'apply', 'ff', 'sync', 'archive', 'verify', 'auto-drive'];
     for (const commandId of coreCommands) {
       const commandPath = path.join(projectDir, '.claude', 'commands', 'opsx', `${commandId}.md`);
       fs.mkdirSync(path.dirname(commandPath), { recursive: true });

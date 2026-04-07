@@ -20,7 +20,6 @@ export const SKILL_NAMES = [
   'openspec-ff-change',
   'openspec-sync-specs',
   'openspec-archive-change',
-  'openspec-bulk-archive-change',
   'openspec-verify',
   'openspec-bootstrap',
   'openspec-plan',
@@ -46,7 +45,6 @@ export const COMMAND_IDS = [
   'ff',
   'sync',
   'archive',
-  'bulk-archive',
   'verify',
   'auto-drive',
 ] as const;
