@@ -20,16 +20,16 @@ describe('profiles', () => {
   });
 
   describe('ALL_WORKFLOWS', () => {
-    it('should contain all 21 workflows', () => {
-      expect(ALL_WORKFLOWS).toHaveLength(21);
+    it('should contain all 18 workflows', () => {
+      expect(ALL_WORKFLOWS).toHaveLength(18);
     });
 
     it('should contain expected workflow IDs', () => {
       const expected = [
-        'explore', 'bugfix', 'knowledge', 'new', 'continue', 'apply',
-        'ff', 'sync', 'archive', 'bulk-archive', 'verify', 'onboard',
+        'explore', 'bugfix', 'knowledge', 'continue', 'apply',
+        'ff', 'sync', 'archive', 'bulk-archive', 'verify',
         'bootstrap', 'plan', 'plan-review', 'task-analyze', 'tdd',
-        'implement', 'verify-enhanced', 'review', 'auto-drive',
+        'implement', 'review', 'auto-drive',
       ];
       expect([...ALL_WORKFLOWS]).toEqual(expected);
     });

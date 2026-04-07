@@ -97,22 +97,19 @@ describe('config profile interactive flow', () => {
       'openspec-explore',
       'openspec-bugfix',
       'openspec-knowledge',
-      'openspec-new-change',
       'openspec-continue-change',
       'openspec-apply-change',
       'openspec-ff-change',
       'openspec-sync-specs',
       'openspec-archive-change',
       'openspec-bulk-archive-change',
-      'openspec-verify-change',
-      'openspec-onboard',
+      'openspec-verify',
       'openspec-bootstrap',
       'openspec-plan',
       'openspec-plan-review',
       'openspec-task-analyze',
       'openspec-tdd',
       'openspec-implement',
-      'openspec-verify-enhanced',
       'openspec-review',
       'openspec-auto-drive',
     ];
@@ -122,7 +119,7 @@ describe('config profile interactive flow', () => {
       fs.writeFileSync(skillPath, `name: ${dirName}\n`, 'utf-8');
     }
 
-    const coreCommands = ['explore', 'bugfix', 'knowledge', 'new', 'continue', 'apply', 'ff', 'sync', 'archive', 'bulk-archive', 'verify', 'onboard', 'auto-drive'];
+    const coreCommands = ['explore', 'bugfix', 'knowledge', 'continue', 'apply', 'ff', 'sync', 'archive', 'bulk-archive', 'verify', 'auto-drive'];
     for (const commandId of coreCommands) {
       const commandPath = path.join(projectDir, '.claude', 'commands', 'opsx', `${commandId}.md`);
       fs.mkdirSync(path.dirname(commandPath), { recursive: true });
@@ -239,9 +236,7 @@ describe('config profile interactive flow', () => {
       },
     });
     const ffChoice = checkboxCall.choices.find((choice: { value: string }) => choice.value === 'ff');
-    const onboardChoice = checkboxCall.choices.find((choice: { value: string }) => choice.value === 'onboard');
     expect(ffChoice.checked).toBe(true);
-    expect(onboardChoice.checked).toBe(true);
     expect(getGlobalConfig().workflows).toEqual(['ff', 'explore']);
   });
 

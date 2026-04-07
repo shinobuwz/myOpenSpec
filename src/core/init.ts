@@ -65,22 +65,19 @@ const WORKFLOW_TO_SKILL_DIR: Record<string, string> = {
   'explore': 'openspec-explore',
   'bugfix': 'openspec-bugfix',
   'knowledge': 'openspec-knowledge',
-  'new': 'openspec-new-change',
   'continue': 'openspec-continue-change',
   'apply': 'openspec-apply-change',
   'ff': 'openspec-ff-change',
   'sync': 'openspec-sync-specs',
   'archive': 'openspec-archive-change',
   'bulk-archive': 'openspec-bulk-archive-change',
-  'verify': 'openspec-verify-change',
-  'onboard': 'openspec-onboard',
+  'verify': 'openspec-verify',
   'bootstrap': 'openspec-bootstrap',
   'plan': 'openspec-plan',
   'plan-review': 'openspec-plan-review',
   'task-analyze': 'openspec-task-analyze',
   'tdd': 'openspec-tdd',
   'implement': 'openspec-implement',
-  'verify-enhanced': 'openspec-verify-enhanced',
   'review': 'openspec-review',
   'auto-drive': 'openspec-auto-drive',
 };
@@ -722,9 +719,9 @@ export class InitCommand {
     if (activeWorkflows.includes('ff')) {
       console.log(chalk.bold('开始使用：'));
       console.log('  开始您的第一个变更：/opsx:ff "您的想法"');
-    } else if (activeWorkflows.includes('new')) {
+    } else if (activeWorkflows.includes('continue')) {
       console.log(chalk.bold('开始使用：'));
-      console.log('  开始您的第一个变更：/opsx:new "您的想法"');
+      console.log('  开始您的第一个变更：/opsx:continue "您的想法"');
     } else {
       console.log("完成。运行 'openspec-cn config profile' 配置您的工作流程。");
     }

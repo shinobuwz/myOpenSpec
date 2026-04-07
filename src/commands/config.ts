@@ -54,10 +54,6 @@ const WORKFLOW_PROMPT_META: Record<string, WorkflowPromptMeta> = {
     name: '经验沉淀',
     description: '独立写入 pitfalls、patterns 或 test-recipes',
   },
-  new: {
-    name: '新建变更',
-    description: '快速创建新变更脚手架',
-  },
   continue: {
     name: '继续变更',
     description: '恢复对现有变更的工作',
@@ -86,10 +82,6 @@ const WORKFLOW_PROMPT_META: Record<string, WorkflowPromptMeta> = {
     name: '验证变更',
     description: '针对变更运行验证检查',
   },
-  onboard: {
-    name: '入门指南',
-    description: 'OpenSpec 入门引导流程',
-  },
   bootstrap: {
     name: '会话引导',
     description: '注入完整工作流优先级和使用规则',
@@ -113,10 +105,6 @@ const WORKFLOW_PROMPT_META: Record<string, WorkflowPromptMeta> = {
   implement: {
     name: '增强实施',
     description: '按带 trace 和执行模式的 tasks 实施',
-  },
-  'verify-enhanced': {
-    name: '增强验证',
-    description: '从完整性、正确性和一致性三维验证 change',
   },
   review: {
     name: '代码审查',

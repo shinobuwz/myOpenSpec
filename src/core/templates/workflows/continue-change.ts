@@ -9,12 +9,26 @@ import type { SkillTemplate, CommandTemplate } from '../types.js';
 export function getContinueChangeSkillTemplate(): SkillTemplate {
   return {
     name: 'openspec-continue-change',
-    description: '通过创建下一个产出物继续处理 OpenSpec 变更。当用户想要推进其变更、创建下一个产出物或继续其工作流程时使用。',
-    instructions: `通过创建下一个产出物继续处理变更。
+    description: '创建新变更或继续处理已有变更，每次推进一个产出物。替代 openspec-new-change。',
+    instructions: `创建新变更或继续处理已有变更，每次推进一个产出物。
 
-**输入**：可选指定变更名称。如果省略，检查是否可以从对话上下文中推断。如果模糊或不明确，你**必须**提示获取可用变更。
+**输入**：可选指定变更名称。如果省略，检查是否可以从对话上下文中推断。如果模糊或不明确，提示选择。
 
 **步骤**
+
+0. **如果指定的变更不存在，先创建它**
+
+   检查变更名称是否已存在（运行 \`openspec-cn list --json\` 确认）。
+
+   如果变更**不存在**，先创建：
+   - 确定 Schema（默认省略 \`--schema\`；仅当用户明确要求时才使用 \`--schema <name>\`）
+   - 运行：
+     \`\`\`bash
+     openspec-cn new change "<name>"
+     \`\`\`
+   - 创建完成后，继续步骤1
+
+   如果变更**已存在**，直接进入步骤1。
 
 1. **如果没有提供变更名称，提示选择**
 
@@ -129,11 +143,19 @@ export function getOpsxContinueCommandTemplate(): CommandTemplate {
     description: '继续处理变更 - 创建下一个产出物（实验性）',
     category: '工作流',
     tags: ['workflow', 'artifacts', 'experimental'],
-    content: `通过创建下一个产出物继续处理变更。
+    content: `创建新变更或继续处理已有变更，每次推进一个产出物。
 
-**输入**：可选择在 \`/opsx:continue\` 后指定变更名称（例如，\`/opsx:continue add-auth\`）。如果省略，检查是否可以从对话上下文中推断出来。如果模糊或不明确，你必须提示可用的变更。
+**输入**：可选择在 \`/opsx:continue\` 后指定变更名称（例如，\`/opsx:continue add-auth\`）。
 
 **步骤**
+
+0. **如果指定变更不存在，先创建它**
+
+   检查 \`openspec-cn list --json\` 确认变更是否存在。不存在则运行：
+   \`\`\`bash
+   openspec-cn new change "<name>"
+   \`\`\`
+   然后继续步骤1。
 
 1. **如果没有提供变更名称，提示选择**
 

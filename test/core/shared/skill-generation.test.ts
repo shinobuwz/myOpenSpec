@@ -8,9 +8,9 @@ import {
 
 describe('skill-generation', () => {
   describe('getSkillTemplates', () => {
-    it('should return all 21 skill templates', () => {
+    it('should return all 18 skill templates', () => {
       const templates = getSkillTemplates();
-      expect(templates).toHaveLength(21);
+      expect(templates).toHaveLength(18);
     });
 
     it('should have unique directory names', () => {
@@ -27,22 +27,19 @@ describe('skill-generation', () => {
       expect(dirNames).toContain('openspec-explore');
       expect(dirNames).toContain('openspec-bugfix');
       expect(dirNames).toContain('openspec-knowledge');
-      expect(dirNames).toContain('openspec-new-change');
       expect(dirNames).toContain('openspec-continue-change');
       expect(dirNames).toContain('openspec-apply-change');
       expect(dirNames).toContain('openspec-ff-change');
       expect(dirNames).toContain('openspec-sync-specs');
       expect(dirNames).toContain('openspec-archive-change');
       expect(dirNames).toContain('openspec-bulk-archive-change');
-      expect(dirNames).toContain('openspec-verify-change');
-      expect(dirNames).toContain('openspec-onboard');
+      expect(dirNames).toContain('openspec-verify');
       expect(dirNames).toContain('openspec-bootstrap');
       expect(dirNames).toContain('openspec-plan');
       expect(dirNames).toContain('openspec-plan-review');
       expect(dirNames).toContain('openspec-task-analyze');
       expect(dirNames).toContain('openspec-tdd');
       expect(dirNames).toContain('openspec-implement');
-      expect(dirNames).toContain('openspec-verify-enhanced');
       expect(dirNames).toContain('openspec-review');
       expect(dirNames).toContain('openspec-auto-drive');
     });
@@ -100,9 +97,9 @@ describe('skill-generation', () => {
   });
 
   describe('getCommandTemplates', () => {
-    it('should return all 13 command templates', () => {
+    it('should return all 11 command templates', () => {
       const templates = getCommandTemplates();
-      expect(templates).toHaveLength(13);
+      expect(templates).toHaveLength(11);
     });
 
     it('should have unique IDs', () => {
@@ -119,7 +116,6 @@ describe('skill-generation', () => {
       expect(ids).toContain('explore');
       expect(ids).toContain('bugfix');
       expect(ids).toContain('knowledge');
-      expect(ids).toContain('new');
       expect(ids).toContain('continue');
       expect(ids).toContain('apply');
       expect(ids).toContain('ff');
@@ -127,7 +123,6 @@ describe('skill-generation', () => {
       expect(ids).toContain('archive');
       expect(ids).toContain('bulk-archive');
       expect(ids).toContain('verify');
-      expect(ids).toContain('onboard');
       expect(ids).toContain('auto-drive');
     });
 
@@ -158,9 +153,9 @@ describe('skill-generation', () => {
   });
 
   describe('getCommandContents', () => {
-    it('should return all 13 command contents', () => {
+    it('should return all 11 command contents', () => {
       const contents = getCommandContents();
-      expect(contents).toHaveLength(13);
+      expect(contents).toHaveLength(11);
     });
 
     it('should have valid content structure', () => {

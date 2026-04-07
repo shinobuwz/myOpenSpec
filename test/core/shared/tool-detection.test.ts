@@ -28,27 +28,24 @@ describe('tool-detection', () => {
 
   describe('SKILL_NAMES', () => {
     it('should contain all skill names matching COMMAND_IDS', () => {
-      expect(SKILL_NAMES).toHaveLength(21);
+      expect(SKILL_NAMES).toHaveLength(18);
       expect(SKILL_NAMES).toContain('openspec-explore');
       expect(SKILL_NAMES).toContain('openspec-bugfix');
       expect(SKILL_NAMES).toContain('openspec-knowledge');
-      expect(SKILL_NAMES).toContain('openspec-new-change');
+      expect(SKILL_NAMES).toContain('openspec-continue-change');
       expect(SKILL_NAMES).toContain('openspec-continue-change');
       expect(SKILL_NAMES).toContain('openspec-apply-change');
       expect(SKILL_NAMES).toContain('openspec-ff-change');
       expect(SKILL_NAMES).toContain('openspec-sync-specs');
       expect(SKILL_NAMES).toContain('openspec-archive-change');
       expect(SKILL_NAMES).toContain('openspec-bulk-archive-change');
-      expect(SKILL_NAMES).toContain('openspec-verify-change');
-      expect(SKILL_NAMES).toContain('openspec-onboard');
+      expect(SKILL_NAMES).toContain('openspec-verify');
       expect(SKILL_NAMES).toContain('openspec-bootstrap');
       expect(SKILL_NAMES).toContain('openspec-plan');
       expect(SKILL_NAMES).toContain('openspec-plan-review');
       expect(SKILL_NAMES).toContain('openspec-task-analyze');
       expect(SKILL_NAMES).toContain('openspec-tdd');
       expect(SKILL_NAMES).toContain('openspec-implement');
-      expect(SKILL_NAMES).toContain('openspec-verify-enhanced');
-      expect(SKILL_NAMES).toContain('openspec-review');
       expect(SKILL_NAMES).toContain('openspec-review');
       expect(SKILL_NAMES).toContain('openspec-auto-drive');
     });
