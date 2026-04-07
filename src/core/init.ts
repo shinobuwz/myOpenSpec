@@ -469,16 +469,20 @@ export class InitCommand {
   // ═══════════════════════════════════════════════════════════
 
   private async createDirectoryStructure(openspecPath: string, extendMode: boolean): Promise<void> {
-    const knowledgePath = path.join(openspecPath, 'knowledge');
+    const projectRoot = path.dirname(openspecPath);
+    const knowledgePath = path.join(projectRoot, '.aiknowledge', 'pitfalls');
+    const knowledgeDomains = [
+      'memory', 'concurrency', 'api', 'build', 'testing',
+      'performance', 'security', 'platform', 'data',
+      'network', 'lifecycle', 'config', 'misc',
+    ];
     const directories = [
       openspecPath,
       path.join(openspecPath, 'specs'),
       path.join(openspecPath, 'changes'),
       path.join(openspecPath, 'changes', 'archive'),
       knowledgePath,
-      path.join(knowledgePath, 'pitfalls'),
-      path.join(knowledgePath, 'patterns'),
-      path.join(knowledgePath, 'test-recipes'),
+      ...knowledgeDomains.map(d => path.join(knowledgePath, d)),
     ];
 
     if (extendMode) {
@@ -756,22 +760,41 @@ export class InitCommand {
       return;
     }
 
-    const content = `# OpenSpec Knowledge
+    const content = `# 经验知识库
 
-该目录用于沉淀可复用的工程经验，供后续 change 复用：
+按技术领域组织的可复用工程经验。三层渐进式披露：
 
-- \`pitfalls/\`：易错点、踩坑记录
-- \`patterns/\`：可复用的实现模式
-- \`test-recipes/\`：测试套路、回归样例
+## 目录结构
 
-建议每次归档后补充：
+\`\`\`
+.aiknowledge/pitfalls/
+├── index.md              ← L1 顶层：领域列表 + 条目数量
+├── <领域>/
+│   ├── index.md          ← L2 领域：条目标题 + 一句话摘要
+│   └── <slug>.md         ← L3 条目：完整描述含 diff
+\`\`\`
 
-1. Trigger：什么场景会再次触发
-2. Symptom：当时的现象
-3. Root Cause：根因
-4. Fix Pattern：通用修法
-5. Verification：如何验证不再复发
-6. Source：对应的 change / commit
+## 技术领域
+
+| 目录 | 覆盖范围 |
+|------|----------|
+| memory | 内存泄漏、OOM、循环引用、野指针 |
+| concurrency | 死锁、竞态条件、线程安全、异步陷阱 |
+| api | 接口变更、兼容性破坏、序列化 |
+| build | 编译错误、依赖冲突、链接问题 |
+| testing | 测试陷阱、mock 泄漏、flaky test |
+| performance | 性能退化、N+1 查询、渲染卡顿 |
+| security | 安全漏洞、注入、权限绕过 |
+| platform | 平台差异（Android/iOS/Web）踩坑 |
+| data | 数据一致性、脏数据、迁移失败 |
+| network | 超时、重试风暴、DNS、证书 |
+| lifecycle | 生命周期、初始化顺序、销毁遗漏 |
+| config | 配置错误、环境变量、Feature Flag |
+| misc | 其他 |
+
+## 条目模板
+
+每条经验包含：现象、根因、修复前 diff、修复后 diff、要点、来源。
 `;
 
     await FileSystemUtils.writeFile(readmePath, content);

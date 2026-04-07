@@ -3,24 +3,53 @@ import type { SkillTemplate, CommandTemplate } from '../types.js';
 export function getKnowledgeSkillTemplate(): SkillTemplate {
   return {
     name: 'openspec-knowledge',
-    description: '独立的经验沉淀工作流。将一次修复、开发或排障中的可复用经验整理到知识库。',
-    instructions: `执行经验沉淀工作流。目标是把一次具体工作中的可复用信息整理为可检索、可复用的知识条目。
+    description: '独立的经验沉淀工作流。将一次修复、开发或排障中的可复用经验整理到 .aiknowledge/ 知识库。',
+    instructions: `执行经验沉淀工作流。目标是把一次具体工作中的可复用信息整理为可检索、可复用的知识条目，写入 \`.aiknowledge/pitfalls/\`。
 
 ## 适用条件
 
 - 一次 bugfix、feature、review 或排障刚完成
 - 过程中出现了值得复用的经验、踩坑或测试方法
-- 不需要再创建或修改 change 制品
 
 ## 标准路径
 
-收集上下文 → 判断知识类型 → 写入知识条目 → 校验可复用性
+收集上下文 → 判断技术领域 → 写入知识条目 → 更新索引 → 校验可复用性
 
-## 知识类型
+## 目录结构（三层渐进式披露）
 
-- \`pitfalls/\`：易错点、踩坑、特殊约束
-- \`patterns/\`：值得重复使用的实现模式
-- \`test-recipes/\`：某类问题的测试套路或回归方法
+\`\`\`
+.aiknowledge/pitfalls/
+├── index.md                        # L1 顶层目录：领域列表 + 条目数量 + 链接
+├── memory/
+│   ├── index.md                    # L2 领域目录：条目标题 + 一句话摘要 + 链接
+│   └── <short-slug>.md             # L3 完整条目（含 diff）
+├── concurrency/
+│   ├── index.md
+│   └── ...
+└── ...
+\`\`\`
+
+AI 按需加载：先读 L1 顶层 index → 再读 L2 领域 index → 最后读 L3 具体条目。
+
+## 预定义技术领域
+
+| 目录 | 覆盖范围 |
+|------|----------|
+| \`memory/\` | 内存泄漏、OOM、循环引用、野指针、引用计数 |
+| \`concurrency/\` | 死锁、竞态条件、线程安全、异步陷阱、信号量 |
+| \`api/\` | 接口变更、兼容性破坏、序列化、版本适配 |
+| \`build/\` | 编译错误、依赖冲突、链接问题、打包陷阱 |
+| \`testing/\` | 测试陷阱、mock 泄漏、flaky test、覆盖率盲区 |
+| \`performance/\` | 性能退化、N+1 查询、渲染卡顿、CPU/IO 瓶颈 |
+| \`security/\` | 安全漏洞、注入、权限绕过、密钥泄露 |
+| \`platform/\` | 平台差异（Android/iOS/Web/小程序）踩坑 |
+| \`data/\` | 数据一致性、脏数据、迁移失败、缓存不一致 |
+| \`network/\` | 超时、重试风暴、DNS 解析、证书、代理 |
+| \`lifecycle/\` | 生命周期管理、初始化顺序、销毁遗漏、状态机 |
+| \`config/\` | 配置错误、环境变量、Feature Flag、灰度 |
+| \`misc/\` | 不属于以上类别的其他经验 |
+
+新领域可按需创建，但优先归入已有类别。
 
 ## 步骤
 
@@ -28,95 +57,127 @@ export function getKnowledgeSkillTemplate(): SkillTemplate {
    - 读取用户输入、最近修改、相关测试或提交信息
    - 提炼出真正值得复用的信息，而不是一次性过程记录
 
-2. **判断条目类型**
-   - 如果重点是“哪里容易出错、为什么出错”，写到 \`pitfalls/\`
-   - 如果重点是“以后可以照着做”，写到 \`patterns/\`
-   - 如果重点是“以后怎么测、怎么复现、怎么防回归”，写到 \`test-recipes/\`
+2. **判断技术领域**
+   - 根据问题本质选择对应领域目录
+   - 如果跨多个领域，放在最核心的那个领域下
 
-3. **创建或更新条目**
-   - 在 \`openspec/knowledge/\` 对应目录下创建一个简洁的 kebab-case 文件名
-   - 优先复用已有条目；只有当主题明显不同才新建
+3. **检查是否可归并**
+   - 先读该领域的 \`index.md\`，查看是否已有高度相似的条目
+   - 相似条目应合并更新，不要重复创建
 
-4. **使用统一模板**
-   - 建议至少包含：
+4. **创建或更新条目**
+   - 在 \`.aiknowledge/pitfalls/<领域>/\` 下创建 kebab-case 文件名
+   - 使用统一模板：
+
    \`\`\`md
-   # <title>
+   # <简短描述>
 
-   ## Trigger
-   什么场景会再次遇到
+   **标签**：[语言/平台标签]
 
-   ## Symptom
-   现象是什么
+   ## 现象
+   出了什么问题
 
-   ## Root Cause
-   根因是什么
+   ## 根因
+   为什么会出问题
 
-   ## Fix Pattern
-   以后应该如何处理
+   ## 修复前
+   \\\`\\\`\\\`diff
+   - 问题代码（从 git diff 中提取核心片段）
+   \\\`\\\`\\\`
 
-   ## Verification
-   如何验证修复或避免回归
+   ## 修复后
+   \\\`\\\`\\\`diff
+   + 修复代码（对应的修复片段）
+   \\\`\\\`\\\`
 
-   ## Source
-   关联代码、测试、提交或变更
+   ## 要点
+   一句话总结教训，方便 index 引用
+
+   ## 来源
+   commit: <short-sha>（YYYY-MM-DD）
    \`\`\`
 
-5. **校验可复用性**
+5. **更新索引（关键步骤）**
+
+   **L2 领域 index.md 格式：**
+   \`\`\`md
+   # <领域名称>
+
+   | 条目 | 摘要 |
+   |------|------|
+   | [<标题>](<slug>.md) | 一句话要点 |
+   \`\`\`
+
+   **L1 顶层 index.md 格式：**
+   \`\`\`md
+   # 经验知识库
+
+   | 领域 | 条目数 | 说明 |
+   |------|--------|------|
+   | [memory](memory/index.md) | N | 内存泄漏、OOM、循环引用 |
+   | [concurrency](concurrency/index.md) | N | 死锁、竞态、线程安全 |
+   | ... | | |
+   \`\`\`
+
+   每次写入条目后必须同步更新 L2 和 L1 索引。
+
+6. **diff 提取规则**
+   - 从 fix/revert 的 git diff 中提取**核心变更片段**，不要贴整个文件
+   - 保留足够上下文（前后各 3-5 行）让读者理解代码位置
+   - 如果修复涉及多处，只保留最关键的 1-2 处
+
+7. **校验可复用性**
    - 删除只对这一次会话有意义的表述
    - 确保其他人或未来的自己能独立看懂并复用
 
 ## 护栏
 
 - 不把经验总结写成流水账
-- 不要求依赖 change/archive 才能沉淀知识
 - 不重复创建多个高相似度条目
 - 条目应聚焦一个问题或一个模式，避免大而全
+- 每次写入必须更新两层索引
 `,
     license: 'MIT',
     compatibility: '需要 openspec CLI。',
-    metadata: { author: 'openspec', version: '1.0' },
+    metadata: { author: 'openspec', version: '2.0' },
   };
 }
 
 export function getOpsxKnowledgeCommandTemplate(): CommandTemplate {
   return {
     name: 'OPSX: Knowledge',
-    description: '独立沉淀可复用经验到 openspec/knowledge/',
+    description: '独立沉淀可复用经验到 .aiknowledge/pitfalls/',
     category: '工作流',
     tags: ['workflow', 'knowledge', 'pitfall', 'pattern', 'testing'],
     content: `执行独立经验沉淀工作流。
 
-适用于一次 bugfix、开发、review 或排障结束后，把可复用经验写入知识库，而不要求先走 archive 或维护 change 文档。
+适用于一次 bugfix、开发、review 或排障结束后，把可复用经验写入 \`.aiknowledge/pitfalls/\` 知识库。
 
 ## 输入
 
 \`/opsx:knowledge\` 后可提供一段总结、标题或背景。例如：
 
 - \`/opsx:knowledge iOS 首帧音频前必须先等待 session ready\`
-- \`/opsx:knowledge 补一条登录超时问题的回归测试套路\`
+- \`/opsx:knowledge 登录超时问题的回归测试套路\`
 
 ## 执行要求
 
 1. 如信息不足，先询问最少必要背景
-2. 将内容归类到以下其一：
-   - \`pitfalls\`
-   - \`patterns\`
-   - \`test-recipes\`
-3. 在 \`openspec/knowledge/\` 下创建或更新一个条目
-4. 使用统一模板整理：
-   - \`Trigger\`
-   - \`Symptom\`
-   - \`Root Cause\`
-   - \`Fix Pattern\`
-   - \`Verification\`
-   - \`Source\`
-5. 保持内容简洁、可复用、可检索
+2. 判断技术领域，归入对应目录：
+   - \`memory\` / \`concurrency\` / \`api\` / \`build\` / \`testing\`
+   - \`performance\` / \`security\` / \`platform\` / \`data\`
+   - \`network\` / \`lifecycle\` / \`config\` / \`misc\`
+3. 先读该领域 \`index.md\`，检查是否有可归并的已有条目
+4. 在 \`.aiknowledge/pitfalls/<领域>/\` 下创建或更新条目
+5. 使用统一模板：现象 → 根因 → 修复前 diff → 修复后 diff → 要点 → 来源
+6. 更新 L2 领域 index.md 和 L1 顶层 index.md
+7. 保持内容简洁、可复用、可检索
 
 ## 护栏
 
 - 不把一次性过程记录当作知识沉淀
-- 不强制依赖 OpenSpec change 文档
 - 不重复制造多个高重合条目
+- 每次必须同步更新索引
 `,
   };
 }

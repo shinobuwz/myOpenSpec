@@ -126,9 +126,10 @@ AI：随时可以开始。运行 /opsx:new add-jwt-auth 来开始。
 | `summary` | 否 | 一段经验摘要、标题或背景说明 |
 
 **功能：**
-- 将内容归类到 `pitfalls`、`patterns` 或 `test-recipes`
-- 在 `openspec/knowledge/` 下创建或更新知识条目
-- 使用统一模板整理 `Trigger / Symptom / Root Cause / Fix Pattern / Verification / Source`
+- 按技术领域归类到 `.aiknowledge/pitfalls/<领域>/`（memory / concurrency / api / build 等 13 个领域）
+- 在对应领域目录下创建或更新知识条目
+- 使用统一模板整理：现象 / 根因 / 修复前 diff / 修复后 diff / 要点 / 来源
+- 自动维护三层索引（顶层 index → 领域 index → 具体条目）
 
 **适合：**
 - bugfix 完成后的经验沉淀
