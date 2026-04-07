@@ -68,10 +68,8 @@ Finally /opsx-apply to implement`;
       'ff',
       'sync',
       'archive',
-      'bulk-archive',
       'verify',
       'explore',
-      'onboard',
     ];
 
     for (const cmd of commands) {
