@@ -10,6 +10,7 @@ import { getReviewSkillTemplate } from '../../../src/core/templates/workflows/re
 import { getAutoDriveSkillTemplate, getAutoDriveCommandTemplate } from '../../../src/core/templates/workflows/auto-drive.js';
 import { getPlanReviewSkillTemplate } from '../../../src/core/templates/workflows/plan-review.js';
 import { getTaskAnalyzeSkillTemplate } from '../../../src/core/templates/workflows/task-analyze.js';
+import { getTasksSkillTemplate } from '../../../src/core/templates/workflows/tasks.js';
 import { getBugfixSkillTemplate, getOpsxBugfixCommandTemplate } from '../../../src/core/templates/workflows/bugfix.js';
 import { getKnowledgeSkillTemplate, getOpsxKnowledgeCommandTemplate } from '../../../src/core/templates/workflows/knowledge.js';
 
@@ -24,6 +25,7 @@ describe('harness workflow skill templates', () => {
     { name: 'auto-drive', fn: getAutoDriveSkillTemplate },
     { name: 'plan-review', fn: getPlanReviewSkillTemplate },
     { name: 'task-analyze', fn: getTaskAnalyzeSkillTemplate },
+    { name: 'tasks', fn: getTasksSkillTemplate },
   ];
 
   for (const { name, fn } of templateGetters) {
