@@ -1,11 +1,9 @@
 import { CompletionGenerator } from './types.js';
 import { ZshGenerator } from './generators/zsh-generator.js';
 import { BashGenerator } from './generators/bash-generator.js';
-import { FishGenerator } from './generators/fish-generator.js';
 import { PowerShellGenerator } from './generators/powershell-generator.js';
 import { ZshInstaller } from './installers/zsh-installer.js';
 import { BashInstaller } from './installers/bash-installer.js';
-import { FishInstaller } from './installers/fish-installer.js';
 import { PowerShellInstaller } from './installers/powershell-installer.js';
 import { SupportedShell } from '../../utils/shell-detection.js';
 
@@ -39,7 +37,7 @@ export interface CompletionInstaller {
  * This design makes it easy to add support for additional shells
  */
 export class CompletionFactory {
-  private static readonly SUPPORTED_SHELLS: SupportedShell[] = ['zsh', 'bash', 'fish', 'powershell'];
+  private static readonly SUPPORTED_SHELLS: SupportedShell[] = ['zsh', 'bash', 'powershell'];
 
   /**
    * Create a completion generator for the specified shell
@@ -54,8 +52,6 @@ export class CompletionFactory {
         return new ZshGenerator();
       case 'bash':
         return new BashGenerator();
-      case 'fish':
-        return new FishGenerator();
       case 'powershell':
         return new PowerShellGenerator();
       default:
@@ -76,8 +72,6 @@ export class CompletionFactory {
         return new ZshInstaller();
       case 'bash':
         return new BashInstaller();
-      case 'fish':
-        return new FishInstaller();
       case 'powershell':
         return new PowerShellInstaller();
       default:

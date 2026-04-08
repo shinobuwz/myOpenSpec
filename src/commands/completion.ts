@@ -152,7 +152,6 @@ export class CompletionCommand {
             const configPaths: Record<string, string> = {
               zsh: '~/.zshrc',
               bash: '~/.bashrc',
-              fish: '~/.config/fish/config.fish',
               powershell: '$PROFILE',
             };
             const configPath = configPaths[shell] || '配置文件';
@@ -185,7 +184,6 @@ export class CompletionCommand {
             const reloadCommands: Record<string, string> = {
               zsh: 'exec zsh',
               bash: 'exec bash',
-              fish: 'exec fish',
               powershell: '. $PROFILE',
             };
             const reloadCmd = reloadCommands[shell] || `重启您的 ${shell}`;
@@ -218,7 +216,6 @@ export class CompletionCommand {
       const configPaths: Record<string, string> = {
         zsh: '~/.zshrc',
         bash: '~/.bashrc',
-        fish: 'Fish 配置',  // Fish doesn't modify profile, just removes script file
         powershell: '$PROFILE',
       };
       const configPath = configPaths[shell] || `${shell} 配置`;

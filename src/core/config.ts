@@ -20,5 +20,4 @@ export interface AIToolOption {
 export const AI_TOOLS: AIToolOption[] = [
   { name: 'Claude Code', value: 'claude', available: true, successLabel: 'Claude Code', skillsDir: '.claude' },
   { name: 'Codex', value: 'codex', available: true, successLabel: 'Codex', skillsDir: '.codex' },
-  { name: 'AGENTS.md (适用于 Amp, VS Code, …)', value: 'agents', available: false, successLabel: '您的兼容 AGENTS.md 的助手' }
 ];
