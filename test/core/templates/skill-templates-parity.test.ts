@@ -33,7 +33,7 @@ const EXPECTED_FUNCTION_HASHES: Record<string, string> = {
   getArchiveChangeSkillTemplate: '912a43c7704650342e8512a6cf94c391867965de509106ce9dbab3e726d4d5da',
   getOpsxSyncCommandTemplate: 'fe13a808ce5d2f4fd8eb4054373ce8b02e9b097d562f4921caa591fc50e5cfae',
   getOpsxArchiveCommandTemplate: 'b9252b3909536e36aeb7b51585514b74e2e0a80cb6dd1b46d2f4b2b0c7c1a76f',
-  getOpsxVerifyCommandTemplate: '9a2dc98a60e2674dc08bee127b26ba96517fc887cd3eea9284a16039cf8d4b54',
+  getOpsxVerifyCommandTemplate: '5756d4564bf1bec8c8f2650fd35ab26f127f171c5ffa1428715b727d6dab9073',
 };
 
 const EXPECTED_GENERATED_SKILL_CONTENT_HASHES: Record<string, string> = {

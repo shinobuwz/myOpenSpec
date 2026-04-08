@@ -42,53 +42,99 @@ export function getVerifySkillTemplate(): SkillTemplate {
 
    这会返回变更目录和上下文文件。从 \`contextFiles\` 读取所有可用产出物。
 
-4. **初始化验证报告结构**
+4. **并行 subagent 审查**
 
-   创建具有三个维度的报告结构：
-   - **完整性**：跟踪任务和规范覆盖率
-   - **正确性**：跟踪需求实现和场景覆盖率
-   - **一致性**：跟踪设计遵循情况和模式一致性
+   三个维度（完整性、正确性、一致性）**完全独立**，使用 Agent tool 并行派遣 3 个 subagent 同时执行。
 
-   每个维度可以有 CRITICAL、WARNING 或 SUGGESTION 问题。
+   在**同一条消息**中发起 3 个 Agent tool 调用（这样它们会并行运行）：
 
-5. **验证完整性**
+   **Subagent A — 完整性检查**：
+   \`\`\`
+   Agent({
+     description: "验证完整性",
+     subagent_type: "general-purpose",
+     prompt: \`检查变更 '<name>' 的完整性。
 
-   **任务完成情况**：
-   - 如果 contextFiles 中存在 tasks.md，读取它
-   - 解析复选框：\`- [ ]\`（未完成）vs \`- [x]\`（已完成）
-   - 统计已完成 vs 总任务数
-   - 如果存在未完成的任务：
-     - 为每个未完成任务添加 CRITICAL 问题
-     - 建议："完成任务：<描述>" 或 "如果已实现则标记为完成"
+     读取以下文件：
+     <列出 contextFiles 中的 tasks.md 和 specs 路径>
 
-   **规范覆盖率**：
-   - 如果 \`openspec/changes/<name>/specs/\` 中存在增量规范：
-     - 提取所有需求（标记为 "### 需求:"）
-     - 对于每个需求：在代码库中搜索与需求相关的关键词，评估实现是否可能存在
-     - 如果需求看起来未实现：添加 CRITICAL 问题并建议实现
+     任务完成情况：
+     - 读取 tasks.md，统计 [x] vs [ ] 复选框数量
+     - 为每个未完成任务生成 CRITICAL 问题
 
-6. **验证正确性**
+     规范覆盖率：
+     - 读取 openspec/changes/<name>/specs/ 中的增量规范
+     - 提取所有需求（"### 需求:"）
+     - 对每个需求在代码库中搜索实现证据
+     - 未实现的需求生成 CRITICAL 问题
 
-   **需求实现映射**：
-   - 对于增量规范中的每个需求：在代码库中搜索实现证据，评估是否符合需求意图
-   - 如果检测到偏差：添加 WARNING 并建议审查对应文件
+     输出格式：
+     ## 完整性检查报告
+     **任务**: X/Y 已完成
+     **需求覆盖**: M/N
+     ### 问题列表
+     - [CRITICAL/WARNING/SUGGESTION] 具体描述\`
+   })
+   \`\`\`
 
-   **场景覆盖率**：
-   - 对于增量规范中的每个场景（标记为 "#### 场景:"）：检查代码处理和测试覆盖
-   - 如果场景看起来未覆盖：添加 WARNING 并建议添加测试
+   **Subagent B — 正确性检查**：
+   \`\`\`
+   Agent({
+     description: "验证正确性",
+     subagent_type: "general-purpose",
+     prompt: \`检查变更 '<name>' 的正确性。
 
-7. **验证一致性**
+     读取以下文件：
+     <列出 contextFiles 中的 specs 路径>
 
-   **设计遵循情况**：
-   - 如果 contextFiles 中存在 design.md：提取关键决策，验证实现是否遵循
-   - 如果检测到矛盾：添加 WARNING 并建议更新实现或 design.md
-   - 如果没有 design.md：跳过并注明
+     需求实现映射：
+     - 对增量规范中的每个需求，搜索代码库确认实现是否符合需求意图
+     - 偏差生成 WARNING
 
-   **代码模式一致性**：
-   - 审查新代码与项目模式的一致性（文件命名、目录结构、编码风格）
-   - 如果发现重大偏差：添加 SUGGESTION
+     场景覆盖率：
+     - 对每个场景（"#### 场景:"），检查代码处理和测试覆盖
+     - 未覆盖的场景生成 WARNING
 
-8. **生成验证报告**
+     输出格式：
+     ## 正确性检查报告
+     **需求映射**: X/Y 符合
+     **场景覆盖**: M/N
+     ### 问题列表
+     - [CRITICAL/WARNING/SUGGESTION] 具体描述\`
+   })
+   \`\`\`
+
+   **Subagent C — 一致性检查**：
+   \`\`\`
+   Agent({
+     description: "验证一致性",
+     subagent_type: "general-purpose",
+     prompt: \`检查变更 '<name>' 的一致性。
+
+     读取以下文件：
+     <列出 contextFiles 中的 design.md 路径>
+
+     设计遵循情况：
+     - 如果存在 design.md：提取关键决策，验证代码是否遵循
+     - 矛盾生成 WARNING
+     - 无 design.md 则跳过并注明
+
+     代码模式一致性：
+     - 审查新代码与项目模式的一致性（文件命名、目录结构、编码风格）
+     - 重大偏差生成 SUGGESTION
+
+     输出格式：
+     ## 一致性检查报告
+     **设计遵循**: 是/否/跳过
+     **模式一致**: 是/否
+     ### 问题列表
+     - [CRITICAL/WARNING/SUGGESTION] 具体描述\`
+   })
+   \`\`\`
+
+   等待 3 个 subagent 全部返回后，进入汇总步骤。
+
+5. **汇总验证报告**
 
    **摘要记分卡**：
    \`\`\`
@@ -115,9 +161,9 @@ export function getVerifySkillTemplate(): SkillTemplate {
 
 **优雅降级**
 
-- 如果只存在 tasks.md：仅验证任务完成情况，跳过规范/设计检查
-- 如果存在任务 + 规范：验证完整性和正确性，跳过设计
-- 如果存在完整产出物：验证所有三个维度
+- 如果只存在 tasks.md：仅派遣 Subagent A（完整性），跳过 B 和 C
+- 如果存在任务 + 规范：派遣 A + B，跳过 C
+- 如果存在完整产出物：三个 subagent 全部派遣
 - 始终注明跳过了哪些检查以及原因
 
 **验证启发式方法**
@@ -158,11 +204,11 @@ export function getOpsxVerifyCommandTemplate(): CommandTemplate {
 
 3. **加载产出物** — \`openspec-cn instructions apply --change "<name>" --json\`，读取所有 contextFiles
 
-4. **三维验证**：完整性（任务+规范覆盖）→ 正确性（需求映射+场景覆盖）→ 一致性（设计遵循+代码模式）
+4. **三维并行验证**：使用 Agent tool 同时派遣 3 个 subagent 并行执行完整性/正确性/一致性检查，汇总报告
 
 5. **生成报告**：摘要记分卡 + CRITICAL/WARNING/SUGGESTION 分级问题列表 + 最终评估
 
-**优雅降级**：仅有 tasks.md → 只验证任务；tasks+规范 → 验证完整性+正确性；全产出物 → 三维全验
+**优雅降级**：仅有 tasks.md → 只派遣完整性 subagent；tasks+规范 → 完整性+正确性；全产出物 → 三维并行全验
 
 **退出**：无 CRITICAL → 可归档；有 CRITICAL → 修复后重验`
   };

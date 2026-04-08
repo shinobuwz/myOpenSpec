@@ -29,9 +29,70 @@ export function getImplementSkillTemplate(): SkillTemplate {
 5. 确认测试框架已配置并可运行
 6. 找到第一个未完成的任务
 
-## 流程
+## 并行实施策略
 
-对每个任务重复以下循环：
+在逐项执行前，先分析 tasks.md 的依赖关系，识别可并行的独立任务组：
+
+### 依赖分析
+
+1. 解析 tasks.md 中每个任务的依赖标注（如”依赖 Task 1”、”blockedBy”等）
+2. 构建任务依赖 DAG
+3. 识别同一层级（无互相依赖）的任务组
+
+### 并行条件
+
+任务组满足**全部**以下条件时，可以并行派遣：
+- 组内任务之间无依赖关系
+- 组内任务修改的文件路径无重叠（通过任务描述中的文件路径判断）
+- 组内至少有 2 个任务
+
+### 并行执行
+
+对可并行的任务组，在**同一条消息**中使用 Agent tool 派遣多个 worktree-isolated subagent：
+
+\`\`\`
+Agent({
+  description: “实施 Task N”,
+  subagent_type: “general-purpose”,
+  isolation: “worktree”,
+  prompt: \`在隔离 worktree 中实施以下任务：
+
+  任务编号：N
+  任务描述：<从 tasks.md 摘取>
+  验收标准：<从 tasks.md 摘取>
+  执行方式：[test-first|characterization-first|direct]
+
+  上下文文件：
+  <列出 proposal.md, design.md, specs/ 的路径>
+
+  执行步骤：
+  1. 读取上下文文件理解设计意图
+  2. 按执行方式进行 TDD 循环（test-first: 先写失败测试→实现→重构）
+  3. 确保所有验收标准有对应测试
+  4. git commit 所有变更
+
+  完成后报告：修改了哪些文件、测试结果、commit hash\`
+})
+\`\`\`
+
+### 合并策略
+
+所有并行 subagent 完成后：
+1. 检查每个 subagent 的返回结果（worktree 路径和分支名）
+2. 逐个合并 worktree 分支到当前分支（\`git merge <worktree-branch>\`）
+3. 如果合并冲突：暂停，提示用户手动解决
+4. 合并成功后在 tasks.md 中标记对应任务为 \`[x]\`
+5. 提交 tasks.md 更新
+
+### 回退机制
+
+- subagent 报告失败 → 不合并该 worktree，标记任务为”需要手动处理”
+- 合并冲突 → 暂停并行，回退到串行模式处理剩余任务
+- 测试不通过 → 回退该 worktree 的合并（\`git revert\`）
+
+## 串行流程
+
+对有依赖关系的任务、或并行组执行完毕后的剩余任务，按以下循环逐个执行：
 
 ### 1. 展示任务
 - 显示当前任务的编号、描述和验收标准
@@ -42,7 +103,7 @@ export function getImplementSkillTemplate(): SkillTemplate {
 - 如果任务是 \`[test-first]\`：调用 openspec-tdd 执行红绿重构循环
 - 如果任务是 \`[characterization-first]\`：先固化旧行为测试，再修改代码
 - 如果任务是 \`[direct]\`：仅在纯样式、纯配置、纯脚手架场景直接执行
-- 确保每个验收标准都有对应的测试或显式的“不需要测试”理由
+- 确保每个验收标准都有对应的测试或显式的”不需要测试”理由
 - 所有验证通过后才算任务完成
 
 ### 3. 标记完成
