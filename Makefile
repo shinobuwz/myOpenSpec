@@ -4,7 +4,7 @@
 PNPM ?= pnpm
 NODE ?= node
 
-.PHONY: all install deps build link unlink clean release test
+.PHONY: all install deps build link unlink clean test
 
 # Default: install deps, build, and link as global "openspec-cn"
 all: install
@@ -31,10 +31,6 @@ unlink:
 # Simple clean placeholder (extend as needed)
 clean:
 	rm -rf node_modules dist
-
-# Release a new version to npm (publishes @studyzy/openspec-cn)
-release:
-	$(PNPM) run release:local
 
 test: build
 	$(PNPM) test

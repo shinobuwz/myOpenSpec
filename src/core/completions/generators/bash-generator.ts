@@ -169,7 +169,7 @@ complete -F _openspec_completion openspec
         lines.push(`${indent}_openspec_complete_items`);
         break;
       case 'shell':
-        lines.push(`${indent}local shells="zsh bash fish powershell"`);
+        lines.push(`${indent}local shells="zsh bash powershell"`);
         lines.push(`${indent}COMPREPLY=($(compgen -W "$shells" -- "$cur"))`);
         break;
       case 'path':
