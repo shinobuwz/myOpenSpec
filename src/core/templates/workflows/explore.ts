@@ -45,6 +45,8 @@ export function getExploreSkillTemplate(): SkillTemplate {
 - 识别已在使用的模式
 - 揭示隐藏的复杂性
 
+> **模型节约原则**：需要大范围搜索代码库（glob、grep、跨多个文件读取）时，使用 Agent tool（subagent_type: "Explore"）委托执行，而不是当前模型直接读文件。Explore subagent 使用更轻量的模型，成本更低。仅在需要深度推理或综合分析时才用当前模型直接操作。
+
 **比较选项**
 - 头脑风暴多种方法
 - 构建比较表
