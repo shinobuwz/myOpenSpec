@@ -17,7 +17,7 @@ export function getBugfixSkillTemplate(): SkillTemplate {
 
 ## 标准路径
 
-定位问题 → 判断是否需要写测试 → 修复 → 验证 → 经验总结
+读 codemap 辅助定位 → 判断测试策略 → 修复 → 验证 → codemap 更新（按需）→ 经验总结
 
 ## 步骤
 
@@ -25,7 +25,12 @@ export function getBugfixSkillTemplate(): SkillTemplate {
    - 如果用户没有提供明确症状、期望行为或复现线索，先询问
    - 如果问题范围已经扩展成需求变更或架构调整，停止 bugfix 流程并建议改走常规流程
 
-2. **决定测试策略**
+2. **读取 codemap 辅助定位**
+   - 读 \`.aiknowledge/codemap/index.md\`，找到涉及模块
+   - 如果涉及模块在 codemap 中，读对应 \`<module>.md\` 定位关键文件和调用链
+   - 如果模块不在 codemap 中，正常阅读代码定位；修复完成后按需补全 codemap
+
+3. **决定测试策略**
    - 如果 bug 可通过新增失败测试直接复现，使用 \`[test-first]\`
    - 如果是旧行为不清晰或回归缺陷，先用 \`[characterization-first]\` 固化现状
    - 仅纯样式、纯配置类缺陷使用 \`[direct]\`
@@ -38,7 +43,11 @@ export function getBugfixSkillTemplate(): SkillTemplate {
    - 运行与 bug 相关的测试或验证命令
    - 如果修复无法被测试证明，明确说明验证依据
 
-5. **经验总结**
+5. **Codemap 更新（按需）**
+   - 如果 fix 涉及模块边界变化、接口变更或新的跨模块调用链，调用 \`openspec-codemap\` skill 更新受影响模块
+   - 小范围 bugfix（单文件内部逻辑修复）无需更新 codemap
+
+6. **经验总结**
    - 直接在 \`.aiknowledge/pitfalls/<领域>/\` 中补一条最小经验，或调用 \`/opsx:knowledge\`
    - 根据问题本质选择技术领域（memory / concurrency / api / build / testing / performance / security / platform / data / network / lifecycle / config / misc）
    - **写之前必须先 \`ls .aiknowledge/pitfalls/\`**，确认目标领域目录是否已存在：
@@ -71,7 +80,7 @@ export function getOpsxBugfixCommandTemplate(): CommandTemplate {
 
 适用于明确缺陷的快速修复，不要求手动依次运行 explore、plan、tdd、review 等完整前置流程。你应当在一次工作流中完成：
 
-定位问题 → 判断测试策略 → 修复 → 验证 → 经验总结
+定位问题 → 判断测试策略 → 修复 → 验证 → codemap 更新（按需）→ 经验总结
 
 ## 输入
 
@@ -83,13 +92,15 @@ export function getOpsxBugfixCommandTemplate(): CommandTemplate {
 ## 执行要求
 
 1. 如果描述不清楚，先询问最少必要信息
-2. 根据情况选择：
+2. 读 \`.aiknowledge/codemap/index.md\` 辅助定位涉及模块
+3. 根据情况选择：
    - \`[test-first]\`
    - \`[characterization-first]\`
    - \`[direct]\`
-3. 完成修复
-4. 运行验证
-5. 在 \`.aiknowledge/pitfalls/<领域>/\` 中补一条经验，必要时调用 \`/opsx:knowledge\`
+4. 完成修复
+5. 运行验证
+6. 如 fix 涉及模块边界或调用链变化，调用 \`/opsx:codemap\` 更新
+7. 在 \`.aiknowledge/pitfalls/<领域>/\` 中补一条经验，必要时调用 \`/opsx:knowledge\`
 
 ## 护栏
 
