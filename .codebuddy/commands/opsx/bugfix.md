@@ -27,6 +27,9 @@ argument-hint: "[command arguments]"
 3. 完成修复
 4. 运行验证
 5. 在 `.aiknowledge/pitfalls/<领域>/` 中补一条经验，必要时调用 `/opsx:knowledge`
+   - **写之前先 `ls .aiknowledge/pitfalls/`**，确认目标目录是否已存在再决定新建还是追加
+   - 不得按平台名（微信/抖音等）细分子目录，平台内容统一归入 `platform/`
+   - 新增或追加后必须同步更新该领域 index.md 和顶层 index.md
 
 ## 护栏
 

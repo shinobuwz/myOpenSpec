@@ -41,6 +41,10 @@ export function getBugfixSkillTemplate(): SkillTemplate {
 5. **经验总结**
    - 直接在 \`.aiknowledge/pitfalls/<领域>/\` 中补一条最小经验，或调用 \`/opsx:knowledge\`
    - 根据问题本质选择技术领域（memory / concurrency / api / build / testing / performance / security / platform / data / network / lifecycle / config / misc）
+   - **写之前必须先 \`ls .aiknowledge/pitfalls/\`**，确认目标领域目录是否已存在：
+     - 已存在 → 追加到该目录，更新该目录的 index.md，更新顶层 index.md 条目数
+     - 不存在 → 才创建新目录，同时在顶层 index.md 新增一行
+   - 不得按平台名（微信/抖音/H5 等）细分子目录，平台相关内容统一归入 \`platform/\`
    - 至少记录：现象、根因、修复 diff、要点、来源
    - 更新对应领域的 index.md 和顶层 index.md
 
