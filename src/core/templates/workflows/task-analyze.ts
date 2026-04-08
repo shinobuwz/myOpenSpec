@@ -23,6 +23,10 @@ export function getTaskAnalyzeSkillTemplate(): SkillTemplate {
 3. 确认 openspec-plan-review 已通过（spec↔plan 一致性已验证）
 4. 读取 change 的全部 artifact：proposal.md、design.md、specs/、tasks.md
 
+## 审查方式
+
+使用 Agent tool 启动 subagent 进行独立审查。subagent 只读取产出物文件，不做任何修改。审查结果由 subagent 汇报，主 agent 汇总输出。
+
 ## 审查维度
 
 ### 需求覆盖（design/specs → tasks）
