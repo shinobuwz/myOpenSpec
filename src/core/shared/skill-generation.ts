@@ -32,6 +32,8 @@ import {
   getTaskAnalyzeSkillTemplate,
   getAutoDriveSkillTemplate,
   getAutoDriveCommandTemplate,
+  getCodemapSkillTemplate,
+  getOpsxCodemapCommandTemplate,
   type SkillTemplate,
 } from '../templates/skill-templates.js';
 import type { CommandContent } from '../command-generation/index.js';
@@ -77,6 +79,7 @@ export function getSkillTemplates(workflowFilter?: readonly string[]): SkillTemp
     { template: getImplementSkillTemplate(), dirName: 'openspec-implement', workflowId: 'implement' },
     { template: getReviewSkillTemplate(), dirName: 'openspec-review', workflowId: 'review' },
     { template: getAutoDriveSkillTemplate(), dirName: 'openspec-auto-drive', workflowId: 'auto-drive' },
+    { template: getCodemapSkillTemplate(), dirName: 'openspec-codemap', workflowId: 'codemap' },
   ];
 
   if (!workflowFilter) return all;
@@ -102,6 +105,7 @@ export function getCommandTemplates(workflowFilter?: readonly string[]): Command
     { template: getOpsxArchiveCommandTemplate(), id: 'archive' },
     { template: getOpsxVerifyCommandTemplate(), id: 'verify' },
     { template: getAutoDriveCommandTemplate(), id: 'auto-drive' },
+    { template: getOpsxCodemapCommandTemplate(), id: 'codemap' },
   ];
 
   if (!workflowFilter) return all;

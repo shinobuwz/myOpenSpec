@@ -30,6 +30,7 @@ export function getBootstrapSkillTemplate(): SkillTemplate {
 | openspec-verify | 验证、检查、质量 | 三维验证检查 |
 | openspec-review | 审查、代码审查、review | 独立代码审查 |
 | openspec-archive-change | 归档、上线、发布 | 归档 + knowledge + codemap + git |
+| openspec-codemap | codemap、架构图、模块地图 | 独立维护 .aiknowledge/codemap/ 架构认知地图 |
 | openspec-auto-drive | 自动驱动、auto、优化 | AI 自主驱动完整工作流 |
 
 ## 强制流程链

@@ -24,3 +24,4 @@ export { getPlanReviewSkillTemplate } from './workflows/plan-review.js';
 export { getTasksSkillTemplate } from './workflows/tasks.js';
 export { getTaskAnalyzeSkillTemplate } from './workflows/task-analyze.js';
 export { getAutoDriveSkillTemplate, getAutoDriveCommandTemplate } from './workflows/auto-drive.js';
+export { getCodemapSkillTemplate, getOpsxCodemapCommandTemplate } from './workflows/codemap.js';

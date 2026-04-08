@@ -118,14 +118,8 @@ export function getArchiveChangeSkillTemplate(): SkillTemplate {
 
 **8. Codemap 更新（强制）**
 
-更新 \`.aiknowledge/codemap/\`，反映本次变更带来的架构变化：
-1. 读取 \`.aiknowledge/codemap/index.md\`（如不存在则创建）
-2. 对比本次变更涉及的模块，判断是否有新模块或模块边界变化
-3. 更新/创建对应模块目录下的文件（overview.md、dependencies.md 等）
-4. 如模块间链路有变化，更新 \`connections.md\`
-5. 更新 \`index.md\` 目录索引
-
-原则：只更新本次变更涉及的模块，不全量重写。写入前提议用户确认。
+使用 Task tool（subagent_type: "general-purpose"）：
+> "Use Skill tool to invoke openspec-codemap. Context: just archived change '<change-name>'. Update codemap for modules affected by this change."
 
 **9. Git 操作（强制）**
 
@@ -309,7 +303,7 @@ export function getOpsxArchiveCommandTemplate(): CommandTemplate {
 
 **7. 知识沉淀** — 调用 openspec-knowledge，提炼本次变更的可复用经验到 \`.aiknowledge/pitfalls/\`
 
-**8. Codemap 更新** — 更新 \`.aiknowledge/codemap/\` 中涉及模块的 overview/dependencies，仅更新变更涉及部分
+**8. Codemap 更新** — 调用 \`openspec-codemap\` skill，更新本次变更涉及模块的 codemap，仅更新变更涉及部分
 
 **9. Git 操作**
 \`\`\`bash
