@@ -7,7 +7,8 @@ import { promises as fsp } from 'node:fs';
 import { AI_TOOLS, type AIToolOption } from '../../src/core/config.js';
 import { CommandAdapterRegistry } from '../../src/core/command-generation/index.js';
 import { saveGlobalConfig, getGlobalConfigPath } from '../../src/core/global-config.js';
-import { migrateIfNeeded, scanInstalledWorkflows } from '../../src/core/migration.js';
+import { migrateIfNeeded, scanInstalledWorkflows, syncCoreProfileWorkflows } from '../../src/core/migration.js';
+import { CORE_WORKFLOWS } from '../../src/core/profiles.js';
 
 const CLAUDE_TOOL = AI_TOOLS.find((tool) => tool.value === 'claude') as AIToolOption | undefined;
 
@@ -133,6 +134,64 @@ describe('migration', () => {
     migrateIfNeeded(projectDir, [ensureClaudeTool()]);
 
     expect(fs.existsSync(getGlobalConfigPath())).toBe(false);
+  });
+
+  describe('syncCoreProfileWorkflows', () => {
+    it('replaces stale entries with CORE_WORKFLOWS for core profile', () => {
+      saveGlobalConfig({
+        featureFlags: {},
+        profile: 'core',
+        delivery: 'both',
+        workflows: ['propose', 'explore', 'new', 'bulk-archive'],
+      });
+
+      syncCoreProfileWorkflows();
+
+      const config = readRawConfig();
+      expect(config.workflows).toEqual([...CORE_WORKFLOWS]);
+    });
+
+    it('adds missing entries to reach CORE_WORKFLOWS for core profile', () => {
+      saveGlobalConfig({
+        featureFlags: {},
+        profile: 'core',
+        delivery: 'both',
+        workflows: ['explore', 'bugfix'],
+      });
+
+      syncCoreProfileWorkflows();
+
+      const config = readRawConfig();
+      expect(config.workflows).toEqual([...CORE_WORKFLOWS]);
+    });
+
+    it('does not modify workflows for custom profile', () => {
+      const customWorkflows = ['explore', 'bugfix', 'plan'];
+      saveGlobalConfig({
+        featureFlags: {},
+        profile: 'custom',
+        delivery: 'both',
+        workflows: customWorkflows,
+      });
+
+      syncCoreProfileWorkflows();
+
+      const config = readRawConfig();
+      expect(config.workflows).toEqual(customWorkflows);
+    });
+
+    it('sets workflows to CORE_WORKFLOWS when workflows is undefined for core profile', () => {
+      saveGlobalConfig({
+        featureFlags: {},
+        profile: 'core',
+        delivery: 'both',
+      });
+
+      syncCoreProfileWorkflows();
+
+      const config = readRawConfig();
+      expect(config.workflows).toEqual([...CORE_WORKFLOWS]);
+    });
   });
 
   it('ignores unknown custom skill and command files when scanning workflows', async () => {

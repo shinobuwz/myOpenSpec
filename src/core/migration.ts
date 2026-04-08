@@ -9,7 +9,7 @@ import type { AIToolOption } from './config.js';
 import { getGlobalConfig, getGlobalConfigPath, saveGlobalConfig, type Delivery } from './global-config.js';
 import { CommandAdapterRegistry } from './command-generation/index.js';
 import { WORKFLOW_TO_SKILL_DIR } from './profile-sync-drift.js';
-import { ALL_WORKFLOWS } from './profiles.js';
+import { ALL_WORKFLOWS, CORE_WORKFLOWS } from './profiles.js';
 import path from 'path';
 import * as fs from 'fs';
 
@@ -128,4 +128,18 @@ export function migrateIfNeeded(projectPath: string, tools: AIToolOption[]): voi
 
   console.log(`已迁移：自定义配置，共 ${installedWorkflows.length} 个工作流程`);
   console.log("尝试 'openspec-cn config profile core' 获得精简体验。");
+}
+
+/**
+ * For 'core' profile users, syncs the global config's workflows array
+ * to match the current CORE_WORKFLOWS.
+ *
+ * Called during init and update to remove stale entries and add new ones.
+ * No-op for 'custom' profile.
+ */
+export function syncCoreProfileWorkflows(): void {
+  const config = getGlobalConfig();
+  if (config.profile !== 'core') return;
+  config.workflows = [...CORE_WORKFLOWS];
+  saveGlobalConfig(config);
 }
