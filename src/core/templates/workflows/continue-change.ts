@@ -84,7 +84,9 @@ export function getContinueChangeSkillTemplate(): SkillTemplate {
      - 在编写时将 \`context\` 和 \`rules\` 作为约束 - 但不要把它们复制进文件
      - 写入指令中指定的 outputPath
    - 展示创建了什么，以及现在解锁了什么
-   - 创建一个产出物后停止
+     - **[门控]** 如果刚创建的产出物 ID 为 \`design\`：在停止前自动调用 **openspec-plan-review**（subagent 独立执行 spec↔plan 审查）。审查通过后展示进度并停止；未通过则提示修正后重审。
+     - **[门控]** 如果刚创建的产出物 ID 为 \`tasks\`：在停止前自动调用 **openspec-task-analyze**（subagent 独立执行 plan↔tasks 审查）。审查通过后展示进度并停止；未通过则提示修正后重审。
+     - 其余产出物：创建后直接展示进度并停止。
 
    ---
 
@@ -211,7 +213,9 @@ export function getOpsxContinueCommandTemplate(): CommandTemplate {
      - 在编写时应用 \`context\` 和 \`rules\` 作为约束 - 但不要将它们复制到文件中
      - 写入指令中指定的输出路径
    - 显示创建的内容以及现在解锁的内容
-   - 创建一个产出物后停止
+     - **[门控]** 如果刚创建的产出物 ID 为 \`design\`：停止前自动调用 **openspec-plan-review**（subagent）。通过后停止；未通过则提示修正。
+     - **[门控]** 如果刚创建的产出物 ID 为 \`tasks\`：停止前自动调用 **openspec-task-analyze**（subagent）。通过后停止；未通过则提示修正。
+     - 其余产出物：创建后直接展示进度并停止。
 
    ---
 
