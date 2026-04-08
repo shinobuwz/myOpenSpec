@@ -131,8 +131,9 @@ explore/plan 阶段收敛的核心决策（1-3 句）
 
 ## 退出契约
 
-- 输出优化摘要，包含每次迭代的度量结果
-- 输出最终状态和改进幅度
+- 生成 \`.aiknowledge/auto-drive/<change-name>/summary.md\`，汇总所有 iter-N.md 的指标趋势、关键转折和参考链接
+- 输出最终状态（达标 / 超出迭代上限 / 手动停止）和改进幅度
+- 提示用户 summary.md 路径：\`.aiknowledge/auto-drive/<change-name>/summary.md\`
 - 提供后续优化建议`,
     license: 'MIT',
     compatibility: '需要 openspec CLI。',
