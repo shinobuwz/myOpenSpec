@@ -53,7 +53,6 @@ export function getPlanSkillTemplate(): SkillTemplate {
 
 - 所有产出物已生成并获得用户确认
 - 所有产出物已提交到 git
-- 任务列表质量检查通过
 
 ## 硬性门控
 
