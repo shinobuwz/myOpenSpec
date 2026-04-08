@@ -30,6 +30,7 @@ export const WORKFLOW_TO_SKILL_DIR: Record<WorkflowId, string> = {
   'implement': 'openspec-implement',
   'review': 'openspec-review',
   'auto-drive': 'openspec-auto-drive',
+  'codemap': 'openspec-codemap',
 };
 
 function toKnownWorkflows(workflows: readonly string[]): WorkflowId[] {

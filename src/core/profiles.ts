@@ -29,6 +29,7 @@ export const ALL_WORKFLOWS = [
   'implement',
   'review',
   'auto-drive',
+  'codemap',
 ] as const;
 
 /**
