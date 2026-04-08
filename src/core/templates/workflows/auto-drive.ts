@@ -26,6 +26,70 @@ export function getAutoDriveSkillTemplate(): SkillTemplate {
 - **迭代次数上限**：最多执行多少次循环
 - **门控级别**：none / design / all
 
+## 记录机制
+
+每次迭代和最终完成时，将结果写入 \`.aiknowledge/auto-drive/<change-name>/\`：
+
+\`\`\`
+.aiknowledge/auto-drive/
+└── <change-name>/
+    ├── iter-01.md   ← 每轮 Phase 7 完成后写入
+    ├── iter-02.md
+    └── summary.md   ← 退出契约触发时生成
+\`\`\`
+
+**iter-N.md 格式**（文件名两位数补零，如 iter-01.md）：
+
+\`\`\`markdown
+# 第 N 轮迭代
+
+**时间**：YYYY-MM-DD HH:MM
+**量化指标**：目标值 X，本轮实测 Y，差距 Z
+
+### 本轮方案
+
+explore/plan 阶段收敛的核心决策（1-3 句）
+
+### verify 发现
+
+- [CRITICAL/WARNING/SUGGESTION] 问题描述
+
+### 决策
+
+达标 / 继续下一轮 / 卡住回退
+
+### 卡住原因（如有）
+
+说明连续 2 轮无改进的表现和回退策略
+\`\`\`
+
+**summary.md 格式**：
+
+\`\`\`markdown
+# Auto-Drive 摘要：<change-name>
+
+**总轮次**：N
+**最终状态**：达标 / 超出迭代上限 / 手动停止
+**目标**：<用户设定的优化目标>
+**量化标准**：<达标条件>
+
+### 指标趋势
+
+| 轮次 | 实测值 | 达标 |
+|------|--------|------|
+| 1    | Y1     | ✗    |
+| 2    | Y2     | ✓    |
+
+### 关键转折
+
+- 第 N 轮：<什么决策带来了突破或停滞>
+
+### 参考文件
+
+- [第 1 轮](iter-01.md)
+- [第 N 轮](iter-N.md)
+\`\`\`
+
 ## 引擎循环
 
 每次迭代执行以下阶段：
