@@ -34,7 +34,7 @@ export function getAutoDriveSkillTemplate(): SkillTemplate {
 
 **Phase 2 - 探索**：使用 openspec-explore 探索方案并收敛设计
 
-**Phase 3 - 规划**：使用 openspec-plan 创建变更
+**Phase 3 - 规划**：使用 openspec-plan 创建变更（生成 proposal + design + specs），plan-review 通过后由 openspec-tasks 生成 tasks，task-analyze 通过后进入实施
 
 **Phase 4 - 实施**：使用 openspec-implement 逐项实施
 
