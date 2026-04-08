@@ -16,6 +16,10 @@ export function getPlanReviewSkillTemplate(): SkillTemplate {
 2. \`openspec-cn status --change "<name>" --json\` 确认 design artifact 已生成
 3. 读取 change 的 artifact：proposal.md、design.md、specs/
 
+## 审查方式
+
+使用 Agent tool 启动 subagent 进行独立审查。subagent 只读取产出物文件，不做任何修改。审查结果由 subagent 汇报，主 agent 汇总输出。
+
 ## 审查维度
 
 ### 需求进入设计（specs → design）
@@ -56,7 +60,7 @@ export function getPlanReviewSkillTemplate(): SkillTemplate {
 
 ## 退出契约
 
-- **如"通过"**：必须进入 tasks 生成阶段（openspec-plan 继续生成 tasks.md）。这不是建议，是强制要求。
+- **如"通过"**：必须转入 **openspec-tasks** 生成 tasks.md。这不是建议，是强制要求。
 - **如"需修正"**：必须回到 **openspec-plan** 修正 design.md 和 specs/。禁止跳过直接生成 tasks。
 - 所有发现已记录在审查报告中`,
     license: 'MIT',
