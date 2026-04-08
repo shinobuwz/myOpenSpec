@@ -232,13 +232,13 @@ Old instructions content
         'old'
       );
 
-      // Set up Cursor
-      const cursorSkillsDir = path.join(testDir, '.cursor', 'skills');
-      await fs.mkdir(path.join(cursorSkillsDir, 'openspec-explore'), {
+      // Set up Codex
+      const codexSkillsDir = path.join(testDir, '.codex', 'skills');
+      await fs.mkdir(path.join(codexSkillsDir, 'openspec-explore'), {
         recursive: true,
       });
       await fs.writeFile(
-        path.join(cursorSkillsDir, 'openspec-explore', 'SKILL.md'),
+        path.join(codexSkillsDir, 'openspec-explore', 'SKILL.md'),
         'old'
       );
 
@@ -258,70 +258,14 @@ Old instructions content
       );
       expect(claudeSkill).toContain('name: openspec-explore');
 
-      // Verify Cursor skills updated
-      const cursorSkill = await fs.readFile(
-        path.join(cursorSkillsDir, 'openspec-explore', 'SKILL.md'),
+      // Verify Codex skills updated
+      const codexSkill = await fs.readFile(
+        path.join(codexSkillsDir, 'openspec-explore', 'SKILL.md'),
         'utf-8'
       );
-      expect(cursorSkill).toContain('name: openspec-explore');
+      expect(codexSkill).toContain('name: openspec-explore');
 
       consoleSpy.mockRestore();
-    });
-
-    it('should update Qwen tool with correct command format', async () => {
-      // Set up Qwen
-      const qwenSkillsDir = path.join(testDir, '.qwen', 'skills');
-      await fs.mkdir(path.join(qwenSkillsDir, 'openspec-explore'), {
-        recursive: true,
-      });
-      await fs.writeFile(
-        path.join(qwenSkillsDir, 'openspec-explore', 'SKILL.md'),
-        'old'
-      );
-
-      await updateCommand.execute(testDir);
-
-      // Check Qwen command format (TOML) - Qwen uses flat path structure: opsx-<id>.toml
-      const qwenCmd = path.join(
-        testDir,
-        '.qwen',
-        'commands',
-        'opsx-explore.toml'
-      );
-      const exists = await FileSystemUtils.fileExists(qwenCmd);
-      expect(exists).toBe(true);
-
-      const content = await fs.readFile(qwenCmd, 'utf-8');
-      expect(content).toContain('description =');
-      expect(content).toContain('prompt =');
-    });
-
-    it('should update Windsurf tool with correct command format', async () => {
-      // Set up Windsurf
-      const windsurfSkillsDir = path.join(testDir, '.windsurf', 'skills');
-      await fs.mkdir(path.join(windsurfSkillsDir, 'openspec-explore'), {
-        recursive: true,
-      });
-      await fs.writeFile(
-        path.join(windsurfSkillsDir, 'openspec-explore', 'SKILL.md'),
-        'old'
-      );
-
-      await updateCommand.execute(testDir);
-
-      // Check Windsurf command format
-      const windsurfCmd = path.join(
-        testDir,
-        '.windsurf',
-        'workflows',
-        'opsx-explore.md'
-      );
-      const exists = await FileSystemUtils.fileExists(windsurfCmd);
-      expect(exists).toBe(true);
-
-      const content = await fs.readFile(windsurfCmd, 'utf-8');
-      expect(content).toContain('---');
-      expect(content).toContain('name:');
     });
   });
 

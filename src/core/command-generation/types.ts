@@ -30,7 +30,7 @@ export interface CommandContent {
  * and frontmatter format requirements.
  */
 export interface ToolCommandAdapter {
-  /** Tool identifier matching AIToolOption.value (e.g., 'claude', 'cursor') */
+  /** Tool identifier matching AIToolOption.value (e.g., 'claude', 'codex') */
   toolId: string;
   /**
    * Returns the file path for a command.

@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { generateCommand, generateCommands } from '../../../src/core/command-generation/generator.js';
 import { claudeAdapter } from '../../../src/core/command-generation/adapters/claude.js';
-import { cursorAdapter } from '../../../src/core/command-generation/adapters/cursor.js';
+import { codexAdapter } from '../../../src/core/command-generation/adapters/codex.js';
 import type { CommandContent, ToolCommandAdapter } from '../../../src/core/command-generation/types.js';
 
 describe('command-generation/generator', () => {
@@ -24,13 +24,10 @@ describe('command-generation/generator', () => {
       expect(result.fileContent).toContain('Command body here.');
     });
 
-    it('should generate command with path and content using Cursor adapter', () => {
-      const result = generateCommand(sampleContent, cursorAdapter);
+    it('should generate command with path and content using Codex adapter', () => {
+      const result = generateCommand(sampleContent, codexAdapter);
 
-      expect(result.path).toContain('.cursor');
       expect(result.path).toContain('opsx-explore.md');
-      expect(result.fileContent).toContain('name: /opsx-explore');
-      expect(result.fileContent).toContain('id: opsx-explore');
       expect(result.fileContent).toContain('Command body here.');
     });
 

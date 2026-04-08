@@ -84,7 +84,7 @@ openspec-cn init [path] [options]
 | `--tools <list>` | 非交互式配置 AI 工具。可用 `all`、`none` 或英文逗号分隔列表 |
 | `--force` | 无需提示，自动清理遗留文件 |
 
-**支持的工具：** `amazon-q`, `antigravity`, `auggie`, `claude`, `cline`, `codex`, `codebuddy`, `continue`, `costrict`, `crush`, `cursor`, `factory`, `gemini`, `github-copilot`, `iflow`, `kilocode`, `opencode`, `qoder`, `qwen`, `roocode`, `windsurf`
+**支持的工具：** `claude`, `codex`
 
 **示例：**
 
@@ -95,8 +95,8 @@ openspec-cn init
 # 在指定目录初始化
 openspec-cn init ./my-project
 
-# 非交互式：配置 Claude 与 Cursor
-openspec-cn init --tools claude,cursor
+# 非交互式：配置 Claude 与 Codex
+openspec-cn init --tools claude,codex
 
 # 配置所有支持的工具
 openspec-cn init --tools all
@@ -114,7 +114,7 @@ openspec/
 └── config.yaml         # 项目配置
 
 .claude/skills/         # Claude Code 技能文件（若选择 claude）
-.cursor/rules/          # Cursor 规则（若选择 cursor）
+.codex/skills/          # Codex 技能文件（若选择 codex）
 ...（其他工具配置）
 ```
 

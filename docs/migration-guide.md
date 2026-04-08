@@ -42,12 +42,7 @@ OPSX 用流畅的、基于行动的方法取代了旧的阶段锁定工作流。
 **各工具的旧命令位置**（示例——您的工具可能不同）：
 
 - Claude Code：`.claude/commands/openspec/`
-- Cursor：`.cursor/commands/openspec-*.md`
-- Windsurf：`.windsurf/workflows/openspec-*.md`
-- Cline：`.clinerules/workflows/openspec-*.md`
-- Roo：`.roo/commands/openspec-*.md`
-- GitHub Copilot：`.github/prompts/openspec-*.prompt.md` (IDE extensions only; not supported in Copilot CLI)
-- 其他（Augment、Continue、Amazon Q 等）
+- Codex：`.codex/prompts/openspec-*.md`
 
 迁移会检测您配置的任何工具并清理其旧文件。
 

@@ -35,15 +35,13 @@ describe('available-tools', () => {
 
     it('should detect multiple tool directories', async () => {
       await fs.mkdir(path.join(testDir, '.claude'), { recursive: true });
-      await fs.mkdir(path.join(testDir, '.cursor'), { recursive: true });
-      await fs.mkdir(path.join(testDir, '.windsurf'), { recursive: true });
+      await fs.mkdir(path.join(testDir, '.codex'), { recursive: true });
 
       const tools = getAvailableTools(testDir);
       const toolValues = tools.map((t) => t.value);
       expect(toolValues).toContain('claude');
-      expect(toolValues).toContain('cursor');
-      expect(toolValues).toContain('windsurf');
-      expect(tools).toHaveLength(3);
+      expect(toolValues).toContain('codex');
+      expect(tools).toHaveLength(2);
     });
 
     it('should ignore files that are not directories', async () => {
@@ -66,15 +64,15 @@ describe('available-tools', () => {
     });
 
     it('should return full AIToolOption objects', async () => {
-      await fs.mkdir(path.join(testDir, '.cursor'), { recursive: true });
+      await fs.mkdir(path.join(testDir, '.codex'), { recursive: true });
 
       const tools = getAvailableTools(testDir);
       expect(tools).toHaveLength(1);
       expect(tools[0]).toMatchObject({
-        name: 'Cursor',
-        value: 'cursor',
+        name: 'Codex',
+        value: 'codex',
         available: true,
-        skillsDir: '.cursor',
+        skillsDir: '.codex',
       });
     });
 

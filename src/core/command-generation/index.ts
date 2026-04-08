@@ -8,7 +8,7 @@
  * import { generateCommands, CommandAdapterRegistry, type CommandContent } from './command-generation/index.js';
  *
  * const contents: CommandContent[] = [...];
- * const adapter = CommandAdapterRegistry.get('cursor');
+ * const adapter = CommandAdapterRegistry.get('claude');
  * if (adapter) {
  *   const commands = generateCommands(contents, adapter);
  *   // Write commands to disk
@@ -30,4 +30,4 @@ export { CommandAdapterRegistry } from './registry.js';
 export { generateCommand, generateCommands } from './generator.js';
 
 // Adapters (for direct access if needed)
-export { claudeAdapter, cursorAdapter, windsurfAdapter } from './adapters/index.js';
+export { claudeAdapter, codexAdapter } from './adapters/index.js';

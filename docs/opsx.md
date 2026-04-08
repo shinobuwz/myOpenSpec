@@ -395,7 +395,7 @@ rules:
 │                    ▼                                                        │
 │   技能文件（.claude/skills/openspec-*/SKILL.md）                              │
 │                                                                             │
-│   • 跨编辑器兼容（Claude Code、Cursor、Windsurf）                              │
+│   • 跨编辑器兼容（Claude Code、Codex）                                       │
 │   │ • 技能查询 CLI 以获取结构化数据                                         │   │
 │   │ • 通过模式文件完全可定制                                               │   │
 │                                                                             │

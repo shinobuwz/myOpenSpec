@@ -1,6 +1,6 @@
 # 命令参考
 
-这是 OpenSpec 斜杠命令的参考文档。这些命令在你的 AI 编程助手的聊天界面中调用（例如 Claude Code、Cursor、Windsurf）。
+这是 OpenSpec 斜杠命令的参考文档。这些命令在你的 AI 编程助手的聊天界面中调用（例如 Claude Code、Codex）。
 
 关于工作流模式以及何时使用每个命令，请参阅[工作流](workflows.md)。关于 CLI 命令，请参阅[CLI](cli.md)。
 
@@ -640,14 +640,9 @@ AI：欢迎使用 OpenSpec！
 | 工具 | 语法示例 |
 |------|----------------|
 | Claude Code | `/opsx:new`, `/opsx:apply` |
-| Cursor | `/opsx-new`, `/opsx-apply` |
-| Windsurf | `/opsx-new`, `/opsx-apply` |
-| Copilot (IDE) | `/opsx-new`, `/opsx-apply` |
-| Trae | `/openspec-new-change`, `/openspec-apply-change` |
+| Codex | `/opsx-new`, `/opsx-apply` |
 
 无论语法如何，功能都是相同的。
-
-> **Note:** GitHub Copilot commands (`.github/prompts/*.prompt.md`) are only available in IDE extensions (VS Code, JetBrains, Visual Studio). GitHub Copilot CLI does not currently support custom prompt files — see [Supported Tools](supported-tools.md) for details and workarounds.
 
 ---
 

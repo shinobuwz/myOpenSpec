@@ -15,13 +15,7 @@ import { OPENSPEC_MARKERS } from './config.js';
  */
 export const LEGACY_CONFIG_FILES = [
   'CLAUDE.md',
-  'CLINE.md',
-  'CODEBUDDY.md',
-  'COSTRICT.md',
-  'QODER.md',
-  'IFLOW.md',
   'AGENTS.md', // root AGENTS.md (not openspec/AGENTS.md)
-  'QWEN.md',
 ] as const;
 
 /**
@@ -32,28 +26,8 @@ export const LEGACY_CONFIG_FILES = [
 export const LEGACY_SLASH_COMMAND_PATHS: Record<string, LegacySlashCommandPattern> = {
   // Directory-based: .tooldir/commands/openspec/ or .tooldir/commands/openspec/*.md
   'claude': { type: 'directory', path: '.claude/commands/openspec' },
-  'codebuddy': { type: 'directory', path: '.codebuddy/commands/openspec' },
-  'qoder': { type: 'directory', path: '.qoder/commands/openspec' },
-  'crush': { type: 'directory', path: '.crush/commands/openspec' },
-  'gemini': { type: 'directory', path: '.gemini/commands/openspec' },
-  'costrict': { type: 'directory', path: '.cospec/openspec/commands' },
 
   // File-based: individual openspec-*.md files in a commands/workflows/prompts folder
-  'cursor': { type: 'files', pattern: '.cursor/commands/openspec-*.md' },
-  'windsurf': { type: 'files', pattern: '.windsurf/workflows/openspec-*.md' },
-  'kilocode': { type: 'files', pattern: '.kilocode/workflows/openspec-*.md' },
-  'kiro': { type: 'files', pattern: '.kiro/prompts/openspec-*.prompt.md' },
-  'github-copilot': { type: 'files', pattern: '.github/prompts/openspec-*.prompt.md' },
-  'amazon-q': { type: 'files', pattern: '.amazonq/prompts/openspec-*.md' },
-  'cline': { type: 'files', pattern: '.clinerules/workflows/openspec-*.md' },
-  'roocode': { type: 'files', pattern: '.roo/commands/openspec-*.md' },
-  'auggie': { type: 'files', pattern: '.augment/commands/openspec-*.md' },
-  'factory': { type: 'files', pattern: '.factory/commands/openspec-*.md' },
-  'opencode': { type: 'files', pattern: '.opencode/command/openspec-*.md' },
-  'continue': { type: 'files', pattern: '.continue/prompts/openspec-*.prompt' },
-  'antigravity': { type: 'files', pattern: '.agent/workflows/openspec-*.md' },
-  'iflow': { type: 'files', pattern: '.iflow/commands/openspec-*.md' },
-  'qwen': { type: 'files', pattern: '.qwen/commands/openspec-*.toml' },
   'codex': { type: 'files', pattern: '.codex/prompts/openspec-*.md' },
 };
 
@@ -204,7 +178,7 @@ export async function detectLegacySlashCommands(
  * Finds legacy slash command files matching a glob pattern.
  *
  * @param projectPath - The root path of the project
- * @param pattern - Glob pattern like '.cursor/commands/openspec-*.md'
+ * @param pattern - Glob pattern like '.codex/prompts/openspec-*.md'
  * @returns Array of matching file paths relative to projectPath
  */
 async function findLegacySlashCommandFiles(
@@ -603,7 +577,7 @@ export function getToolsFromLegacyArtifacts(detection: LegacyDetectionResult): s
     for (const [toolId, pattern] of Object.entries(LEGACY_SLASH_COMMAND_PATHS)) {
       if (pattern.type === 'files' && pattern.pattern) {
         // Convert glob pattern to regex for matching
-        // e.g., '.cursor/commands/openspec-*.md' -> /^\.cursor\/commands\/openspec-.*\.md$/
+        // e.g., '.codex/prompts/openspec-*.md' -> /^\.codex\/prompts\/openspec-.*\.md$/
         const regexPattern = pattern.pattern
           .replace(/[.+^${}()|[\]\\]/g, '\\$&') // Escape regex special chars except *
           .replace(/\*/g, '.*'); // Replace * with .*
