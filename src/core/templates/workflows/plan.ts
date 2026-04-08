@@ -45,17 +45,7 @@ export function getPlanSkillTemplate(): SkillTemplate {
 - 每个 spec 包含输入、输出、行为描述
 - 边缘情况和错误处理
 
-**tasks.md** - 任务列表
-- 将实施工作拆分为独立的、可测试的任务
-- 每个任务有清晰的完成标准
-- 任务按依赖关系排序
-
-### 3. 任务质量检查
-- 每个任务不超过 2 小时的工作量
-- 每个任务有明确的验收标准
-- 任务之间的依赖关系清晰
-
-### 4. 逐个提交
+### 3. 逐个提交
 - 每个产出物完成后单独提交到 git
 - 提交信息遵循项目规范
 
@@ -67,15 +57,12 @@ export function getPlanSkillTemplate(): SkillTemplate {
 
 ## 硬性门控
 
-**在 design.md 和 specs/ 生成后，必须转入 openspec-plan-review 进行 spec↔plan 审查。** 在 plan-review 通过之前，禁止生成 tasks.md。
-
-**在 tasks.md 生成后，必须转入 openspec-task-analyze 进行 plan↔tasks 审查。** 在 task-analyze 通过之前，禁止进入实施阶段。
+**在 design.md 和 specs/ 生成后，必须转入 openspec-plan-review 进行 spec↔plan 审查。** plan-review 通过后由 openspec-tasks 生成 tasks.md，禁止在 plan skill 内部生成 tasks.md。
 
 ## 退出契约
 
-- 输出变更摘要，包含所有产出物的简要描述
-- **必须**转入 **openspec-plan-review** 审查 spec↔plan 一致性。这不是建议，是强制要求。
-- plan-review 通过后生成 tasks.md，再**必须**转入 **openspec-task-analyze** 审查 plan↔tasks 一致性`,
+- 输出变更摘要（proposal.md、design.md、specs/ 概述）
+- **必须**转入 **openspec-plan-review** 审查 spec↔plan 一致性。这不是建议，是强制要求。`,
     license: 'MIT',
     compatibility: '需要 openspec CLI。',
     metadata: { author: 'openspec', version: '1.0' },
