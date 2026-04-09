@@ -1,421 +1,116 @@
 # 工作流
 
-本指南涵盖 OpenSpec 的常见工作流模式以及何时使用每种模式。关于基础设置，请参阅[入门指南](getting-started.md)。关于命令参考，请参阅[命令](commands.md)。
+当前仓库使用的是 skill-first OPSX 工作流。工作流由 `opsx-*` skills 驱动，不再依赖 `.claude/commands/opsx/`。
 
-## 哲学：行动而非阶段
+## 基本原则
 
-传统工作流迫使你通过阶段：规划、然后实施、然后完成。但实际工作并不完全适合这种框框。
+- 行动单元是 skill，不是阶段化命令。
+- 强制关卡写在 skill 本身里，以 skill 为真相源。
+- 规划、任务、实现、验证可以串成闭环，但不再需要额外命令包装层。
 
-OPSX 采用不同的方法：
+## 典型模式
 
-```text
-传统（阶段锁定）：
-
-  规划 ────────► 实施 ────────► 完成
-      │                       │
-      │   "不能回退"           │
-      └───────────────────────┘
-
-OPSX（流畅行动）：
-
-  proposal ──► specs ──► design ──► tasks ──► implement
-```
-
-**关键原则：**
-
-- **行动而非阶段** - 命令是你可以做的事情，而不是你被困在的阶段
-- **依赖是赋能者** - 它们显示什么是可能的，而不是下一步必须做什么
-
-> **自定义：** OPSX 工作流由定义制品序列的模式驱动。有关创建自定义模式的详细信息，请参阅[自定义](customization.md)。
-
-## 工作流模式
-
-### 快速功能
-
-当你知道要构建什么并只需要执行时：
+### 1. 探索后落地
 
 ```text
-/opsx:new ──► /opsx:ff ──► /opsx:apply ──► /opsx:verify ──► /opsx:archive
+opsx-explore
+-> opsx-plan
+-> opsx-plan-review
+-> opsx-tasks
+-> opsx-task-analyze
+-> opsx-apply
+-> opsx-verify
+-> opsx-review
+-> opsx-archive
 ```
 
-**示例对话：**
+适合：
+
+- 需求不明确
+- 需要先调查代码库
+- 需要先做方案对比
+
+### 2. 直接推进
 
 ```text
-你：/opsx:new add-logout-button
-
-AI：已创建 openspec/changes/add-logout-button/
-     准备创建：proposal
-
-你：/opsx:ff
-
-AI：正在创建所有规划制品...
-     ✓ proposal.md
-     ✓ specs/
-     ✓ design.md
-     ✓ tasks.md
-     准备实施！
-
-你：/opsx:apply
-
-AI：正在处理任务...
-     ✓ 在页眉添加了登出按钮
-     ✓ 实现了会话清除
-     ✓ 添加了确认对话框
-     所有任务完成！
-
-你：/opsx:archive
-
-AI：✓ 已合并规范
-     ✓ 已归档变更
+opsx-plan
+-> opsx-plan-review
+-> opsx-tasks
+-> opsx-task-analyze
+-> opsx-apply
+-> opsx-verify
+-> opsx-review
+-> opsx-archive
 ```
 
-**最适合：** 中小型功能、错误修复、直接变更。
+适合：
 
-### 探索性
+- 功能边界已经明确
+- 只需要快速进入规划和实现
 
-当需求不明确或需要先进行调查时：
+### 3. 明确缺陷修复
 
 ```text
-/opsx:explore ──► /opsx:new ──► /opsx:continue ──► ... ──► /opsx:apply
+opsx-bugfix
+-> opsx-knowledge
 ```
 
-**示例对话：**
+适合：
+
+- 现象明确
+- 影响范围小
+- 不值得新建完整 change 文档
+
+## 强制关卡
+
+以下 skill 不能跳过：
+
+- `opsx-plan-review`
+- `opsx-task-analyze`
+- `opsx-verify`
+
+推荐顺序：
 
 ```text
-你：/opsx:explore
-
-AI：你想探索什么？
-
-你：我想改进页面加载性能，但不确定瓶颈在哪里。
-
-AI：让我帮助调查...
-     [分析包大小，识别慢查询，审查组件渲染模式]
-
-     我发现了三个主要瓶颈：
-     1. 大尺寸未优化的图片
-     2. ProductList 中的同步数据获取
-     3. 上下文变化导致的重新渲染
-
-     你想先解决哪个？
-
-你：让我们处理数据获取问题。
-
-你：/opsx:new optimize-product-list-fetching
-
-AI：已创建变更。准备创建：proposal
-
-你：/opsx:continue
-
-AI：基于我们的探索创建提案...
-     [撰写包含调查见解的提案]
-
-     准备创建：specs, design
-     你希望接下来做什么？
-
-你：/opsx:continue
-
-AI：正在创建规范...
+plan -> plan-review -> tasks -> task-analyze -> apply -> verify -> review -> archive
 ```
 
-**最适合：** 性能优化、调试、架构决策、不明确的需求。
-
-### 并行变更
-
-同时处理多个变更：
+## 示例
 
 ```text
-变更 A：/opsx:new ──► /opsx:ff ──► /opsx:apply（进行中）
-                                         │
-                                    上下文切换
-                                         │
-变更 B：/opsx:new ──► /opsx:ff ──────► /opsx:apply
+你：请使用 `opsx-plan` 为 add-dark-mode 创建变更
+AI：已生成 proposal / specs / design
+
+你：请使用 `opsx-tasks`
+AI：已生成 tasks.md，task-analyze 已通过
+
+你：请使用 `opsx-apply`
+AI：正在按 tasks.md 推进实现
+
+你：请使用 `opsx-verify`
+AI：验证通过
+
+你：请使用 `opsx-review`
+AI：审查完成，无阻断问题
+
+你：请使用 `opsx-archive`
+AI：已归档，知识与 codemap 已更新
 ```
 
-**示例对话：**
-
-```text
-你：我正在处理 add-dark-mode，但被拉去修复一个错误
-
-你：/opsx:new fix-login-redirect
-
-AI：已创建 openspec/changes/fix-login-redirect/
-
-你：/opsx:ff
-
-AI：✓ 已创建规划制品
-
-你：/opsx:apply
-
-AI：正在处理 fix-login-redirect...
-     [实施修复]
-     所有任务完成！
-
-你：/opsx:archive
-
-AI：✓ 已归档 fix-login-redirect
-
-你：让我们回到深色模式
-
-你：/opsx:apply add-dark-mode
-
-AI：恢复 add-dark-mode...
-     从任务 2.3 继续：更新页眉...
-```
-
-**最适合：** 并行工作流、紧急中断、团队协作。
-
-当你有多个已完成的变更时，使用 `/opsx:bulk-archive`：
-
-```text
-你：/opsx:bulk-archive
-
-AI：找到 3 个已完成的变更：
-     - add-dark-mode（所有任务完成）
-     - fix-login-redirect（所有任务完成）
-     - update-footer（所有任务完成）
-
-     检查规范冲突...
-     ⚠ add-dark-mode 和 update-footer 都涉及 specs/ui/
-
-     检查代码库以解决冲突...
-     两个变更都已实现。将按时间顺序应用。
-
-     归档所有 3 个变更？
-
-你：是
-
-AI：✓ 已归档 add-dark-mode
-     ✓ 已归档 fix-login-redirect
-     ✓ 已归档 update-footer
-     规范按顺序合并：add-dark-mode → update-footer
-```
-
-批量归档检测多个变更是否涉及相同规范，并通过检查实际实现来解决冲突。
-
-### 完成变更
-
-推荐的完成流程：
-
-```text
-/opsx:apply ──► /opsx:verify ──► /opsx:archive
-                    │                 │
-              验证实施         如果需要会提示
-              是否匹配         同步规范
-```
-
-#### 验证：检查你的工作
-
-`/opsx:verify` 从三个维度验证实施是否与你的制品匹配：
-
-```text
-你：/opsx:verify
-
-AI：正在验证 add-auth...
-
-     完整性
-     ✓ tasks.md 中所有 12 个任务已勾选
-     ✓ 规范中所有需求都有对应的代码
-     ⚠ 场景"不活动后会话超时"未测试
-
-     正确性
-     ✓ 实施符合规范意图
-     ✓ 处理了场景中的边缘情况
-     ✓ 错误状态匹配规范定义
-
-     一致性
-     ✓ 设计决策反映在代码结构中
-     ✓ 命名约定与 design.md 一致
-     ⚠ 设计提到"事件驱动"但实施使用轮询
-
-     总结
-     ─────────────────────────────
-     关键问题：0
-     警告：2
-     准备归档：是（有警告）
-
-     建议：
-     1. 为会话超时场景添加测试
-     2. 考虑按设计重构为事件驱动，或更新 design.md
-```
-
-**验证检查内容：**
-
-| 维度 | 验证内容 |
-|-----------|------------------|
-| 完整性 | 所有任务完成、所有需求已实施、场景已覆盖 |
-| 正确性 | 实施符合规范意图、处理了边缘情况 |
-| 一致性 | 设计决策反映在代码中、模式一致 |
-
-验证不会阻止归档，但会暴露你可能想先解决的问题。
-
-#### 归档：最终确定变更
-
-`/opsx:archive` 完成变更并将其移动到归档：
-
-```text
-你：/opsx:archive
-
-AI：正在归档 add-auth...
-
-     制品状态：
-     ✓ proposal.md 存在
-     ✓ specs/ 存在
-     ✓ design.md 存在
-     ✓ tasks.md 存在（12/12 任务完成）
-
-     增量规范：尚未同步到主规范
-     → 现在同步吗？
-
-你：是
-
-AI：✓ 已将规范同步到 openspec/specs/auth/spec.md
-     ✓ 已移动到 openspec/changes/archive/2025-01-24-add-auth/
-
-     变更已成功归档。
-```
-
-如果规范未同步，归档会提示。它不会因未完成任务而阻止，但会警告你。
-
-### `/opsx:ff` vs `/opsx:continue`
-
-## 何时使用什么
-
-### `/opsx:ff` vs `/opsx:continue`
-
-| 情况 | 使用 |
-|-----------|-----|
-| 需求明确，准备构建 | `/opsx:ff` |
-| 探索中，想审查每个步骤 | `/opsx:continue` |
-| 想在规范前迭代提案 | `/opsx:continue` |
-| 时间紧迫，需要快速推进 | `/opsx:ff` |
-| 复杂变更，需要控制 | `/opsx:continue` |
-
-**经验法则：** 如果你能提前描述完整范围，使用 `/opsx:ff`。如果你在过程中逐步理解，使用 `/opsx:continue`。
-
-### 何时更新 vs 重新开始
-
-一个常见问题：什么时候可以更新现有变更，什么时候应该开始新的变更？
-
-**更新现有变更的情况：**
-
-- 相同意图，优化执行
-- 范围缩小（先做 MVP，其余后续）
-- 学习驱动的修正（代码库与预期不同）
-- 基于实施发现的设计调整
-
-**开始新变更的情况：**
-
-- 意图根本性改变
-- 范围爆炸到完全不同的工作
-- 原始变更可以独立标记为"完成"
-- 补丁会混淆而非澄清
-
-```text
-                     ┌─────────────────────────────────────┐
-                     │     这是相同的工作吗？                 │
-                     └──────────────┬──────────────────────┘
-                                    │
-                 ┌──────────────────┼──────────────────┐
-                 │                  │                  │
-                 ▼                  ▼                  ▼
-          相同意图？              >50% 重叠？        原始变更能否
-          相同问题？              相同范围？         在没有这些更改
-                 │                  │         的情况下"完成"？
-                 │                  │                  │
-       ┌────────┴────────┐  ┌──────┴──────┐   ┌───────┴───────┐
-       │                 │  │             │   │               │
-      是                否  是            否   否              是
-       │                 │  │             │   │               │
-       ▼                 ▼  ▼             ▼   ▼               ▼
-     更新              新建 更新         新建   更新            新建
-```
-
-**示例："添加深色模式"**
-
-- "还需要支持自定义主题" → 新变更（范围爆炸）
-- "系统偏好检测比预期困难" → 更新（相同意图）
-- "先发布切换器，稍后添加偏好设置" → 更新然后归档，然后新变更
-
-每个变更一个逻辑工作单元。如果你在做"添加功能 X 并重构 Y"，考虑两个独立的变更。
-
-**为什么重要：**
-- 更易于审查和理解
-- 更清晰的归档历史
-- 可以独立发布
-- 需要时回滚更简单
-
-### 对不明确的需求使用 `/opsx:explore`
-
-在提交变更之前，先探索问题空间：
-
-```text
-你：/opsx:explore
-
-AI：你想探索什么？
-
-你：我们应该如何处理 API 的速率限制？
-
-AI：让我调查你当前的设置和选项...
-     [研究代码库，考虑模式]
-
-     我看到我们可以采用三种方法：
-     1. 基于中间件（简单，按端点）
-     2. Redis 支持（可扩展，共享状态）
-     3. 每个用户的令牌桶（公平，复杂）
-
-     你当前的堆栈建议使用 #1 或 #2。你的规模如何？
-```
-
-探索在创建制品之前澄清思路。
-
-### 归档前验证
-
-使用 `/opsx:verify` 检查实施是否与制品匹配：
-
-```text
-你：/opsx:verify
-
-AI：正在验证 add-dark-mode...
-
-     ✓ tasks.md 中所有任务已勾选
-     ✓ 规范中的需求有对应的代码
-     ✓ 设计决策反映在实施中
-
-     准备归档！
-```
-
-在关闭变更前发现不匹配。
-
-### 清晰命名变更
-
-好命名会让 `openspec-cn list` 更好用：
-
-```text
-好的：                         避免：
-add-dark-mode                 feature-1
-fix-login-redirect            update
-optimize-product-query        changes
-implement-2fa                 wip
-```
-
-## 命令快速参考
-
-有关完整命令详情和选项，请参阅[命令](commands.md)。
-
-| 命令 | 目的 | 何时使用 |
-|---------|---------|-------------|
-| `/opsx:explore` | 思考想法 | 需求不明确、调查 |
-| `/opsx:new` | 开始变更 | 开始任何新工作 |
-| `/opsx:continue` | 创建下一个制品 | 逐步创建制品 |
-| `/opsx:ff` | 创建所有规划制品 | 范围明确，准备构建 |
-| `/opsx:apply` | 实施任务 | 准备编写代码 |
-| `/opsx:verify` | 验证实施 | 归档前，发现不匹配 |
-| `/opsx:sync` | 合并增量规范 | 可选—归档时会提示 |
-| `/opsx:archive` | 完成变更 | 所有工作完成 |
-| `/opsx:bulk-archive` | 归档多个变更 | 并行工作，批量完成 |
-
-## 下一步
-
-- [命令](commands.md) - 带选项的完整命令参考
-- [概念](concepts.md) - 深入探讨规范、制品和模式
-- [自定义](customization.md) - 创建自定义工作流
+## 选哪个 Skill
+
+| 场景 | 推荐 skill |
+|------|------------|
+| 需求模糊，先聊思路 | `opsx-explore` |
+| 创建新 change | `opsx-plan` |
+| 基于当前状态前进一步 | `opsx-continue` |
+| 一次性推进完整规划 | `opsx-ff` |
+| 开始或继续编码 | `opsx-apply` |
+| 做最终一致性检查 | `opsx-verify` |
+| 归档 | `opsx-archive` |
+| 快速修复 bug | `opsx-bugfix` |
+
+## 注意
+
+- 当前仓库没有独立的 `opsx-sync`、`opsx-onboard`、`opsx-bulk-archive` skill。
+- 如需判断当前真相源，请优先看 `.claude/skills/opsx-*/SKILL.md`。

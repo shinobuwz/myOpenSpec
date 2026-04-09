@@ -18,4 +18,4 @@ TARGET="$1"
 
 echo ""
 echo "Installation complete."
-echo "Tell your AI: /opsx:propose <feature you want to build>"
+echo "Tell your AI: use opsx-plan for <feature you want to build>"

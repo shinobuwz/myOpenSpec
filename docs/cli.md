@@ -1,6 +1,6 @@
 # CLI 参考手册
 
-OpenSpec CLI（`openspec-cn`）提供一组终端命令，用于项目初始化、校验、状态查看与管理。这些命令与 AI 的斜杠命令（如 `/opsx:new`）相互补充；斜杠命令详见 [命令](commands.md)。
+OpenSpec CLI（`openspec-cn`）提供一组终端命令，用于项目初始化、校验、状态查看与管理。这些命令与项目内的 `opsx-*` skills 相互补充；skills 详见 [技能参考](commands.md)。
 
 ## 总览
 
@@ -435,7 +435,7 @@ Artifacts:
   ◆ design       ready (requires: specs)
   ○ tasks        blocked (requires: design)
 
-Next: 使用 /opsx:continue 创建设计
+Next: 使用 `opsx-continue` 创建设计
 ```
 
 **输出（JSON）：**
@@ -918,7 +918,7 @@ openspec-cn completion uninstall
 
 ## 相关文档
 
-- [命令](commands.md) - AI 斜杠命令（`/opsx:new`、`/opsx:apply` 等）
+- [技能参考](commands.md) - OPSX skills（`opsx-plan`、`opsx-apply` 等）
 - [工作流](workflows.md) - 常见模式及何时使用每个命令
 - [自定义](customization.md) - 创建自定义 schema 和模板
 - [入门指南](getting-started.md) - 首次设置指南

@@ -1,7 +1,7 @@
 # skill-sync
 
 ## 职责
-将 `.claude/skills/openspec-*.md` 和 `.codex/commands/opsx*.md` 同步到目标仓库，替代已删除的 TypeScript CLI（`openspec-cn init`/`openspec-cn update`）。
+将 `.claude/skills/opsx-*.md` 和 `.codex/commands/opsx*.md` 同步到目标仓库，替代已删除的 TypeScript CLI（`openspec-cn init`/`openspec-cn update`）。
 
 ## 关键文件
 | 文件 | 角色 |

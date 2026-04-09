@@ -4,7 +4,7 @@
 
 ## 现象
 
-`openspec-bootstrap` skill 的启动序列调用了 `openspec-cn list --json`。当 `openspec-cn` CLI 被删除（或未安装）后，bootstrap skill 立刻失效，整个会话引导流程中断。
+`opsx-bootstrap` skill 的启动序列调用了 `openspec-cn list --json`。当 `openspec-cn` CLI 被删除（或未安装）后，bootstrap skill 立刻失效，整个会话引导流程中断。
 
 ## 根因
 
