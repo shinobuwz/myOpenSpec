@@ -23,7 +23,6 @@ metadata:
 | openspec-knowledge | 经验、沉淀、知识库 | 独立沉淀 pitfalls；**归档后强制执行** |
 | openspec-plan | 规划、计划、创建变更 | 创建 OpenSpec change 和 artifact |
 | openspec-plan-review | plan skill 完成后 | 规划审查：spec↔plan 一致性 |
-| openspec-tasks | plan-review 通过后 | 生成 tasks.md，强制 TDD 标签决策 |
 | openspec-task-analyze | tasks 生成后 | 任务分析：plan↔tasks 一致性 |
 | openspec-tdd | 测试、TDD、红绿重构 | 测试先行开发 |
 | openspec-implement | 实施、实现、开始编码 | 按 tasks.md 逐项实施 |
@@ -38,8 +37,8 @@ metadata:
 以下流程链中的 **[方括号]** 关卡是强制的，不可跳过：
 
 ```
-explore → plan → [plan-review] → [tasks（TDD标签决策）] → [task-analyze] → implement → [verify] → review → archive
-                    spec↔plan        测试框架探测+标签                plan↔tasks              tasks↔code
+explore → plan → [plan-review] → tasks → [task-analyze] → implement → [verify] → review → archive
+                    spec↔plan               plan↔tasks                   tasks↔code
 ```
 
 **铁律：**

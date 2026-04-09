@@ -52,9 +52,6 @@ metadata:
    按依赖顺序循环遍历产出物（没有待处理依赖项的产出物优先）：
 
    a. **对于每个 `ready`（依赖项已满足）的产出物**：
-
-      > ⚠️ **特例：`tasks` 产出物不走此通用循环。** tasks.md 必须由 **openspec-tasks** skill 生成（见步骤 4b），禁止在此处直接调用 `openspec-cn instructions tasks`。
-
       - 获取指令：
         ```bash
         openspec-cn instructions <artifact-id> --change "<name>" --json
@@ -71,10 +68,10 @@ metadata:
       - 应用 `context` 和 `rules` 作为约束 - 但不要将它们复制到文件中
       - 显示简短进度："✓ 已创建 <artifact-id>"
 
-   b. **[关卡1] design 生成后，立即执行 plan-review（spec↔plan 审查），然后由 openspec-tasks 生成 tasks.md**
+   b. **[关卡1] design 生成后，立即执行 plan-review（spec↔plan 审查）**
       - 调用 **openspec-plan-review** skill（subagent 独立执行）
       - 如果审查未通过（有 TRACE_GAP 或 ORPHAN）：必须修正 design 后重审，**禁止继续生成 tasks**
-      - 审查通过后，**必须**调用 **openspec-tasks** skill 生成 tasks.md（禁止绕过直接用 `openspec-cn instructions tasks`）
+      - 审查通过后，openspec-tasks 由 plan-review 退出契约自动触发，生成 tasks.md（无需手动调用）
 
    c. **[关卡2] task-analyze 由 openspec-tasks 退出契约自动触发**
       - openspec-tasks 生成 tasks.md 后，自动调用 **openspec-task-analyze** skill（subagent 独立执行）

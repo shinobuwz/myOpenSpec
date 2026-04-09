@@ -66,9 +66,6 @@ metadata:
 
    **如果产出物准备好创建**（状态显示有 `status: "ready"` 的产出物）：
    - 从状态输出中选择第一个 `status: "ready"` 的产出物
-
-   > ⚠️ **特例：`tasks` 产出物不走以下通用流程。** 如果 ready 的产出物 ID 为 `tasks`，必须调用 **openspec-tasks** skill 生成 tasks.md（禁止直接调用 `openspec-cn instructions tasks`），然后调用 **openspec-task-analyze** 审查，停止。
-
    - 获取其指令：
      ```bash
      openspec-cn instructions <artifact-id> --change "<name>" --json
@@ -87,6 +84,7 @@ metadata:
      - 写入指令中指定的 outputPath
    - 展示创建了什么，以及现在解锁了什么
      - **[门控]** 如果刚创建的产出物 ID 为 `design`：在停止前自动调用 **openspec-plan-review**（subagent 独立执行 spec↔plan 审查）。审查通过后展示进度并停止；未通过则提示修正后重审。
+     - **[门控]** 如果刚创建的产出物 ID 为 `tasks`：在停止前自动调用 **openspec-task-analyze**（subagent 独立执行 plan↔tasks 审查）。审查通过后展示进度并停止；未通过则提示修正后重审。
      - 其余产出物：创建后直接展示进度并停止。
 
    ---

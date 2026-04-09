@@ -1,10 +1,15 @@
-import type { SkillTemplate } from '../types.js';
+---
+name: openspec-plan-review
+description: 规划审查：检查 specs 需求是否完整进入 design。在 plan 生成 design 后、生成 tasks 之前使用。
+license: MIT
+compatibility: 需要 openspec CLI。
+metadata:
+  author: openspec
+  version: "1.0"
+  generatedBy: "1.2.0-cc.4"
+---
 
-export function getPlanReviewSkillTemplate(): SkillTemplate {
-  return {
-    name: 'openspec-plan-review',
-    description: '规划审查：检查 specs 需求是否完整进入 design。在 plan 生成 design 后、生成 tasks 之前使用。',
-    instructions: `# 规划审查：spec↔plan 一致性检查
+# 规划审查：spec↔plan 一致性检查
 
 ## 硬性门控
 
@@ -13,7 +18,7 @@ export function getPlanReviewSkillTemplate(): SkillTemplate {
 ## 启动序列
 
 1. 确认 git 工作区干净
-2. \`openspec-cn status --change "<name>" --json\` 确认 design artifact 已生成
+2. `openspec-cn status --change "<name>" --json` 确认 design artifact 已生成
 3. 读取 change 的 artifact：proposal.md、design.md、specs/
 
 ## 审查方式
@@ -25,7 +30,7 @@ export function getPlanReviewSkillTemplate(): SkillTemplate {
 ### 需求进入设计（specs → design）
 - 逐条检查 delta specs 中的每个需求
 - 每条需求都必须有 trace id（如 [R1]）
-- design.md 的 \`## 需求追踪\` 中必须存在 \`- [R1] -> [U1]\` 映射
+- design.md 的 `## 需求追踪` 中必须存在 `- [R1] -> [U1]` 映射
 - 标记未进入设计的需求为 **TRACE_GAP**
 
 ### 需求颗粒度审查
@@ -34,15 +39,15 @@ export function getPlanReviewSkillTemplate(): SkillTemplate {
 - **COARSE_R** 需回 specs 拆分为更细的独立需求，每条只描述一个行为，再重新审查
 
 ### 设计完整性（design 自洽检查）
-- 收集 design.md 需求追踪中所有出现的 R 编号（如 \`[R1]\`、\`[R2]\`）
-- 收集 specs/ 目录中所有 \`**Trace**: R?\` 声明的 R 编号
-- 对比两者：design 中的每个 R 编号必须在 specs 中有对应的 \`**Trace**: R?\` 声明，否则标记为 **GHOST_R**
+- 收集 design.md 需求追踪中所有出现的 R 编号（如 `[R1]`、`[R2]`）
+- 收集 specs/ 目录中所有 `**Trace**: R?` 声明的 R 编号
+- 对比两者：design 中的每个 R 编号必须在 specs 中有对应的 `**Trace**: R?` 声明，否则标记为 **GHOST_R**
 - 实施单元 [U?] 是否都有对应的需求来源 [R?]，否则标记为 **ORPHAN**
 - 注：**GHOST_R** = design 引用了 specs 中不存在的 R 编号；**ORPHAN** = 实施单元 U 没有任何 R 驱动
 
 ## 输出格式
 
-\`\`\`
+```
 ## 规划审查报告（spec↔plan）
 
 ### 追踪矩阵
@@ -58,7 +63,7 @@ export function getPlanReviewSkillTemplate(): SkillTemplate {
 
 ### 结论
 通过 / 需修正后重审
-\`\`\`
+```
 
 ## 完成条件
 
@@ -70,9 +75,4 @@ export function getPlanReviewSkillTemplate(): SkillTemplate {
 
 - **如"通过"**：必须转入 **openspec-tasks** 生成 tasks.md。这不是建议，是强制要求。
 - **如"需修正"**：必须回到 **openspec-plan** 修正 design.md 和 specs/。禁止跳过直接生成 tasks。COARSE_R 问题需在 specs 中将粗粒度需求拆分为多条独立需求后重新审查。
-- 所有发现已记录在审查报告中`,
-    license: 'MIT',
-    compatibility: '需要 openspec CLI。',
-    metadata: { author: 'openspec', version: '1.0' },
-  };
-}
+- 所有发现已记录在审查报告中
