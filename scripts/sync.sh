@@ -15,7 +15,16 @@ fi
 TARGET="$1"
 
 # Sync Claude skills (each skill is a directory containing SKILL.md)
+# First, remove stale skill directories from target that no longer exist in source
 mkdir -p "$TARGET/.claude/skills"
+for target_skill_dir in "$TARGET/.claude/skills"/openspec-*/; do
+  [ -d "$target_skill_dir" ] || continue
+  skill_name="$(basename "$target_skill_dir")"
+  if [ ! -d "$REPO_ROOT/.claude/skills/$skill_name" ]; then
+    rm -rf "$target_skill_dir"
+  fi
+done
+# Copy current skills from source to target
 for skill_dir in "$REPO_ROOT/.claude/skills"/openspec-*/; do
   cp -r "$skill_dir" "$TARGET/.claude/skills/"
 done

@@ -2,7 +2,7 @@
 name: openspec-plan
 description: 创建 OpenSpec change 并生成全套 artifact（proposal/design/specs/tasks）。当需求已明确、准备进入规划阶段时使用。
 license: MIT
-compatibility: 需要 openspec CLI。
+compatibility: 不需要外部 CLI，直接读取文件系统。
 metadata:
   author: openspec
   version: "1.0"
@@ -14,7 +14,7 @@ metadata:
 ## 启动序列
 
 1. 确认需求已经过脑暴或探索阶段的澄清
-2. 执行 `openspec-cn list --json` 检查是否已有相关变更
+2. 执行 `ls openspec/changes/ | grep -v archive` 检查是否已有相关变更
 3. 读取 `.aiknowledge/codemap/` 中涉及模块的 overview.md 和 dependencies.md，了解模块边界和依赖
 4. 读取 `.aiknowledge/pitfalls/` 中相关领域的 index.md，在设计中规避已知陷阱
 5. 收集必要的上下文信息
@@ -22,7 +22,7 @@ metadata:
 ## 流程
 
 ### 1. 创建变更
-- 使用 `openspec-cn new YYYY-MM-DD-<name>` 创建新变更
+- 使用 `mkdir -p openspec/changes/YYYY-MM-DD-<name>/specs` 创建新变更目录结构
 - **变更名称必须带日期前缀**（如 `2026-04-03-add-auth`），便于按时间追溯
 - 名称部分简洁、描述性强，使用 kebab-case
 

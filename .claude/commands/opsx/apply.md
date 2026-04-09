@@ -16,51 +16,37 @@ tags: [workflow, artifacts, experimental]
    如果提供了名称，使用它。否则：
    - 如果用户提到了某个变更，从对话上下文中推断
    - 如果只存在一个活动变更，自动选择
-   - 如果不明确，运行 `openspec-cn list --json` 获取可用变更，并使用 **AskUserQuestion tool** 让用户选择
+   - 如果不明确，运行 `ls openspec/changes/ | grep -v archive` 获取可用变更，并使用 **AskUserQuestion tool** 让用户选择
 
    始终宣布："正在使用变更：<name>"以及如何覆盖（例如，`/opsx:apply <other>`）。
 
-2. **检查状态以了解 Schema**
-   ```bash
-   openspec-cn status --change "<name>" --json
-   ```
-   解析 JSON 以了解：
-   - `schemaName`：正在使用的工作流（例如："spec-driven"）
-   - 哪个产出物包含任务（对于 spec-driven 通常是 "tasks"，检查其他产出物的状态）
+2. **检查变更目录结构**
 
-3. **获取应用指令**
-
-   ```bash
-   openspec-cn instructions apply --change "<name>" --json
-   ```
-
-   这返回：
-   - 上下文文件路径（因 Schema 而异）
-   - 进度（总计，完成，剩余）
-   - 带有状态的任务列表
-   - 基于当前状态的动态指令
+   列出 `openspec/changes/<name>/` 下的文件，确认存在的产出物：
+   - `tasks.md`：任务清单（必须存在才能开始实施）
+   - `specs/`：规格说明（如存在则读取）
+   - `proposal.md`、`design.md`：背景和设计（如存在则读取）
 
    **处理状态：**
-   - 如果 `state: "blocked"`（缺少产出物）：显示消息，建议使用 `/opsx:continue`
-   - 如果 `state: "all_done"`：祝贺，建议归档
+   - 如果 `tasks.md` 不存在：显示消息，建议先完成规划阶段
+   - 如果 tasks.md 中所有任务均已完成（全为 `[x]`）：祝贺，建议归档
    - 否则：继续实现
 
-4. **阅读上下文文件**
+3. **阅读上下文文件**
 
-   阅读 apply instructions 输出中 `contextFiles` 列出的文件。
-   文件取决于正在使用的 Schema：
-   - **spec-driven**: proposal, specs, design, tasks
-   - 其他模式：遵循 CLI 输出中的 contextFiles
+   直接读取以下文件（如存在）：
+   - `openspec/changes/<name>/tasks.md`（必须）
+   - `openspec/changes/<name>/proposal.md`
+   - `openspec/changes/<name>/design.md`
+   - `openspec/changes/<name>/specs/` 下所有 .md 文件
 
-5. **显示当前进度**
+4. **显示当前进度**
 
    显示：
-   - 正在使用的 Schema
    - 进度："N/M 任务已完成"
    - 剩余任务概览
-   - 来自 CLI 的动态指令
 
-6. **实现任务（循环直到完成或受阻）**
+5. **实现任务（循环直到完成或受阻）**
 
    对于每个待处理任务：
    - 显示正在处理哪个任务
@@ -75,7 +61,7 @@ tags: [workflow, artifacts, experimental]
    - 遇到错误或阻碍 → 报告并等待指导
    - 用户中断
 
-7. **完成或暂停时，显示状态**
+6. **完成或暂停时，显示状态**
 
    显示：
    - 本次会话完成的任务

@@ -2,34 +2,20 @@
 
 set -euo pipefail
 
-ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-if ! command -v node >/dev/null 2>&1; then
-  echo "Error: Node.js is required but was not found in PATH."
+if [ $# -eq 0 ]; then
+  echo "Usage: $0 <target-dir>"
+  echo "  Installs OpenSpec skills into <target-dir>"
+  echo ""
+  echo "Example: $0 ~/my-project"
   exit 1
 fi
 
-if ! command -v npm >/dev/null 2>&1; then
-  echo "Error: npm is required but was not found in PATH."
-  exit 1
-fi
+TARGET="$1"
 
-if ! command -v pnpm >/dev/null 2>&1; then
-  echo "Error: pnpm is required but was not found in PATH."
-  exit 1
-fi
+"$SCRIPT_DIR/sync.sh" "$TARGET"
 
-cd "$ROOT_DIR"
-
-echo "Installing dependencies..."
-pnpm install
-
-echo "Building OpenSpec..."
-pnpm run build
-
-echo "Linking openspec-cn globally with npm link..."
-npm link
-
-echo
-echo "Local install complete."
-echo "Try: openspec-cn --version"
+echo ""
+echo "Installation complete."
+echo "Tell your AI: /opsx:propose <feature you want to build>"

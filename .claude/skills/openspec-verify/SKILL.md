@@ -2,7 +2,7 @@
 name: openspec-verify
 description: 验证实现是否与变更产出物匹配（完整性/正确性/一致性）。实施完成后或归档前使用。
 license: MIT
-compatibility: 需要 openspec CLI。
+compatibility: 不需要外部 CLI，直接读取文件系统。
 metadata:
   author: openspec
   version: "1.0"
@@ -17,7 +17,7 @@ metadata:
 
 1. **如果没有提供变更名称，提示选择**
 
-   运行 `openspec-cn list --json` 获取可用变更。使用 **AskUserQuestion tool** 让用户选择。
+   运行 `ls openspec/changes/ | grep -v archive` 获取可用变更。使用 **AskUserQuestion tool** 让用户选择。
 
    显示具有实现任务的变更（存在任务产出物）。
    如果可用，包括每个变更使用的 Schema。
@@ -25,21 +25,17 @@ metadata:
 
    **重要提示**：不要猜测或自动选择变更。始终让用户选择。
 
-2. **检查状态以了解 Schema**
-   ```bash
-   openspec-cn status --change "<name>" --json
-   ```
-   解析 JSON 以了解：
-   - `schemaName`：正在使用的工作流模式
-   - 此变更存在哪些产出物
+2. **检查变更目录结构**
 
-3. **获取变更目录并加载产出物**
+   列出 `openspec/changes/<name>/` 下的文件，确认存在的产出物（tasks.md、specs/、design.md 等）。
 
-   ```bash
-   openspec-cn instructions apply --change "<name>" --json
-   ```
+3. **加载产出物**
 
-   这会返回变更目录、上下文文件和 `gateReview` facts bundle。从 `contextFiles` 读取所有可用产出物，并将 `gateReview` 作为共享事实底座提供给所有 reviewer。
+   变更目录为 `openspec/changes/<name>/`。直接读取所有可用产出物，并将文件内容作为共享事实底座提供给所有 reviewer：
+   - `tasks.md`（必须）
+   - `specs/` 下所有 .md 文件（如存在）
+   - `design.md`（如存在）
+   - `proposal.md`（如存在）
 
 4. **并行 subagent 审查**
 
@@ -55,7 +51,7 @@ metadata:
      prompt: `检查变更 '<name>' 的完整性。
 
      读取以下文件：
-     <列出 contextFiles 中的 tasks.md 和 specs 路径>
+     <列出 openspec/changes/<name>/tasks.md 和 specs/ 路径>
 
      任务完成情况：
      - 读取 tasks.md，统计 [x] vs [ ] 复选框数量
@@ -84,7 +80,7 @@ metadata:
      prompt: `检查变更 '<name>' 的正确性。
 
      读取以下文件：
-     <列出 contextFiles 中的 specs 路径>
+     <列出 openspec/changes/<name>/specs/ 路径>
 
      需求实现映射：
      - 对增量规范中的每个需求，搜索代码库确认实现是否符合需求意图
@@ -111,7 +107,7 @@ metadata:
      prompt: `检查变更 '<name>' 的一致性。
 
      读取以下文件：
-     <列出 contextFiles 中的 design.md 路径>
+     <列出 openspec/changes/<name>/design.md 路径（如存在）>
 
      设计遵循情况：
      - 如果存在 design.md：提取关键决策，验证代码是否遵循
