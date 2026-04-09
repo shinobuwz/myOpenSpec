@@ -12,7 +12,6 @@ export { getKnowledgeSkillTemplate, getOpsxKnowledgeCommandTemplate } from './wo
 export { getContinueChangeSkillTemplate, getOpsxContinueCommandTemplate } from './workflows/continue-change.js';
 export { getApplyChangeSkillTemplate, getOpsxApplyCommandTemplate } from './workflows/apply-change.js';
 export { getFfChangeSkillTemplate, getOpsxFfCommandTemplate } from './workflows/ff-change.js';
-export { getSyncSpecsSkillTemplate, getOpsxSyncCommandTemplate } from './workflows/sync-specs.js';
 export { getArchiveChangeSkillTemplate, getOpsxArchiveCommandTemplate } from './workflows/archive-change.js';
 export { getBootstrapSkillTemplate } from './workflows/bootstrap.js';
 export { getPlanSkillTemplate } from './workflows/plan.js';
