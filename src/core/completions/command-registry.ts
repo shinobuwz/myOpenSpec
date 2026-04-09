@@ -136,7 +136,7 @@ export const COMMAND_REGISTRY: CommandDefinition[] = [
   },
   {
     name: 'archive',
-    description: '归档已完成的变更并更新主规范',
+    description: '归档已完成的变更',
     acceptsPositional: true,
     positionalType: 'change-id',
     flags: [
