@@ -19,7 +19,6 @@ export const WORKFLOW_TO_SKILL_DIR: Record<WorkflowId, string> = {
   'continue': 'openspec-continue-change',
   'apply': 'openspec-apply-change',
   'ff': 'openspec-ff-change',
-  'sync': 'openspec-sync-specs',
   'archive': 'openspec-archive-change',
   'verify': 'openspec-verify',
   'bootstrap': 'openspec-bootstrap',

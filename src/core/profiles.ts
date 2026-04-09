@@ -18,7 +18,6 @@ export const ALL_WORKFLOWS = [
   'continue',
   'apply',
   'ff',
-  'sync',
   'archive',
   'verify',
   'bootstrap',
