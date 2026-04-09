@@ -29,17 +29,23 @@ metadata:
 
    列出 `openspec/changes/<name>/` 下的文件，确认存在的产出物（tasks.md、specs/、design.md 等）。
 
-3. **加载产出物**
+3. **构建共享 facts bundle**
 
-   变更目录为 `openspec/changes/<name>/`。直接读取所有可用产出物，并将文件内容作为共享事实底座提供给所有 reviewer：
+   变更目录为 `openspec/changes/<name>/`。主 agent 先组装一个共享 facts bundle，供所有 reviewer 复用：
    - `tasks.md`（必须）
    - `specs/` 下所有 .md 文件（如存在）
    - `design.md`（如存在）
    - `proposal.md`（如存在）
+   - `context/knowledge-refs.md`、`context/review-scope.md`、`context/artifact-index.md`（如存在，作为声明性事实输入）
+   - `test-report.md` 的存在性，以及 tasks 中 TDD 标签的摘要事实
+
+   约束：
+   - `context/*.md` 是 change-local 声明层，不是权威源；与 specs/design/tasks 冲突时以后者为准
+   - facts bundle 只包含事实，不包含 findings、severity 或修复建议
 
 4. **并行 subagent 审查**
 
-   三个维度（完整性、正确性、一致性）**完全独立**，使用 Agent tool 并行派遣 3 个 subagent 同时执行。同时派遣 Subagent D 检查测试留档完整性。所有 reviewer 必须共享同一个 `gateReview` facts bundle，但不得共享彼此的 findings、主 agent 怀疑点或预设严重级别。
+   三个维度（完整性、正确性、一致性）**完全独立**，使用 Agent tool 并行派遣 3 个 subagent 同时执行。同时派遣 Subagent D 检查测试留档完整性。所有 reviewer 必须共享同一个 facts bundle（即 `gateReview` 的同等事实底座），并可读取各自所需的目标产出物与代码证据，但不得共享彼此的 findings、主 agent 怀疑点或预设严重级别。
 
    在**同一条消息**中发起 4 个 Agent tool 调用（这样它们会并行运行）：
 

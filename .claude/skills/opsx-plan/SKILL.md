@@ -1,6 +1,6 @@
 ---
 name: opsx-plan
-description: 创建 OpenSpec change 并生成全套 artifact（proposal/design/specs/tasks）。当需求已明确、准备进入规划阶段时使用。
+description: 创建 OpenSpec change 并生成规划产出物（proposal/design/specs）。当需求已明确、准备进入规划阶段时使用。
 license: MIT
 compatibility: 不需要外部 CLI，直接读取文件系统。
 metadata:
@@ -9,14 +9,14 @@ metadata:
   generatedBy: "1.2.0-cc.4"
 ---
 
-规划 Skill。创建 OpenSpec change 并生成完整的产出物集合。
+规划 Skill。创建 OpenSpec change 并生成规划阶段的产出物集合。
 
 ## 启动序列
 
 1. 确认需求已经过脑暴或探索阶段的澄清
 2. 执行 `bash .claude/opsx/bin/changes-status.sh` 检查是否已有相关变更（含阶段和进度）
-3. 读取 `.aiknowledge/codemap/` 中涉及模块的 overview.md 和 dependencies.md，了解模块边界和依赖
-4. 读取 `.aiknowledge/pitfalls/` 中相关领域的 index.md，在设计中规避已知陷阱
+3. 先读 `.aiknowledge/codemap/index.md`，判断目标模块是否已有 codemap；已有则继续读对应 `<module>.md` 和必要的 `chains/*.md`，没有则先调用 `opsx-codemap`
+4. 读取 `.aiknowledge/pitfalls/index.md` 和相关领域的 `index.md`，在设计中规避已知陷阱
 5. 收集必要的上下文信息
 
 ## 流程

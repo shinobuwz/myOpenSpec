@@ -36,13 +36,24 @@ metadata:
    - 如果 tasks.md 中所有任务均已完成（全为 `[x]`）：祝贺，建议归档
    - 否则：继续实现
 
-3. **阅读上下文文件**
+3. **构建共享实现上下文**
 
-   直接读取以下文件（如存在）：
+   先读取以下权威产出物（如存在）：
    - `openspec/changes/<name>/tasks.md`（必须）
    - `openspec/changes/<name>/proposal.md`
    - `openspec/changes/<name>/design.md`
    - `openspec/changes/<name>/specs/` 下所有 .md 文件
+
+   再读取以下 change-local 声明层（如存在）：
+   - `openspec/changes/<name>/context/knowledge-refs.md`
+   - `openspec/changes/<name>/context/review-scope.md`
+   - `openspec/changes/<name>/context/artifact-index.md`
+   - `openspec/changes/<name>/test-report.md`
+
+   读取规则：
+   - `context/*.md` 只作为共享事实的声明层，不得覆盖 `tasks.md` / `specs/` / `design.md`
+   - 如果 `knowledge-refs.md` 声明了 `.aiknowledge/` 中的具体条目，只按声明精确读取，不要无界扫描整个知识库
+   - 如果 `test-report.md` 已存在，实现前先读取，避免重复执行或遗漏已有 TDD 留档
 
 4. **显示当前进度**
 
@@ -126,13 +137,13 @@ metadata:
 
 **护栏**
 - 继续执行任务直到完成或受阻
-- 开始前始终阅读上下文文件（来自 apply instructions 输出）
+- 开始前始终构建共享实现上下文：权威产出物 + 可选 `context/*.md` + 已有 `test-report.md`
 - 如果任务模棱两可，暂停并在实现前询问
 - 如果实现揭示了问题，暂停并建议更新产出物
 - 保持代码更改最小化并限定在每个任务范围内
 - 完成每个任务后立即更新任务复选框
 - 遇到错误、阻碍或不清楚的需求时暂停 - 不要猜测
-- 使用 CLI 输出中的 contextFiles，不要假设特定的文件名
+- `context/*.md` 是声明层，不是新的权威源；真实约束仍以 `tasks.md` / `specs/` / `design.md` 为准
 
 **流畅的工作流集成**
 
