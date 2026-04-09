@@ -269,13 +269,6 @@ export class CompletionCommand {
           }
           break;
         }
-        case 'specs': {
-          const specIds = await this.completionProvider.getSpecIds();
-          for (const id of specIds) {
-            console.log(`${id}\t规范`);
-          }
-          break;
-        }
         case 'archived-changes': {
           const archivedIds = await getArchivedChangeIds();
           for (const id of archivedIds) {

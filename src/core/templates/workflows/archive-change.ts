@@ -51,22 +51,7 @@ export function getArchiveChangeSkillTemplate(): SkillTemplate {
 
    **如果没有任务文件存在：** 继续，无需任务相关警告。
 
-4. **评估增量规范同步状态**
-
-   检查 \`openspec/changes/<name>/specs/\` 中的增量规范。如果不存在，则在没有同步提示的情况下继续。
-
-   **如果存在增量规范：**
-   - 将每个增量规范与其在 \`openspec/specs/<capability>/spec.md\` 对应的各主规范进行比较
-   - 确定将应用哪些更改（添加、修改、移除、重命名）
-   - 在提示前显示综合摘要
-
-   **提示选项：**
-   - 如果需要更改："立即同步（推荐）"、"归档而不同步"
-   - 如果已同步："立即归档"、"仍然同步"、"取消"
-
-   如果用户选择同步，使用 Task tool（subagent_type: "general-purpose", prompt: "Use Skill tool to invoke openspec-sync-specs for change '<name>'. Delta spec analysis: <include the analyzed delta spec summary>"）。无论选择如何，都继续归档。
-
-5. **执行归档**
+4. **执行归档**
 
    如果归档目录不存在，则创建它：
    \`\`\`bash
@@ -83,13 +68,12 @@ export function getArchiveChangeSkillTemplate(): SkillTemplate {
    mv openspec/changes/<name> openspec/changes/archive/YYYY-MM-DD-<name>
    \`\`\`
 
-6. **显示摘要**
+5. **显示摘要**
 
    显示归档完成摘要，包括：
    - 变更名称
    - 使用的 Schema
    - 归档位置
-   - 规范是否已同步（如果适用）
    - 关于任何警告的说明（未完成的产出物/任务）
 
 **成功时的输出**
@@ -100,7 +84,6 @@ export function getArchiveChangeSkillTemplate(): SkillTemplate {
 **变更：** <change-name>
 **模式：** <schema-name>
 **归档至：** openspec/changes/archive/YYYY-MM-DD-<name>/
-**规范：** ✓ 已同步到主规范（或 "无增量规范" 或 "同步已跳过"）
 
 所有产出物已完成。所有任务已完成。
 \`\`\`
@@ -109,19 +92,19 @@ export function getArchiveChangeSkillTemplate(): SkillTemplate {
 
 归档目录移动成功后，依次执行以下步骤，**全部强制，不可跳过**：
 
-**7. 知识沉淀（强制）**
+**6. 知识沉淀（强制）**
 
 调用 **openspec-knowledge** skill，将本次变更的可复用经验写入 \`.aiknowledge/pitfalls/\`。
 
 使用 Task tool（subagent_type: "general-purpose"）：
 > "Use Skill tool to invoke openspec-knowledge. Context: just archived change '<name>'. Extract reusable lessons from this change's implementation, fixes, and review findings."
 
-**8. Codemap 更新（强制）**
+**7. Codemap 更新（强制）**
 
 使用 Task tool（subagent_type: "general-purpose"）：
 > "Use Skill tool to invoke openspec-codemap. Context: just archived change '<change-name>'. Create or update codemap for modules affected by this change. If codemap does not exist yet, create it from scratch — do NOT skip."
 
-**9. Git 操作（强制）**
+**8. Git 操作（强制）**
 
 \`\`\`bash
 git add -A
@@ -140,8 +123,6 @@ git push                   # 可选，询问用户是否推送
 - 不要在警告时阻止归档 - 只需告知并确认
 - 移动到归档时保留 .openspec.yaml（它与目录一起移动）
 - 显示清晰的操作摘要
-- 如果请求同步，使用 openspec-sync-specs 方法（代理驱动）
-- 如果存在增量规格说明，始终运行同步评估并在提示前显示综合摘要
 - **归档后三步（knowledge → codemap → git）是强制序列**`,
     license: 'MIT',
     compatibility: '需要 openspec CLI。',
@@ -196,22 +177,7 @@ export function getOpsxArchiveCommandTemplate(): CommandTemplate {
 
    **如果没有任务文件存在：** 继续，无需任务相关警告。
 
-4. **评估增量规格说明同步状态**
-
-   在 \`openspec/changes/<name>/specs/\` 检查增量规格说明。如果不存在，不提示同步直接继续。
-
-   **如果存在增量规格说明：**
-   - 将每个增量规格说明与其在 \`openspec/specs/<capability>/spec.md\` 的相应主规格说明进行比较
-   - 确定将应用哪些更改（添加、修改、删除、重命名）
-   - 在提示前显示合并摘要
-
-   **提示选项：**
-   - 如果需要更改："立即同步（推荐）"，"不同步直接归档"
-   - 如果已同步："立即归档"，"仍要同步"，"取消"
-
-   如果用户选择同步，执行 \`/opsx:sync\` 逻辑。无论选择如何都继续归档。
-
-5. **执行归档**
+4. **执行归档**
 
    如果归档目录不存在，则创建它：
    \`\`\`bash
@@ -228,13 +194,12 @@ export function getOpsxArchiveCommandTemplate(): CommandTemplate {
    mv openspec/changes/<name> openspec/changes/archive/YYYY-MM-DD-<name>
    \`\`\`
 
-6. **显示摘要**
+5. **显示摘要**
 
    显示归档完成摘要，包括：
    - 变更名称
    - 使用的 Schema
    - 归档位置
-   - 规格说明同步状态（已同步 / 跳过同步 / 无增量规格说明）
    - 任何警告的注释（未完成的产出物/任务）
 
 **成功时的输出**
@@ -245,20 +210,6 @@ export function getOpsxArchiveCommandTemplate(): CommandTemplate {
 **变更：** <change-name>
 **Schema：** <schema-name>
 **归档至：** openspec/changes/archive/YYYY-MM-DD-<name>/
-**规范：** ✓ 已同步到主规范
-
-所有产出物已完成。所有任务已完成。
-\`\`\`
-
-**成功时的输出（无增量规范）**
-
-\`\`\`
-## 归档完成
-
-**变更：** <change-name>
-**Schema：** <schema-name>
-**归档至：** openspec/changes/archive/YYYY-MM-DD-<name>/
-**规范：** 无增量规范
 
 所有产出物已完成。所有任务已完成。
 \`\`\`
@@ -271,12 +222,10 @@ export function getOpsxArchiveCommandTemplate(): CommandTemplate {
 **变更：** <change-name>
 **Schema：** <schema-name>
 **归档至：** openspec/changes/archive/YYYY-MM-DD-<name>/
-**规格说明：** 跳过同步（用户选择跳过）
 
 **警告：**
 - 带有 2 个未完成产出物的归档
 - 带有 3 个未完成任务的归档
-- 增量规格说明同步已跳过（用户选择跳过）
 
 如果这不是故意的，请检查归档。
 \`\`\`
@@ -301,11 +250,11 @@ export function getOpsxArchiveCommandTemplate(): CommandTemplate {
 
 归档目录移动成功后，依次执行，**全部强制**：
 
-**7. 知识沉淀** — 调用 openspec-knowledge，提炼本次变更的可复用经验到 \`.aiknowledge/pitfalls/\`
+**6. 知识沉淀** — 调用 openspec-knowledge，提炼本次变更的可复用经验到 \`.aiknowledge/pitfalls/\`
 
-**8. Codemap 更新** — 调用 \`openspec-codemap\` skill，创建或更新本次变更涉及模块的 codemap；codemap 不存在时从头创建，不可跳过
+**7. Codemap 更新** — 调用 \`openspec-codemap\` skill，创建或更新本次变更涉及模块的 codemap；codemap 不存在时从头创建，不可跳过
 
-**9. Git 操作**
+**8. Git 操作**
 \`\`\`bash
 git add -A && git commit -m "archive: <change-name>"
 \`\`\`
@@ -317,8 +266,6 @@ git add -A && git commit -m "archive: <change-name>"
 - 不要在警告时阻止归档 - 只需告知并确认
 - 移动到归档时保留 .openspec.yaml（它与目录一起移动）
 - 显示清晰的操作摘要
-- 如果请求同步，使用 Skill tool 调用 \`openspec-sync-specs\`（代理驱动）
-- 如果存在增量规格说明，请始终运行同步评估，并在提示前显示综合摘要
 - **归档后三步（knowledge → codemap → git）是强制序列**`
   };
 }

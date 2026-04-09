@@ -3,12 +3,6 @@ import path from 'path';
 import { getTaskProgressForChange, formatTaskStatus } from '../utils/task-progress.js';
 import { Validator } from './validation/validator.js';
 import chalk from 'chalk';
-import {
-  findSpecUpdates,
-  buildUpdatedSpec,
-  writeUpdatedSpec,
-  type SpecUpdate,
-} from './specs-apply.js';
 
 /**
  * Recursively copy a directory. Used when fs.rename fails (e.g. EPERM on Windows).
@@ -50,12 +44,11 @@ async function moveDirectory(src: string, dest: string): Promise<void> {
 export class ArchiveCommand {
   async execute(
     changeName?: string,
-    options: { yes?: boolean; skipSpecs?: boolean; noValidate?: boolean; validate?: boolean } = {}
+    options: { yes?: boolean; noValidate?: boolean; validate?: boolean } = {}
   ): Promise<void> {
     const targetPath = '.';
     const changesDir = path.join(targetPath, 'openspec', 'changes');
     const archiveDir = path.join(changesDir, 'archive');
-    const mainSpecsDir = path.join(targetPath, 'openspec', 'specs');
 
     // Check if changes directory exists
     try {
@@ -152,7 +145,7 @@ export class ArchiveCommand {
     } else {
       // Log warning when validation is skipped
       const timestamp = new Date().toISOString();
-      
+
       if (!options.yes) {
         const { confirm } = await import('@inquirer/prompts');
         const proceed = await confirm({
@@ -166,7 +159,7 @@ export class ArchiveCommand {
       } else {
         console.log(chalk.yellow(`\n⚠️  警告：跳过验证可能会归档无效规范。`));
       }
-      
+
       console.log(chalk.yellow(`[${timestamp}] 验证已跳过更改：${changeName}`));
       console.log(chalk.yellow(`受影响文件：${changeDir}`));
     }
@@ -190,77 +183,6 @@ export class ArchiveCommand {
         }
       } else {
         console.log(`警告：发现 ${incompleteTasks} 个未完成任务。由于 --yes 标志继续。`);
-      }
-    }
-
-    // Handle spec updates unless skipSpecs flag is set
-    if (options.skipSpecs) {
-      console.log('跳过规范更新（提供了 --skip-specs 标志）。');
-    } else {
-      // Find specs to update
-      const specUpdates = await findSpecUpdates(changeDir, mainSpecsDir);
-      
-      if (specUpdates.length > 0) {
-        console.log('\n要更新的规范：');
-        for (const update of specUpdates) {
-          const status = update.exists ? 'update' : 'create';
-          const capability = path.basename(path.dirname(update.target));
-          console.log(`  ${capability}: ${status === 'update' ? '更新' : '创建'}`);
-        }
-
-        let shouldUpdateSpecs = true;
-        if (!options.yes) {
-          const { confirm } = await import('@inquirer/prompts');
-          shouldUpdateSpecs = await confirm({
-            message: '继续执行规范更新吗？',
-            default: true
-          });
-          if (!shouldUpdateSpecs) {
-            console.log('跳过规范更新。继续归档。');
-          }
-        }
-
-        if (shouldUpdateSpecs) {
-          // Prepare all updates first (validation pass, no writes)
-          const prepared: Array<{ update: SpecUpdate; rebuilt: string; counts: { added: number; modified: number; removed: number; renamed: number } }> = [];
-          try {
-            for (const update of specUpdates) {
-              const built = await buildUpdatedSpec(update, changeName!);
-              prepared.push({ update, rebuilt: built.rebuilt, counts: built.counts });
-            }
-          } catch (err: any) {
-            console.log(String(err.message || err));
-            console.log('已中止。未更改任何文件。');
-            return;
-          }
-
-          // All validations passed; pre-validate rebuilt full spec and then write files and display counts
-          let totals = { added: 0, modified: 0, removed: 0, renamed: 0 };
-          for (const p of prepared) {
-            const specName = path.basename(path.dirname(p.update.target));
-            if (!skipValidation) {
-              const report = await new Validator().validateSpecContent(specName, p.rebuilt);
-              if (!report.valid) {
-                console.log(chalk.red(`\n${specName}重建规范中的验证错误（将不会写入更改）：`));
-                for (const issue of report.issues) {
-                  if (issue.level === 'ERROR') console.log(chalk.red(`  ✗ ${issue.message}`));
-                  else if (issue.level === 'WARNING') console.log(chalk.yellow(`  ⚠ ${issue.message}`));
-                }
-                console.log('已中止。未更改任何文件。');
-                return;
-              }
-            }
-            await writeUpdatedSpec(p.update, p.rebuilt, p.counts);
-            totals.added += p.counts.added;
-            totals.modified += p.counts.modified;
-            totals.removed += p.counts.removed;
-            totals.renamed += p.counts.renamed;
-          }
-          console.log(
-            `总计：+ ${totals.added} 新增，~ ${totals.modified} 修改，- ${totals.removed} 删除，→ ${totals.renamed} 重命名`
-          );
-          console.log('规范更新成功。');
-        }
       }
     }
 

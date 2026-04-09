@@ -8,7 +8,6 @@ import { UpdateCommand } from '../core/update.js';
 import { ListCommand } from '../core/list.js';
 import { ArchiveCommand } from '../core/archive.js';
 import { ViewCommand } from '../core/view.js';
-import { registerSpecCommand } from '../commands/spec.js';
 import { ChangeCommand } from '../commands/change.js';
 import { ValidateCommand } from '../commands/validate.js';
 import { ShowCommand } from '../commands/show.js';
@@ -137,17 +136,15 @@ program
 
 program
   .command('list')
-  .description('列出项目（默认显示更改）。使用 --specs 列出规范。')
-  .option('--specs', '列出规范而非更改')
+  .description('列出项目（更改）')
   .option('--changes', '明确列出更改（默认）')
   .option('--sort <order>', '排序方式："recent"（默认）或 "name"', 'recent')
   .option('--json', '以 JSON 格式输出（供程序使用）')
-  .action(async (options?: { specs?: boolean; changes?: boolean; sort?: string; json?: boolean }) => {
+  .action(async (options?: { changes?: boolean; sort?: string; json?: boolean }) => {
     try {
       const listCommand = new ListCommand();
-      const mode: 'changes' | 'specs' = options?.specs ? 'specs' : 'changes';
       const sort = options?.sort === 'name' ? 'name' : 'recent';
-      await listCommand.execute('.', mode, { sort, json: options?.json });
+      await listCommand.execute('.', 'changes', { sort, json: options?.json });
     } catch (error) {
       console.log(); // Empty line for spacing
       ora().fail(`错误：${(error as Error).message}`);
@@ -233,11 +230,10 @@ changeCmd
 
 program
   .command('archive [change-name]')
-  .description('归档已完成的更改并更新主规范')
+  .description('归档已完成的更改')
   .option('-y, --yes', '跳过确认提示')
-  .option('--skip-specs', '跳过规范更新操作（适用于基础设施、工具或仅文档更改）')
   .option('--no-validate', '跳过验证（不推荐，需要确认）')
-  .action(async (changeName?: string, options?: { yes?: boolean; skipSpecs?: boolean; noValidate?: boolean; validate?: boolean }) => {
+  .action(async (changeName?: string, options?: { yes?: boolean; noValidate?: boolean; validate?: boolean }) => {
     try {
       const archiveCommand = new ArchiveCommand();
       await archiveCommand.execute(changeName, options);
@@ -247,8 +243,6 @@ program
       process.exit(1);
     }
   });
-
-registerSpecCommand(program);
 registerConfigCommand(program);
 registerSchemaCommand(program);
 
