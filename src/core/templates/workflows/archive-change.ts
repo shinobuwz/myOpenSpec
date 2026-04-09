@@ -119,7 +119,7 @@ export function getArchiveChangeSkillTemplate(): SkillTemplate {
 **8. Codemap 更新（强制）**
 
 使用 Task tool（subagent_type: "general-purpose"）：
-> "Use Skill tool to invoke openspec-codemap. Context: just archived change '<change-name>'. Update codemap for modules affected by this change."
+> "Use Skill tool to invoke openspec-codemap. Context: just archived change '<change-name>'. Create or update codemap for modules affected by this change. If codemap does not exist yet, create it from scratch — do NOT skip."
 
 **9. Git 操作（强制）**
 
@@ -303,7 +303,7 @@ export function getOpsxArchiveCommandTemplate(): CommandTemplate {
 
 **7. 知识沉淀** — 调用 openspec-knowledge，提炼本次变更的可复用经验到 \`.aiknowledge/pitfalls/\`
 
-**8. Codemap 更新** — 调用 \`openspec-codemap\` skill，更新本次变更涉及模块的 codemap，仅更新变更涉及部分
+**8. Codemap 更新** — 调用 \`openspec-codemap\` skill，创建或更新本次变更涉及模块的 codemap；codemap 不存在时从头创建，不可跳过
 
 **9. Git 操作**
 \`\`\`bash

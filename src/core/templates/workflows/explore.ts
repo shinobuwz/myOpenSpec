@@ -47,6 +47,16 @@ export function getExploreSkillTemplate(): SkillTemplate {
 
 > **模型节约原则**：需要大范围搜索代码库（glob、grep、跨多个文件读取）时，使用 Agent tool（subagent_type: "Explore"）委托执行，而不是当前模型直接读文件。Explore subagent 使用更轻量的模型，成本更低。仅在需要深度推理或综合分析时才用当前模型直接操作。
 
+> **🚨 源码搜索强制协议（不可跳过）**：任何需要搜索源码的探索，在执行 glob / grep / 读文件之前，必须先走以下流程：
+>
+> 1. **读取 \`.aiknowledge/codemap/index.md\`**（如果文件存在）
+> 2. **判断 codemap 是否覆盖目标模块**
+>    - 覆盖 → 按 codemap 定位关键文件，只在其指引下精确读取，无需全局扫描
+>    - 未覆盖或 codemap 不存在 → **立即调用 \`openspec-codemap\` skill** 先生成地图，再继续探索
+> 3. **禁止在没有 codemap 指引的情况下大范围 glob/grep**——这是防止重复发现、浪费 token 的铁律
+>
+> 用一句话记住：**搜源码之前，先看地图；没有地图，先画地图。**
+
 **比较选项**
 - 头脑风暴多种方法
 - 构建比较表
@@ -343,14 +353,16 @@ openspec-cn list --json
     └── <chain-name>.md   # 跨模块调用链（按需创建）
 \`\`\`
 
-**进入探索时：**
-1. 检查 \`.aiknowledge/codemap/index.md\` 是否存在
-2. 如果存在，读取它作为探索的起点——避免重复发现已知脉络
-3. 根据本次探索的需求范围，对比已有模块列表，判断是否有缺失
+**进入探索时（强制检查）：**
+1. 读取 \`.aiknowledge/codemap/index.md\`（无论是否存在都要尝试）
+2. 如果存在 → 以它作为探索起点，避免重复发现已知脉络
+3. 如果不存在或目标模块未被覆盖 → **当场调用 \`openspec-codemap\` skill**，不要等到探索结束
 
-**如果发现 codemap 缺失或过时：**
-- 探索结束后，调用 \`openspec-codemap\` skill 补全缺失模块的文档
-- 不要在探索过程中中断去写文档——先完成思考
+> 注意：codemap 的调用时机是**搜索源码之前**，而不是探索结束之后。"先画地图，再开始探索"是硬性规则。
+
+**codemap 文档过时时：**
+- 发现文档与代码不一致 → 提议更新，不要默默使用过时信息
+- 确认过时后立即调用 \`openspec-codemap\` skill 刷新对应模块
 
 地图文档的原则：
 - **地图而非百科**：告诉 AI 去哪里找，不替代读代码
@@ -550,6 +562,6 @@ openspec-cn list --json
 
 ## 渐进式披露
 
-进入时读取 \`.aiknowledge/codemap/index.md\` 作为起点，避免重复发现已知脉络。探索结束后如发现 codemap 缺失或过时，调用 \`openspec-codemap\` skill 补全。`
+**进入时强制**：读取 \`.aiknowledge/codemap/index.md\`；不存在或目标模块未覆盖时，**立即调用 \`openspec-codemap\` skill**，不要等到探索结束。搜源码之前，先看地图；没有地图，先画地图。`
   };
 }
