@@ -42,7 +42,7 @@ OPSX 用流畅的、基于行动的方法取代了旧的阶段锁定工作流。
 **各工具的旧命令位置**（示例——您的工具可能不同）：
 
 - Claude Code：`.claude/commands/openspec/`
-- Codex：`.codex/prompts/openspec-*.md`
+- Codex：`.codex/prompts/opsx-*.md`
 
 迁移会检测您配置的任何工具并清理其旧文件。
 
@@ -375,10 +375,10 @@ OPSX 使用涌现的**技能**标准：
 
 ```
 .claude/skills/
-├── openspec-explore/SKILL.md
-├── openspec-new-change/SKILL.md
-├── openspec-continue-change/SKILL.md
-├── openspec-apply-change/SKILL.md
+├── opsx-explore/SKILL.md
+├── opsx-plan/SKILL.md
+├── opsx-continue/SKILL.md
+├── opsx-apply/SKILL.md
 └── ...
 ```
 
@@ -535,8 +535,8 @@ project/
 │   └── config.yaml               # 新：项目配置
 ├── .claude/
 │   └── skills/                   # 新：OPSX 技能
-│       ├── openspec-explore/
-│       ├── openspec-new-change/
+│       ├── opsx-explore/
+│       ├── opsx-plan/
 │       └── ...
 ├── CLAUDE.md                     # OpenSpec 标记已删除，您的内容保留
 └── AGENTS.md                     # OpenSpec 标记已删除，您的内容保留
