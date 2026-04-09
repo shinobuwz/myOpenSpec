@@ -37,6 +37,16 @@
 
 ---
 
+## 4. ADDED vs MODIFIED delta spec 语言不一致
+
+**现象**：同一变更中，ADDED spec 用中文格式（`### 需求:`、`#### 场景:`），MODIFIED spec 继承主规范的英文格式（`### Requirement:`、`#### Scenario:`）。verify 和 plan-review 解析时需要同时支持两种格式，或者在创建时统一语言。
+
+**根因**：MODIFIED spec 从主规范复制结构时保留了原始语言；ADDED spec 由 AI 生成时使用了项目默认语言（中文）。
+
+**预防**：创建 delta spec 时，无论 ADDED 还是 MODIFIED，统一使用同一语言。如果主规范是英文，MODIFIED 可以在创建时翻译为中文以保持一致性。
+
+---
+
 ## 3. 归档幂等性问题
 
 **现象**：归档中途因校验失败中止，部分 spec（如 `opsx-verify-skill`）已写入主 spec，再次归档时对已写入的 spec 报"需求已存在"冲突。

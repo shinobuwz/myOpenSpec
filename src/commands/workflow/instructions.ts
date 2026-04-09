@@ -19,6 +19,8 @@ import {
   validateSchemaExists,
   type TaskItem,
   type ApplyInstructions,
+  type ChangeContextDeclaration,
+  type GateReviewFacts,
 } from './shared.js';
 
 // -----------------------------------------------------------------------------
@@ -237,6 +239,59 @@ function parseTasksFile(content: string): TaskItem[] {
   return tasks;
 }
 
+function getContextDeclaration(
+  changeDir: string,
+  relativePath: string
+): ChangeContextDeclaration | undefined {
+  const absolutePath = path.join(changeDir, relativePath);
+  if (!fs.existsSync(absolutePath)) {
+    return undefined;
+  }
+
+  return {
+    path: absolutePath,
+    content: fs.readFileSync(absolutePath, 'utf-8'),
+  };
+}
+
+function buildGateReviewFacts(
+  changeDir: string,
+  contextFiles: Record<string, string>,
+  tasks: TaskItem[],
+  progress: ApplyInstructions['progress']
+): GateReviewFacts {
+  const knowledgeRefs = getContextDeclaration(changeDir, path.join('context', 'knowledge-refs.md'));
+  const reviewScope = getContextDeclaration(changeDir, path.join('context', 'review-scope.md'));
+  const artifactIndex = getContextDeclaration(changeDir, path.join('context', 'artifact-index.md'));
+  const tddTaggedTasks = tasks
+    .filter((task) => /\[(test-first|characterization-first)\]/.test(task.description))
+    .map((task) => task.description);
+
+  return {
+    supportedGates: ['plan-review', 'verify'],
+    changeContextFiles: {
+      knowledgeRefs: knowledgeRefs?.path,
+      reviewScope: reviewScope?.path,
+      artifactIndex: artifactIndex?.path,
+    },
+    declaredKnowledgeRefs: knowledgeRefs,
+    declaredReviewScope: reviewScope,
+    declaredArtifactIndex: artifactIndex,
+    artifactIndexPresent: Boolean(artifactIndex),
+    taskSummary: {
+      total: progress.total,
+      complete: progress.complete,
+      remaining: progress.remaining,
+      tddTaggedTasks,
+    },
+    specFiles: Object.entries(contextFiles)
+      .filter(([artifactId]) => artifactId === 'specs')
+      .map(([, filePath]) => filePath),
+    designPresent: Boolean(contextFiles.design),
+    testReportPresent: fs.existsSync(path.join(changeDir, 'test-report.md')),
+  };
+}
+
 /**
  * Checks if an artifact output exists in the change directory.
  * Supports glob patterns (e.g., "specs/*.md") by verifying at least one matching file exists.
@@ -386,16 +441,19 @@ export async function generateApplyInstructions(
     instruction = schemaInstruction?.trim() ?? '所有必需的产出物已完成。继续实现。';
   }
 
+  const progress = { total, complete, remaining };
+
   return {
     changeName,
     changeDir,
     schemaName: context.schemaName,
     contextFiles,
-    progress: { total, complete, remaining },
+    progress,
     tasks,
     state,
     missingArtifacts: missingArtifacts.length > 0 ? missingArtifacts : undefined,
     instruction,
+    gateReview: buildGateReviewFacts(changeDir, contextFiles, tasks, progress),
   };
 }
 

@@ -411,6 +411,59 @@ describe('artifact-workflow CLI commands', () => {
       expect(json.state).toBe('ready');
       expect(json.contextFiles).toBeDefined();
       expect(typeof json.contextFiles).toBe('object');
+      expect(json.gateReview).toBeDefined();
+      expect(json.gateReview.supportedGates).toEqual(['plan-review', 'verify']);
+      expect(json.gateReview.designPresent).toBe(true);
+      expect(json.gateReview.artifactIndexPresent).toBe(false);
+      expect(Array.isArray(json.gateReview.specFiles)).toBe(true);
+    });
+
+    it('includes declared context files in gateReview JSON when present', async () => {
+      const changeDir = await createTestChange('json-apply-context', ['proposal', 'design', 'specs', 'tasks']);
+      const contextDir = path.join(changeDir, 'context');
+      await fs.mkdir(contextDir, { recursive: true });
+      await fs.writeFile(path.join(contextDir, 'knowledge-refs.md'), '# Knowledge refs\n- K1');
+      await fs.writeFile(path.join(contextDir, 'review-scope.md'), '# Review scope\n## verify');
+      await fs.writeFile(path.join(contextDir, 'artifact-index.md'), '# Artifact index');
+      await fs.writeFile(
+        path.join(changeDir, 'tasks.md'),
+        '## Tasks\n- [ ] 1.1 [R1][U1][test-first] Add failing test\n- [x] 1.2 [R1][U1][direct] Ship fact bundle'
+      );
+      await fs.writeFile(path.join(changeDir, 'test-report.md'), '# Test report');
+
+      const result = await runCLI(
+        ['instructions', 'apply', '--change', 'json-apply-context', '--json'],
+        { cwd: tempDir }
+      );
+      expect(result.exitCode).toBe(0);
+
+      const json = JSON.parse(result.stdout);
+      expect(normalizePaths(json.gateReview.changeContextFiles.knowledgeRefs)).toContain(
+        '/openspec/changes/json-apply-context/context/knowledge-refs.md'
+      );
+      expect(json.gateReview.declaredKnowledgeRefs.content).toContain('# Knowledge refs');
+      expect(json.gateReview.declaredReviewScope.content).toContain('## verify');
+      expect(json.gateReview.declaredArtifactIndex.content).toContain('# Artifact index');
+      expect(json.gateReview.artifactIndexPresent).toBe(true);
+      expect(json.gateReview.testReportPresent).toBe(true);
+      expect(json.gateReview.taskSummary.tddTaggedTasks).toHaveLength(1);
+    });
+
+    it('degrades gracefully when gateReview context files are absent', async () => {
+      await createTestChange('json-apply-no-context', ['proposal', 'design', 'specs', 'tasks']);
+
+      const result = await runCLI(
+        ['instructions', 'apply', '--change', 'json-apply-no-context', '--json'],
+        { cwd: tempDir }
+      );
+      expect(result.exitCode).toBe(0);
+
+      const json = JSON.parse(result.stdout);
+      expect(json.gateReview.changeContextFiles).toEqual({});
+      expect(json.gateReview.declaredKnowledgeRefs).toBeUndefined();
+      expect(json.gateReview.declaredReviewScope).toBeUndefined();
+      expect(json.gateReview.declaredArtifactIndex).toBeUndefined();
+      expect(json.gateReview.artifactIndexPresent).toBe(false);
     });
 
     it('shows schema instruction from apply block', async () => {

@@ -40,11 +40,11 @@ export function getVerifySkillTemplate(): SkillTemplate {
    openspec-cn instructions apply --change "<name>" --json
    \`\`\`
 
-   这会返回变更目录和上下文文件。从 \`contextFiles\` 读取所有可用产出物。
+   这会返回变更目录、上下文文件和 \`gateReview\` facts bundle。从 \`contextFiles\` 读取所有可用产出物，并将 \`gateReview\` 作为共享事实底座提供给所有 reviewer。
 
 4. **并行 subagent 审查**
 
-   三个维度（完整性、正确性、一致性）**完全独立**，使用 Agent tool 并行派遣 3 个 subagent 同时执行。
+   三个维度（完整性、正确性、一致性）**完全独立**，使用 Agent tool 并行派遣 3 个 subagent 同时执行。同时派遣 Subagent D 检查测试留档完整性。所有 reviewer 必须共享同一个 \`gateReview\` facts bundle，但不得共享彼此的 findings、主 agent 怀疑点或预设严重级别。
 
    在**同一条消息**中发起 4 个 Agent tool 调用（这样它们会并行运行）：
 
@@ -164,6 +164,11 @@ export function getVerifySkillTemplate(): SkillTemplate {
    \`\`\`
 
    等待 4 个 subagent 全部返回后，进入汇总步骤。
+
+   **可选 Arbiter（仅冲突时）**：
+   - 如果 reviewer 之间对同一问题存在存在性冲突（一个说缺失，一个说存在）、严重级别冲突，或对 requirement/design 意图理解冲突，主 agent 可以追加派遣一个 arbiter。
+   - arbiter 只允许读取冲突 findings、对应证据和同一个 \`gateReview\` facts bundle，不得重跑全量验证。
+   - 如果 reviewer 之间不存在相关冲突，则不得触发 arbiter。
 
 5. **汇总验证报告**
 

@@ -21,6 +21,33 @@ export interface TaskItem {
   done: boolean;
 }
 
+export interface ChangeContextDeclaration {
+  path: string;
+  content: string;
+}
+
+export interface GateReviewFacts {
+  supportedGates: Array<'plan-review' | 'verify'>;
+  changeContextFiles: {
+    knowledgeRefs?: string;
+    reviewScope?: string;
+    artifactIndex?: string;
+  };
+  declaredKnowledgeRefs?: ChangeContextDeclaration;
+  declaredReviewScope?: ChangeContextDeclaration;
+  declaredArtifactIndex?: ChangeContextDeclaration;
+  artifactIndexPresent: boolean;
+  taskSummary: {
+    total: number;
+    complete: number;
+    remaining: number;
+    tddTaggedTasks: string[];
+  };
+  specFiles: string[];
+  designPresent: boolean;
+  testReportPresent: boolean;
+}
+
 export interface ApplyInstructions {
   changeName: string;
   changeDir: string;
@@ -35,6 +62,7 @@ export interface ApplyInstructions {
   state: 'blocked' | 'all_done' | 'ready';
   missingArtifacts?: string[];
   instruction: string;
+  gateReview?: GateReviewFacts;
 }
 
 // -----------------------------------------------------------------------------

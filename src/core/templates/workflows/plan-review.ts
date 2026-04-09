@@ -14,11 +14,12 @@ export function getPlanReviewSkillTemplate(): SkillTemplate {
 
 1. 确认 git 工作区干净
 2. \`openspec-cn status --change "<name>" --json\` 确认 design artifact 已生成
-3. 读取 change 的 artifact：proposal.md、design.md、specs/
+3. \`openspec-cn instructions apply --change "<name>" --json\` 读取 \`gateReview\` facts bundle
+4. 读取 change 的 artifact：proposal.md、design.md、specs/
 
 ## 审查方式
 
-使用 Agent tool 启动 subagent 进行独立审查。subagent 只读取产出物文件，不做任何修改。审查结果由 subagent 汇报，主 agent 汇总输出。
+使用 Agent tool 启动 subagent 进行独立审查。subagent 共享同一个 \`gateReview\` facts bundle 作为事实底座，但不得共享彼此的 findings、主 agent 怀疑点或预设严重级别。subagent 只读取共享 facts、指定产出物文件和当前维度的审查清单，不做任何修改。审查结果由 subagent 汇报，主 agent 汇总输出。
 
 ## 审查维度
 
