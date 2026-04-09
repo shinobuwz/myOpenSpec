@@ -1,6 +1,6 @@
 ## 修改需求
 
-### 需求:Completeness Verification
+### Requirement: Completeness Verification
 **Trace**: R5
 **Slice**: verify/completeness-verification
 
@@ -53,7 +53,9 @@ The agent SHALL verify that all required work has been completed.
 - **THEN** report as CRITICAL issue: "test-report.md missing — TDD results not documented"
 - **AND** block archive
 
-### 需求:Archive Blocked When Test Report Incomplete
+## 新增需求
+
+### Requirement: Archive Blocked When Test Report Incomplete
 **Trace**: R6
 **Slice**: verify/archive-gate
 
@@ -72,6 +74,3 @@ The agent SHALL block archive when TDD tasks exist but test-report.md is incompl
 - **AND** all `[test-first]` / `[characterization-first]` tasks have both 🔴 and 🟢 entries in test-report.md
 - **THEN** the test report check passes
 - **AND** does not block archive on this dimension
-
-## 新增需求
-<!-- 本次变更无新增需求，仅修改现有 Completeness Verification 需求并新增 Archive Gate 需求 -->
