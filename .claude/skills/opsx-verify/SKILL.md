@@ -17,7 +17,7 @@ metadata:
 
 1. **如果没有提供变更名称，提示选择**
 
-   运行 `bash .claude/bin/changes-status.sh` 获取可用变更（含阶段和进度）。使用 **AskUserQuestion tool** 让用户选择。
+   运行 `bash .claude/opsx/bin/changes-status.sh` 获取可用变更（含阶段和进度）。使用 **AskUserQuestion tool** 让用户选择。
 
    显示具有实现任务的变更（存在任务产出物）。
    如果可用，包括每个变更使用的 Schema。

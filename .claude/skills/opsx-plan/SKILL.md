@@ -14,7 +14,7 @@ metadata:
 ## 启动序列
 
 1. 确认需求已经过脑暴或探索阶段的澄清
-2. 执行 `bash .claude/bin/changes-status.sh` 检查是否已有相关变更（含阶段和进度）
+2. 执行 `bash .claude/opsx/bin/changes-status.sh` 检查是否已有相关变更（含阶段和进度）
 3. 读取 `.aiknowledge/codemap/` 中涉及模块的 overview.md 和 dependencies.md，了解模块边界和依赖
 4. 读取 `.aiknowledge/pitfalls/` 中相关领域的 index.md，在设计中规避已知陷阱
 5. 收集必要的上下文信息

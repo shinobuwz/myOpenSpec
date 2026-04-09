@@ -20,7 +20,7 @@ metadata:
    如果提供了名称，使用它。否则：
    - 如果用户提到了某个变更，从对话上下文中推断
    - 如果只存在一个活动变更，自动选择
-   - 如果不明确，运行 `bash .claude/bin/changes-status.sh` 获取可用变更（含阶段和进度），并使用 **AskUserQuestion tool** 让用户选择
+   - 如果不明确，运行 `bash .claude/opsx/bin/changes-status.sh` 获取可用变更（含阶段和进度），并使用 **AskUserQuestion tool** 让用户选择
 
    始终宣布："正在使用变更：<name>"以及如何覆盖（例如，`opsx-apply <other>`）。
 

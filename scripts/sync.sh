@@ -28,11 +28,11 @@ for skill_dir in "$REPO_ROOT/.claude/skills"/opsx-*/; do
   cp -r "$skill_dir" "$TARGET/.claude/skills/"
 done
 
-# Sync .claude/bin (helper scripts for skills)
-if [ -d "$REPO_ROOT/.claude/bin" ]; then
-  mkdir -p "$TARGET/.claude/bin"
-  cp "$REPO_ROOT/.claude/bin"/* "$TARGET/.claude/bin/" 2>/dev/null || true
-  chmod +x "$TARGET/.claude/bin"/* 2>/dev/null || true
+# Sync .claude/opsx/bin (helper scripts for OPSX skills)
+if [ -d "$REPO_ROOT/.claude/opsx/bin" ]; then
+  mkdir -p "$TARGET/.claude/opsx/bin"
+  cp "$REPO_ROOT/.claude/opsx/bin"/* "$TARGET/.claude/opsx/bin/" 2>/dev/null || true
+  chmod +x "$TARGET/.claude/opsx/bin"/* 2>/dev/null || true
 fi
 
 # Sync Codex commands (optional)

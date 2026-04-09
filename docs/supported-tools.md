@@ -7,7 +7,7 @@ OpenSpec 支持 Claude Code 和 Codex 两种 AI 编码助手。当您运行 `ope
 当前仓库采用 skills-only 工作流模型。项目内只维护一套本地 skill 源：
 
 1. **技能** — 可重用的 `opsx-*` 指令目录，位于 `.claude/skills/`
-2. **辅助脚本** — 位于 `.claude/bin/`，供 skill 在本地仓库内调用
+2. **辅助脚本** — 位于 `.claude/opsx/bin/`，供 OPSX skill 在本地仓库内调用
 
 不再维护单独的 `.claude/commands/opsx/` 斜杠命令绑定层。
 
