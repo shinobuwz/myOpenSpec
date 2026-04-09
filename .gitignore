@@ -141,8 +141,10 @@ vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 
 
-# Claude
-.claude/
+# Claude (只忽略敏感文件，保留 skills/ 源文件)
+.claude/settings.local.json
+.claude/todos.json
+.claude/worktrees/
 CLAUDE.md
 .DS_Store
 
@@ -157,4 +159,3 @@ opencode.json
 .idea/
 .npmrc
 pnpm-lock.yaml
-.claude
