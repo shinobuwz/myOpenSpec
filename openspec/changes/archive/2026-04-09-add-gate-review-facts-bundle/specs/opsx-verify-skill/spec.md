@@ -1,8 +1,4 @@
-## 目的
-
-定义 `/opsx:verify` skill 的行为规范，验证实现是否与变更产出物匹配。
-
-## 需求
+## MODIFIED Requirements
 
 ### 需求:Verify Skill 调用
 系统必须提供 `/opsx:verify` skill，验证实现是否与变更产出物匹配。

@@ -1,8 +1,4 @@
-## 目的
-
-定义 CLI 产出物工作流命令的行为规范，包括 `instructions apply` 命令的 schema 感知指令生成。
-
-## 需求
+## MODIFIED Requirements
 
 ### 需求:Apply Instructions 命令
 系统必须通过 `openspec instructions apply` 生成 schema 感知的 apply 指令。

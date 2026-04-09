@@ -157,3 +157,4 @@ opencode.json
 .idea/
 .npmrc
 pnpm-lock.yaml
+.claude
