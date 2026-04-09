@@ -1,8 +1,6 @@
 ## 修改需求
 
 ### Requirement: Completeness Verification
-**Trace**: R5
-**Slice**: verify/completeness-verification
 
 The agent SHALL verify that all required work has been completed.
 
@@ -13,7 +11,6 @@ The agent SHALL verify that all required work has been completed.
 - **AND** reports completion status with specific incomplete tasks listed
 
 #### Scenario: Spec coverage check
-<!-- 此场景为现有行为，本次变更不涉及，保留是为了保持需求块完整性 -->
 - **WHEN** verifying completeness
 - **AND** delta specs exist in `openspec/changes/<name>/specs/`
 - **THEN** the agent extracts all requirements from delta specs
@@ -56,8 +53,6 @@ The agent SHALL verify that all required work has been completed.
 ## 新增需求
 
 ### Requirement: Archive Blocked When Test Report Incomplete
-**Trace**: R6
-**Slice**: verify/archive-gate
 
 The agent SHALL block archive when TDD tasks exist but test-report.md is incomplete or missing.
 
