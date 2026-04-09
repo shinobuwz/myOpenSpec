@@ -46,7 +46,7 @@ export function getVerifySkillTemplate(): SkillTemplate {
 
    三个维度（完整性、正确性、一致性）**完全独立**，使用 Agent tool 并行派遣 3 个 subagent 同时执行。
 
-   在**同一条消息**中发起 3 个 Agent tool 调用（这样它们会并行运行）：
+   在**同一条消息**中发起 4 个 Agent tool 调用（这样它们会并行运行）：
 
    **Subagent A — 完整性检查**：
    \`\`\`
@@ -132,7 +132,38 @@ export function getVerifySkillTemplate(): SkillTemplate {
    })
    \`\`\`
 
-   等待 3 个 subagent 全部返回后，进入汇总步骤。
+   **Subagent D — 测试留档完整性检查**：
+   \`\`\`
+   Agent({
+     description: "验证测试留档",
+     subagent_type: "general-purpose",
+     prompt: \`检查变更 '<name>' 的测试留档完整性。
+
+     读取以下文件：
+     <变更目录>/tasks.md
+     <变更目录>/test-report.md（如存在）
+
+     检查逻辑：
+     1. 读取 tasks.md，统计标注 [test-first] 或 [characterization-first] 的 task 数量
+     2. 如果数量为 0：输出 "No TDD tasks — test-report.md check skipped"，结束
+     3. 如果存在 TDD tasks：检查 test-report.md 是否存在
+     4. 如果 test-report.md 不存在：报 CRITICAL "test-report.md missing — TDD results not documented"
+     5. 如果存在：逐一检查每个 [test-first]/[characterization-first] task 是否有对应的 ## Task N 节
+     6. 检查每个 task 节是否同时包含 🔴 红阶段 和 🟢 绿阶段 两个子节
+     7. 缺少任意一项：报 CRITICAL，注明具体缺失的 task 编号和阶段名称
+     8. 全部完整：报 "Test report complete: N/N TDD tasks documented"
+
+     输出格式：
+     ## 测试留档检查报告
+     **TDD Tasks**: X 个
+     **Test Report**: 存在/不存在/已跳过
+     **覆盖情况**: N/N
+     ### 问题列表
+     - [CRITICAL/INFO] 具体描述\`
+   })
+   \`\`\`
+
+   等待 4 个 subagent 全部返回后，进入汇总步骤。
 
 5. **汇总验证报告**
 
@@ -146,24 +177,26 @@ export function getVerifySkillTemplate(): SkillTemplate {
    | 完整性   | X/Y 任务，N 需求 |
    | 正确性   | M/N 需求已覆盖   |
    | 一致性   | 已遵循/存在问题  |
+   | 测试留档 | N/N TDD tasks    |
    \`\`\`
 
    **按优先级分类的问题**：
 
-   1. **CRITICAL**（归档前必须修复）：未完成的任务、缺失的需求实现
+   1. **CRITICAL**（归档前必须修复）：未完成的任务、缺失的需求实现、test-report.md 缺失或不完整
    2. **WARNING**（应该修复）：规范/设计偏差、缺失的场景覆盖
    3. **SUGGESTION**（最好修复）：模式不一致、小改进
 
    **最终评估**：
-   - 有 CRITICAL 问题 → "发现 X 个关键问题。归档前请修复。"
+   - 有 CRITICAL 问题（含测试留档 CRITICAL）→ "发现 X 个关键问题。归档前请修复。"
    - 只有警告 → "没有关键问题。有 Y 个警告需要考虑。可以归档（但建议改进）。"
    - 全部通过 → "所有检查通过。可以归档。"
 
 **优雅降级**
 
-- 如果只存在 tasks.md：仅派遣 Subagent A（完整性），跳过 B 和 C
-- 如果存在任务 + 规范：派遣 A + B，跳过 C
-- 如果存在完整产出物：三个 subagent 全部派遣
+- 如果只存在 tasks.md：仅派遣 Subagent A（完整性）+ Subagent D（测试留档），跳过 B 和 C
+- 如果存在任务 + 规范：派遣 A + B + D，跳过 C
+- 如果存在完整产出物：四个 subagent 全部派遣
+- Subagent D 内部自动降级：无 TDD tasks 时跳过 test-report.md 检查并注明
 - 始终注明跳过了哪些检查以及原因
 
 **验证启发式方法**
