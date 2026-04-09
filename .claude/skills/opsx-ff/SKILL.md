@@ -66,6 +66,7 @@ metadata:
       - 读取任何已完成的依赖文件以获取上下文
       - 使用 `template` 作为结构创建产出物文件
       - 应用 `context` 和 `rules` 作为约束 - 但不要将它们复制到文件中
+      - 如果当前创建的是 `specs/<capability>/spec.md`，且同一 change 下存在多个 spec 文件：严格检查所有 `**Trace**: R<number>` 是否跨文件唯一；发现重复时先修正编号，禁止继续
       - 显示简短进度："✓ 已创建 <artifact-id>"
 
    b. **[关卡1] design 生成后，立即执行 plan-review（spec↔plan 审查）**

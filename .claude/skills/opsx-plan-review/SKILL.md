@@ -39,6 +39,12 @@ metadata:
 - 如果一条需求同时包含多个独立行为（如"实现 X 并支持 Y 格式并处理 Z 场景"），标记为 **COARSE_R**
 - **COARSE_R** 需回 specs 拆分为更细的独立需求，每条只描述一个行为，再重新审查
 
+### Trace 唯一性审查
+- 收集 `specs/` 目录下所有 `**Trace**: R?` 声明
+- 如果存在多个 spec 文件，必须把所有 R 编号放在同一个全集里检查重复
+- 任意两个需求只要复用了同一个 `R<number>`，无论是否位于不同 spec 文件，都标记为 **DUPLICATE_R**
+- **DUPLICATE_R** 必须回 specs 重新编号后再审查；禁止带着重复 R 进入 tasks/design 追踪
+
 ### 设计完整性（design 自洽检查）
 - 收集 design.md 需求追踪中所有出现的 R 编号（如 `[R1]`、`[R2]`）
 - 收集 specs/ 目录中所有 `**Trace**: R?` 声明的 R 编号
@@ -54,13 +60,14 @@ metadata:
 ### 追踪矩阵
 | 需求 | Trace ID | 实施单元 | 状态 |
 |------|----------|----------|------|
-| ... | R1 | U1 | ✓/TRACE_GAP/GHOST_R/ORPHAN/COARSE_R |
+| ... | R1 | U1 | ✓/TRACE_GAP/GHOST_R/ORPHAN/COARSE_R/DUPLICATE_R |
 
 ### 问题列表
 [TRACE_GAP] 需求 X 未进入 design 实施单元
 [GHOST_R] RY 在 design 中出现但 specs/ 中无对应 **Trace**: RY 声明
 [ORPHAN] 实施单元 UZ 无对应需求来源（无 R 驱动）
 [COARSE_R] RX 颗粒度过粗，包含多个独立行为，需回 specs 拆分
+[DUPLICATE_R] RX 在多个需求或多个 spec 文件中重复使用，需统一重新编号
 
 ### 结论
 通过 / 需修正后重审
@@ -70,10 +77,10 @@ metadata:
 
 - 审查报告已输出
 - 追踪矩阵已完成
-- 所有 TRACE_GAP、GHOST_R、ORPHAN 和 COARSE_R 已列出
+- 所有 TRACE_GAP、GHOST_R、ORPHAN、COARSE_R 和 DUPLICATE_R 已列出
 
 ## 退出契约
 
 - **如"通过"**：必须转入 **opsx-tasks** 生成 tasks.md。这不是建议，是强制要求。
-- **如"需修正"**：必须回到 **opsx-plan** 修正 design.md 和 specs/。禁止跳过直接生成 tasks。COARSE_R 问题需在 specs 中将粗粒度需求拆分为多条独立需求后重新审查。
+- **如"需修正"**：必须回到 **opsx-plan** 修正 design.md 和 specs/。禁止跳过直接生成 tasks。COARSE_R 问题需在 specs 中将粗粒度需求拆分为多条独立需求后重新审查；DUPLICATE_R 问题需在所有相关 spec 文件中统一重新编号后重审。
 - 所有发现已记录在审查报告中

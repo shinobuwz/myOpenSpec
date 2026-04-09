@@ -117,6 +117,7 @@ metadata:
 - **proposal.md**：如果变更不清楚，先向用户确认。填写"为什么""什么变化""能力""影响"。
   - "能力"部分很关键——列出的每个能力都需要一个 spec 文件。
 - **specs/<capability>/spec.md**：为提案"能力"部分列出的每个能力创建一个 spec（使用 capability 名称，而不是 change 名称）。
+  - 如果本次 change 有多个 `specs/<capability>/spec.md`，所有 `**Trace**: R<number>` 必须跨文件全局唯一；写当前 spec 前必须先检查已有 spec 中是否已经使用该编号。
 - **design.md**：记录技术决策、架构和实现方法。
 - **tasks.md**：把实现拆分为带复选框的任务。
 
