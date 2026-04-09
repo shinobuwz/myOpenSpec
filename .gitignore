@@ -159,3 +159,4 @@ opencode.json
 .idea/
 .npmrc
 pnpm-lock.yaml
+scripts/sync-local.sh

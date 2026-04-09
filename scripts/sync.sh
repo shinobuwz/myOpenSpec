@@ -14,9 +14,11 @@ fi
 
 TARGET="$1"
 
-# Sync Claude skills
+# Sync Claude skills (each skill is a directory containing SKILL.md)
 mkdir -p "$TARGET/.claude/skills"
-cp "$REPO_ROOT/.claude/skills"/openspec-*.md "$TARGET/.claude/skills/"
+for skill_dir in "$REPO_ROOT/.claude/skills"/openspec-*/; do
+  cp -r "$skill_dir" "$TARGET/.claude/skills/"
+done
 
 # Sync Codex commands (optional)
 if [ -d "$REPO_ROOT/.codex/commands" ]; then
