@@ -407,7 +407,7 @@ CSS Variables (应用于 :root)
 ### 模式如何工作
 
 ```yaml
-# openspec/schemas/spec-driven/schema.yaml
+# .claude/opsx/schemas/spec-driven/schema.yaml
 name: spec-driven
 artifacts:
   - id: proposal
@@ -468,16 +468,16 @@ proposal → specs → design → tasks → implement
 
 ```bash
 # 从零开始创建
-openspec-cn schema init research-first
+mkdir -p .claude/opsx/schemas/research-first/templates
 
 # 或从现有模式派生
-openspec-cn schema fork spec-driven research-first
+cp -r .claude/opsx/schemas/spec-driven .claude/opsx/schemas/research-first
 ```
 
 **示例自定义模式：**
 
 ```yaml
-# openspec/schemas/research-first/schema.yaml
+# .claude/opsx/schemas/research-first/schema.yaml
 name: research-first
 artifacts:
   - id: research
@@ -493,7 +493,7 @@ artifacts:
     requires: [proposal]   # 跳过规范/设计，直接进入任务
 ```
 
-有关创建和使用自定义模式的完整详情，请参阅[自定义](customization.md)。
+上面的示例已经覆盖了自定义模式的基本结构与用法。
 
 ## 归档（Archive）
 
@@ -621,4 +621,3 @@ openspec/
 - [入门指南](getting-started.md) - 实用的第一步
 - [工作流](workflows.md) - 常见模式及何时使用
 - [命令参考](commands.md) - 完整命令参考
-- [自定义](customization.md) - 创建自定义模式并配置项目

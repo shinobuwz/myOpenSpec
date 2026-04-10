@@ -2,7 +2,7 @@
 name: opsx-plan-review
 description: 规划审查：检查 specs 需求是否完整进入 design。在 plan 生成 design 后、生成 tasks 之前使用。
 license: MIT
-compatibility: 需要 openspec CLI。
+compatibility: 直接文件操作，无需外部 CLI。
 metadata:
   author: openspec
   version: "1.0"
@@ -18,8 +18,8 @@ metadata:
 ## 启动序列
 
 1. 确认 git 工作区干净
-2. `openspec-cn status --change "<name>" --json` 确认 design artifact 已生成
-3. `openspec-cn instructions apply --change "<name>" --json` 读取 `gateReview` facts bundle
+2. 读取 `openspec/changes/<name>/.openspec.yaml` 获取 schema 定义，然后检查各产出物文件是否已存在，确认 design artifact 已生成
+3. 读取 `.openspec.yaml` 中的 `artifacts` 配置获取 apply 的 `gateReview` facts bundle
 4. 读取 change 的 artifact：proposal.md、design.md、specs/
 
 ## 审查方式

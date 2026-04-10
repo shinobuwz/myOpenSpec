@@ -2,7 +2,7 @@
 name: opsx-explore
 description: 进入探索模式 - 一个用于探索想法、调查问题和澄清需求的思考伙伴。当用户想要在进行更改之前或期间深入思考某事时使用。
 license: MIT
-compatibility: 需要 openspec CLI。
+compatibility: 直接文件操作，无需外部 CLI。
 metadata:
   author: openspec
   version: "1.0"
@@ -94,7 +94,7 @@ metadata:
 
 开始时，快速检查存在什么：
 ```bash
-openspec-cn list --json
+ls openspec/changes/ | grep -v archive
 ```
 
 这会告诉你：

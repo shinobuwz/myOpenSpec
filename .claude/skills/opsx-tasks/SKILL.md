@@ -2,7 +2,7 @@
 name: opsx-tasks
 description: 生成 tasks.md，强制为每个 task 分配正确的 TDD 执行模式标签。在 plan-review 通过后使用。
 license: MIT
-compatibility: 需要 openspec CLI。
+compatibility: 直接文件操作，无需外部 CLI。
 metadata:
   author: openspec
   version: "1.0"
@@ -16,7 +16,7 @@ metadata:
 
 ## 启动序列
 
-1. `openspec-cn instructions tasks --change "<name>" --json` 获取模板和输出路径
+1. 读取 `openspec/changes/<name>/.openspec.yaml` 中的 `artifacts` 配置获取 tasks 的模板和输出路径
 2. 读取 proposal.md、design.md、所有 specs/ 文件
 3. 主动探测测试框架（见下方）
 4. 按 TDD 标签决策规则生成 tasks.md

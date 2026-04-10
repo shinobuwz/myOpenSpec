@@ -2,7 +2,7 @@
 name: opsx-continue
 description: 创建新变更或继续处理已有变更，每次推进一个产出物。替代 opsx-plan。
 license: MIT
-compatibility: 需要 openspec CLI。
+compatibility: 直接文件操作，无需外部 CLI。
 metadata:
   author: openspec
   version: "1.0"
@@ -17,13 +17,13 @@ metadata:
 
 0. **如果指定的变更不存在，先创建它**
 
-   检查变更名称是否已存在（运行 `openspec-cn list --json` 确认）。
+   检查变更名称是否已存在（运行 `ls openspec/changes/ | grep -v archive` 确认）。
 
    如果变更**不存在**，先创建：
-   - 确定 Schema（默认省略 `--schema`；仅当用户明确要求时才使用 `--schema <name>`）
+   - 确定 Schema（默认使用 spec-driven）
    - 运行：
      ```bash
-     openspec-cn new change "<name>"
+     bash .claude/opsx/bin/changes.sh init <name> spec-driven
      ```
    - 创建完成后，继续步骤1
 
@@ -31,7 +31,7 @@ metadata:
 
 1. **如果没有提供变更名称，提示选择**
 
-   运行 `openspec-cn list --json` 获取按最近修改排序的可用变更。然后使用 **AskUserQuestion tool** 让用户选择要处理哪个变更。
+   运行 `ls openspec/changes/ | grep -v archive` 获取按最近修改排序的可用变更。然后使用 **AskUserQuestion tool** 让用户选择要处理哪个变更。
 
    展示前 3-4 个最近修改的变更作为选项，显示：
    - 变更名称
@@ -44,13 +44,13 @@ metadata:
    **重要提示**：不要猜测或自动选择变更。始终让用户选择。
 
 2. **检查当前状态**
-   ```bash
-   openspec-cn status --change "<name>" --json
-   ```
-   解析 JSON 以了解当前状态。响应包括：
+
+   读取 `openspec/changes/<name>/.openspec.yaml` 获取 schema 定义，然后检查各产出物文件是否已存在来判断状态（done/ready/blocked）。
+
+   解析以了解当前状态：
    - `schemaName`：正在使用的工作流 schema（例如："spec-driven"）
    - `artifacts`：产出物数组及其状态（"done"、"ready"、"blocked"）
-   - `isComplete`：布尔值，表示是否所有产出物都已完成
+   - `isComplete`：是否所有产出物都已完成
 
 3. **根据状态行动**：
 
@@ -66,11 +66,8 @@ metadata:
 
    **如果产出物准备好创建**（状态显示有 `status: "ready"` 的产出物）：
    - 从状态输出中选择第一个 `status: "ready"` 的产出物
-   - 获取其指令：
-     ```bash
-     openspec-cn instructions <artifact-id> --change "<name>" --json
-     ```
-   - 解析 JSON。关键字段包括：
+   - 获取其指令：读取 `.openspec.yaml` 中的 `artifacts` 配置获取 schema 定义，以及对应的模板文件
+   - 解析关键字段：
      - `context`：项目背景（对你的约束 - 不要包含在输出中）
      - `rules`：产出物特定规则（对你的约束 - 不要包含在输出中）
      - `template`：输出文件使用的结构
@@ -94,9 +91,8 @@ metadata:
    - 显示状态并建议检查问题
 
 4. **创建产出物后，显示进度**
-   ```bash
-   openspec-cn status --change "<name>"
-   ```
+
+   读取 `openspec/changes/<name>/.openspec.yaml` 获取 schema 定义，检查各产出物文件是否已存在，显示当前状态。
 
 **输出**
 
@@ -121,7 +117,7 @@ metadata:
 - **design.md**：记录技术决策、架构和实现方法。
 - **tasks.md**：把实现拆分为带复选框的任务。
 
-对于其他 schema，遵循 CLI 输出中的 `instruction` 字段。
+对于其他 schema，遵循 `.openspec.yaml` 中 `artifacts` 配置的 `instruction` 字段。
 
 **护栏**
 - 每次调用只创建一个产出物

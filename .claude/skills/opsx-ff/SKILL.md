@@ -2,7 +2,7 @@
 name: opsx-ff
 description: 快速创建实现所需的所有产出物。当用户想要快速创建实现所需的所有产出物，而不是逐个创建时使用。
 license: MIT
-compatibility: 需要 openspec CLI。
+compatibility: 直接文件操作，无需外部 CLI。
 metadata:
   author: openspec
   version: "1.0"
@@ -33,15 +33,15 @@ metadata:
 
 2. **创建变更目录**
    ```bash
-   openspec-cn new change "<name>"
+   bash .claude/opsx/bin/changes.sh init <name> spec-driven
    ```
    这将在 `openspec/changes/<name>/` 创建一个带有 `.openspec.yaml` 的脚手架变更。
 
 3. **获取产出物构建顺序**
-   ```bash
-   openspec-cn status --change "<name>" --json
-   ```
-   解析 JSON 以获取：
+
+   读取 `openspec/changes/<name>/.openspec.yaml` 获取 schema 定义，然后检查各产出物文件是否已存在来判断状态（done/ready/blocked）。
+
+   解析以获取：
    - `applyRequires`: 实现前所需的产出物 ID 数组（例如：`["tasks"]`）
    - `artifacts`: 所有产出物及其状态和依赖项的列表
 
@@ -52,10 +52,7 @@ metadata:
    按依赖顺序循环遍历产出物（没有待处理依赖项的产出物优先）：
 
    a. **对于每个 `ready`（依赖项已满足）的产出物**：
-      - 获取指令：
-        ```bash
-        openspec-cn instructions <artifact-id> --change "<name>" --json
-        ```
+      - 获取指令：读取 `.openspec.yaml` 中的 `artifacts` 配置获取 schema 定义，以及对应的模板文件
       - 指令 JSON 包括：
         - `context`：项目背景（对你的约束 - 不要包含在输出中）
         - `rules`：产出物特定规则（对你的约束 - 不要包含在输出中）
@@ -80,7 +77,7 @@ metadata:
       - 审查通过后，继续实施
 
    d. **继续直到所有 `applyRequires` 产出物完成**
-      - 创建每个产出物后，重新运行 `openspec-cn status --change "<name>" --json`
+      - 创建每个产出物后，重新读取 `openspec/changes/<name>/.openspec.yaml` 并检查各产出物文件是否已存在
       - 检查 `applyRequires` 中的每个产出物 ID 在 artifacts 数组中是否具有 `status: "done"`
       - 当所有 `applyRequires` 产出物完成且关卡1、关卡2 均通过时，才能进入实施
 
@@ -98,9 +95,8 @@ metadata:
    - 验证通过后，可以归档
 
 7. **显示最终状态**
-   ```bash
-   openspec-cn status --change "<name>"
-   ```
+
+   读取 `openspec/changes/<name>/.openspec.yaml` 获取 schema 定义，检查各产出物文件是否已存在，显示当前状态。
 
 **输出**
 
@@ -112,7 +108,7 @@ metadata:
 
 **产出物创建指南**
 
-- 遵循每个产出物类型的 `openspec-cn instructions` 中的 `instruction` 字段
+- 遵循每个产出物类型的 `.openspec.yaml` 中 `artifacts` 配置的 `instruction` 字段
 - Schema 定义了每个产出物应包含的内容 - 遵循它
 - 在创建新产出物之前阅读依赖产出物以获取上下文
 - 使用 `template` 作为输出文件的结构 - 填充其各个部分

@@ -1,6 +1,6 @@
 # 支持的工具
 
-OpenSpec 支持 Claude Code 和 Codex 两种 AI 编码助手。当您运行 `openspec-cn init` 时，系统会提示您选择使用的工具，OpenSpec 将配置相应的集成。
+OpenSpec 支持 Claude Code 和 Codex 两种 AI 编码助手。当您运行 `./scripts/sync.sh` 时，系统会将 skill 文件同步到目标项目。
 
 ## 工作原理
 
@@ -18,22 +18,19 @@ OpenSpec 支持 Claude Code 和 Codex 两种 AI 编码助手。当您运行 `ope
 | Claude Code | `.claude/skills/opsx-*/SKILL.md` |
 | Codex | 复用同一仓库内的 OPSX 文档与 skill 源，不提供单独 prompt 产物 |
 
-## 非交互式设置
+## 同步设置
 
-对于 CI/CD 或脚本化设置，使用 `--tools` 标志：
+将 skill 文件同步到目标项目：
 
 ```bash
-# 配置特定工具
-openspec-cn init --tools claude,codex
+# 同步 skill 到目标项目
+./scripts/sync.sh /path/to/your-project
 
-# 配置所有支持的工具
-openspec-cn init --tools all
-
-# 跳过工具配置
-openspec-cn init --tools none
+# 批量同步多个仓库
+./scripts/sync-all.sh
 ```
 
-**可用的工具 ID：** `claude`, `codex`
+如果不需要同步，可跳过此步骤。
 
 ## 安装内容
 
@@ -66,6 +63,6 @@ openspec-cn init --tools none
 
 ## 相关内容
 
-- [CLI 参考](cli.md) — 终端命令
+- [工作流参考](cli.md) — 工作流与配置
 - [技能参考](commands.md) — OPSX skills 与用法
 - [入门指南](getting-started.md) — 首次设置

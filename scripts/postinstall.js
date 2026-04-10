@@ -72,7 +72,7 @@ async function installCompletions(shell) {
 
     // Check if shell is supported
     if (!CompletionFactory.isSupported(shell)) {
-      console.log(`\n提示：运行 'openspec-cn completion install' 以安装 shell 补全`);
+      console.log(`\n提示：运行 'openspec completion install' 以安装 shell 补全`);
       return;
     }
 
@@ -99,7 +99,7 @@ async function installCompletions(shell) {
       }
     } else {
       // Installation failed, show tip for manual install
-      console.log(`\n提示：运行 'openspec-cn completion install' 以安装 shell 补全`);
+      console.log(`\n提示：运行 'openspec completion install' 以安装 shell 补全`);
     }
   } catch (error) {
     // Fail gracefully - show tip for manual install
@@ -127,7 +127,7 @@ async function main() {
     // Detect shell
     const shell = await detectShell();
     if (!shell) {
-      console.log(`\n提示：运行 'openspec-cn completion install' 以安装 shell 补全`);
+      console.log(`\n提示：运行 'openspec completion install' 以安装 shell 补全`);
       return;
     }
 

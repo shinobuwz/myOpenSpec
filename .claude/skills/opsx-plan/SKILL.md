@@ -14,7 +14,7 @@ metadata:
 ## 启动序列
 
 1. 确认需求已经过脑暴或探索阶段的澄清
-2. 执行 `bash .claude/opsx/bin/changes-status.sh` 检查是否已有相关变更（含阶段和进度）
+2. 执行 `bash .claude/opsx/bin/changes.sh` 检查是否已有相关变更（含阶段和进度）
 3. 先读 `.aiknowledge/codemap/index.md`，判断目标模块是否已有 codemap；已有则继续读对应 `<module>.md` 和必要的 `chains/*.md`，没有则先调用 `opsx-codemap`
 4. 读取 `.aiknowledge/pitfalls/index.md` 和相关领域的 `index.md`，在设计中规避已知陷阱
 5. 收集必要的上下文信息
@@ -22,7 +22,7 @@ metadata:
 ## 流程
 
 ### 1. 创建变更
-- 使用 `mkdir -p openspec/changes/YYYY-MM-DD-<name>/specs` 创建新变更目录结构
+- 使用 `bash .claude/opsx/bin/changes.sh init YYYY-MM-DD-<name> spec-driven` 创建新变更目录结构
 - **变更名称必须带日期前缀**（如 `2026-04-03-add-auth`），便于按时间追溯
 - 名称部分简洁、描述性强，使用 kebab-case
 

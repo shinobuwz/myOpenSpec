@@ -2,7 +2,7 @@
 name: opsx-task-analyze
 description: 任务分析：检查 tasks 是否完整覆盖 design/specs 需求、是否与 design 一致。在 tasks 生成后、implement 之前使用。
 license: MIT
-compatibility: 需要 openspec CLI。
+compatibility: 直接文件操作，无需外部 CLI。
 metadata:
   author: openspec
   version: "1.0"
@@ -18,7 +18,7 @@ metadata:
 ## 启动序列
 
 1. 确认 git 工作区干净
-2. `openspec-cn status --change "<name>" --json` 确认 tasks artifact 已生成
+2. 读取 `openspec/changes/<name>/.openspec.yaml` 获取 schema 定义，然后检查各产出物文件是否已存在，确认 tasks artifact 已生成
 3. 确认 opsx-plan-review 已通过（spec↔plan 一致性已验证）
 4. 读取 change 的全部 artifact：proposal.md、design.md、specs/、tasks.md
 

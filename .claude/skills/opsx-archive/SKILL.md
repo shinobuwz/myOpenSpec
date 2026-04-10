@@ -2,7 +2,7 @@
 name: opsx-archive
 description: 归档实验性工作流中已完成的变更。当用户想要在实现完成后最终确定并归档变更时使用。
 license: MIT
-compatibility: 需要 openspec CLI。
+compatibility: 直接文件操作，无需外部 CLI。
 metadata:
   author: openspec
   version: "1.0"
@@ -17,7 +17,7 @@ metadata:
 
 1. **如果没有提供变更名称，提示选择**
 
-   运行 `openspec-cn list --json` 获取可用变更。使用 **AskUserQuestion tool** 让用户选择。
+   运行 `ls openspec/changes/ | grep -v archive` 获取可用变更。使用 **AskUserQuestion tool** 让用户选择。
 
    仅显示活动变更（未归档的）。
    如果可用，包括每个变更使用的 Schema。
@@ -26,9 +26,9 @@ metadata:
 
 2. **检查产出物完成状态**
 
-   运行 `openspec-cn status --change "<name>" --json` 检查产出物完成情况。
+   读取 `openspec/changes/<name>/.openspec.yaml` 获取 schema 定义，然后检查各产出物文件是否已存在来判断产出物完成情况。
 
-   解析 JSON 以了解：
+   解析以了解：
    - `schemaName`：正在使用的工作流
    - `artifacts`：产出物列表及其状态（`done` 或其他）
 
@@ -135,7 +135,7 @@ git push                   # 可选，询问用户是否推送
 
 **防护措施**
 - 如果未提供变更，始终提示选择
-- 使用产出物图（openspec-cn status --json）进行完成度检查
+- 使用产出物图（读取 `.openspec.yaml` 并检查文件存在）进行完成度检查
 - 不要在警告时阻止归档 - 只需告知并确认
 - 移动到归档时保留 .openspec.yaml（它与目录一起移动）
 - 显示清晰的操作摘要
