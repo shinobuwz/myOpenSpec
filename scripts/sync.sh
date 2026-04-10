@@ -16,6 +16,12 @@ TARGET="$1"
 # Sync Claude skills (each skill is a directory containing SKILL.md)
 # First, remove stale skill directories from target that no longer exist in source
 mkdir -p "$TARGET/.claude/skills"
+
+# Clean up a legacy macOS copy artifact from older versions of this script.
+if [ -f "$TARGET/.claude/skills/SKILL.md" ] && [ ! -f "$REPO_ROOT/.claude/skills/SKILL.md" ]; then
+  rm -f "$TARGET/.claude/skills/SKILL.md"
+fi
+
 for target_skill_dir in "$TARGET/.claude/skills"/opsx-*/; do
   [ -d "$target_skill_dir" ] || continue
   skill_name="$(basename "$target_skill_dir")"
@@ -23,9 +29,10 @@ for target_skill_dir in "$TARGET/.claude/skills"/opsx-*/; do
     rm -rf "$target_skill_dir"
   fi
 done
-# Copy current skills from source to target
+# Copy current skills from source to target.
+# Strip the trailing slash so BSD cp preserves the skill directory name on macOS.
 for skill_dir in "$REPO_ROOT/.claude/skills"/opsx-*/; do
-  cp -r "$skill_dir" "$TARGET/.claude/skills/"
+  cp -r "${skill_dir%/}" "$TARGET/.claude/skills/"
 done
 
 # Sync .claude/opsx/bin (helper scripts for OPSX skills)
