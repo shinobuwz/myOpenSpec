@@ -13,51 +13,91 @@ description: 规划审查：检查 specs 需求是否完整进入 design。在 p
 
 1. 确认 git 工作区干净
 2. 读取 `openspec/changes/<name>/.openspec.yaml` 获取 schema 定义，然后检查各产出物文件是否已存在，确认 design artifact 已生成
-3. 读取 `.openspec.yaml` 中的 `artifacts` 配置，获取本次 gate review 所需的 facts bundle
-4. 渐进加载制品（最小只读范围）：
+3. **组装 PlanReviewPacket**（参照 `docs/stage-packet-protocol.md` 第 4.1 节）：
 
-   **从 proposal.md 加载：**
-   - 变更概述/范围
-   - 变更目标（不读实施细节）
+   **core_payload 组装：**
+   - `artifact_presence`：检查 proposal.md / specs/ / design.md 是否存在
+   - `requirements`：从 specs/ 收集每条需求的 `**Trace**: R?` 声明和一行摘要（不读完整 Given/When/Then）
+   - `trace_mapping`：从 design.md 的 `## 需求追踪` 章节提取 R→U 映射
+   - `units`：从 design.md 提取 [U?] 标题列表
 
-   **从 specs/ 加载：**
-   - 每条需求的 `**Trace**: R?` 声明
-   - 需求描述（一行摘要，不读完整 Given/When/Then 展开内容，除非审查需要验证颗粒度）
+   **optional_refs 组装：**
+   - `source_refs`：列出所有存在的产出物文件路径和 kind
+   - `knowledge_refs`：读取 `.aiknowledge/codemap/index.md` 和 `.aiknowledge/pitfalls/index.md`，识别命中模块/领域，只记录路径引用
 
-   **从 design.md 加载：**
-   - `## 需求追踪` 章节（R→U 映射列表）
-   - 实施单元 [U?] 标题及简述
-   - 不读架构详情、序列图、数据模型等实施内容
+4. **校验 Packet Budget**：计算 estimated_tokens（字符数/4）。如超过 soft_limit(2000) 记录警告；如需要预降维则记录到 `budget.truncated_fields`；超过 hard_limit(4000) 必须按固定降维顺序截断后再发送（见协议文档第 2.2 节）
+
+5. 填充 packet 元数据（version, change_id, stage, packet_id, created_at, producer, budget）
+   - 如 `openspec/changes/<name>/context/run-report-data.json` 已存在且 JSON 合法且包含 `run_id`，必须复用该 `run_id`
+   - 如文件存在但 JSON 解析失败，必须中止并报错，禁止覆盖；由用户手动确认后才可重置
+   - 否则生成新的 `run_id`（格式：`<ISO8601>-<short-hash>`）
 
 ## 审查方式
 
-使用 Agent tool 启动 subagent 进行独立审查。subagent 共享同一个 `gateReview` facts bundle 作为事实底座，但不得共享彼此的 findings、主 agent 怀疑点或预设严重级别。subagent 只读取共享 facts、指定产出物文件和当前维度的审查清单，不做任何修改。审查结果由 subagent 汇报，主 agent 汇总输出。
+使用 Agent tool 启动 subagent 进行独立审查。所有 reviewer 共享同一个 PlanReviewPacket 作为事实底座（blind 隔离协议）：
+- 每个 reviewer 收到的输入 = PlanReviewPacket JSON + 该 reviewer 的维度清单
+- reviewer 之间不得共享 findings、主 agent 怀疑点或预设严重级别
+- reviewer 只能读取 packet 中 `source_refs` 和 `knowledge_refs` 列出的文件（Lazy Hydration）
+- reviewer 必须输出符合 **StageResult schema** 的 JSON（见 `docs/stage-packet-protocol.md` 第 3 节）
+
+subagent prompt 模板：
+
+```
+你是 plan-review 的 {agent_role} reviewer。
+
+## 输入 Packet
+{PlanReviewPacket JSON}
+
+## 你的审查维度
+{当前维度的审查清单}
+
+## 输出要求
+你必须输出一个符合 StageResult schema 的 JSON 对象。格式：
+{
+  "version": 1,
+  "run_id": "{packet.run_id}",
+  "change_id": "{packet.change_id}",
+  "stage": "plan-review",
+  "packet_id": "{packet.packet_id}",
+  "agent_role": "{agent_role}",
+  "summary": "一句话总结",
+  "decision": "pass|pass_with_warnings|fail",
+  "metrics": {"findings_total": N, "critical": N, "warning": N, "suggestion": N},
+  "findings": [
+    {"id": "F1", "severity": "critical|warning|suggestion", "dimension": "TRACE_GAP|COARSE_R|DUPLICATE_R|GHOST_R|ORPHAN", "message": "...", "trace_id": "R?"}
+  ]
+}
+
+如需读取文件，只能读取 packet 的 source_refs 和 knowledge_refs 中列出的路径。
+```
 
 ## 审查维度
 
-### 需求进入设计（specs → design）
-- 逐条检查 delta specs 中的每个需求
-- 每条需求都必须有 trace id（如 [R1]）
-- design.md 的 `## 需求追踪` 中必须存在 `- [R1] -> [U1]` 映射
-- 标记未进入设计的需求为 **TRACE_GAP**
+### trace-reviewer：需求进入设计（specs → design）
+- 逐条检查 core_payload.requirements 中的每个 R
+- 在 core_payload.trace_mapping 中必须存在 R→U 映射
+- 标记未进入设计的需求为 **TRACE_GAP**（severity: critical）
 
-### 需求颗粒度审查
+### granularity-reviewer：需求颗粒度审查
 - 检查每条需求是否只描述一个独立的可验证行为
-- 如果一条需求同时包含多个独立行为（如"实现 X 并支持 Y 格式并处理 Z 场景"），标记为 **COARSE_R**
-- **COARSE_R** 需回 specs 拆分为更细的独立需求，每条只描述一个行为，再重新审查
+- 如果一条需求同时包含多个独立行为，标记为 **COARSE_R**（severity: critical）
+- 需要时通过 source_refs 回读 spec 原文验证颗粒度
 
-### Trace 唯一性审查
-- 收集 `specs/` 目录下所有 `**Trace**: R?` 声明
-- 如果存在多个 spec 文件，必须把所有 R 编号放在同一个全集里检查重复
-- 任意两个需求只要复用了同一个 `R<number>`，无论是否位于不同 spec 文件，都标记为 **DUPLICATE_R**
-- **DUPLICATE_R** 必须回 specs 重新编号后再审查；禁止带着重复 R 进入 tasks/design 追踪
+### uniqueness-reviewer：Trace 唯一性审查
+- 收集 core_payload.requirements 中所有 R 编号
+- 任意两条需求复用同一 R 编号，标记为 **DUPLICATE_R**（severity: critical）
 
-### 设计完整性（design 自洽检查）
-- 收集 design.md 需求追踪中所有出现的 R 编号（如 `[R1]`、`[R2]`）
-- 收集 specs/ 目录中所有 `**Trace**: R?` 声明的 R 编号
-- 对比两者：design 中的每个 R 编号必须在 specs 中有对应的 `**Trace**: R?` 声明，否则标记为 **GHOST_R**
-- 实施单元 [U?] 是否都有对应的需求来源 [R?]，否则标记为 **ORPHAN**
-- 注：**GHOST_R** = design 引用了 specs 中不存在的 R 编号；**ORPHAN** = 实施单元 U 没有任何 R 驱动
+### design-integrity-reviewer：设计完整性（design 自洽检查）
+- trace_mapping 中的每个 R 编号必须在 requirements 中存在，否则标记为 **GHOST_R**（severity: critical）
+- 每个 U 必须有至少一个 R 驱动，否则标记为 **ORPHAN**（severity: critical）
+
+## 汇总逻辑
+
+主 agent 收集所有 reviewer 的 StageResult JSON：
+
+1. **合并 findings**：从各 StageResult 的 `findings` 数组合并到统一列表
+2. **计算汇总 metrics**：汇总 critical / warning / suggestion 计数
+3. **生成追踪矩阵**：基于 core_payload 的 requirements + trace_mapping + 各 reviewer findings
 
 ## 输出格式
 
@@ -76,6 +116,9 @@ description: 规划审查：检查 specs 需求是否完整进入 design。在 p
 [COARSE_R] RX 颗粒度过粗，包含多个独立行为，需回 specs 拆分
 [DUPLICATE_R] RX 在多个需求或多个 spec 文件中重复使用，需统一重新编号
 
+### Reviewer Results（JSON）
+（各 reviewer 的 StageResult JSON，供 RunReport 数据源使用）
+
 ### 结论
 通过 / 需修正后重审
 ```
@@ -89,7 +132,13 @@ description: 规划审查：检查 specs 需求是否完整进入 design。在 p
 ## 退出契约
 
 - **如"通过"**：
-  1. 写入门控状态：`yq -i '.gates.plan-review = "'$(date -u +%Y-%m-%dT%H:%M:%SZ)'"' openspec/changes/<name>/.openspec.yaml`
-  2. 必须转入 **opsx-tasks** 生成 tasks.md。这不是建议，是强制要求。
-- **如"需修正"**：不写入 gates。必须回到 **opsx-plan** 修正 design.md 和 specs/。禁止跳过直接生成 tasks。COARSE_R 问题需在 specs 中将粗粒度需求拆分为多条独立需求后重新审查；DUPLICATE_R 问题需在所有相关 spec 文件中统一重新编号后重审。
+  1. 写入门控状态：在 `openspec/changes/<name>/.openspec.yaml` 的 `gates:` 下添加 `plan-review: "<ISO8601 时间戳>"`
+  2. 将 PlanReviewPacket + 所有 StageResult 写入 `openspec/changes/<name>/context/run-report-data.json`（追加式更新：不存在则创建，已存在且 JSON 合法则合并，JSON 损坏则中止并报错，见步骤 5）
+  3. 必须转入 **opsx-tasks** 生成 tasks.md。这不是建议，是强制要求。
+- **如"需修正"**：
+  1. 不写入 gates
+  2. 仍将 packet + results 写入 `context/run-report-data.json`（状态为 fail；JSON 损坏则中止并报错，见步骤 5）
+  3. 必须回到 **opsx-plan** 修正 design.md 和 specs/。禁止跳过直接生成 tasks
+  4. COARSE_R 问题需在 specs 中将粗粒度需求拆分为多条独立需求后重新审查
+  5. DUPLICATE_R 问题需在所有相关 spec 文件中统一重新编号后重审
 - 所有发现已记录在审查报告中

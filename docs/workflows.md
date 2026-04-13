@@ -21,13 +21,24 @@
    - `archive` 结束时会强制回写 `knowledge` 和 `codemap`，让后续 workflow 继续复用这些知识。
    - 这两类知识都采用**事件驱动 freshness 管理**：命中时复核、漂移时标记 `stale`、被推翻时标记 `superseded`，而不是按时间自动过期。
 
-3. **change 级共享事实**
+3. **change 级共享事实（Stage Packet Protocol）**
    - `openspec/changes/<name>/context/knowledge-refs.md`
    - `openspec/changes/<name>/context/review-scope.md`
    - `openspec/changes/<name>/context/artifact-index.md`
    - `openspec/changes/<name>/test-report.md`
+   - `openspec/changes/<name>/context/run-report-data.json`（stage packet + result 数据）
+   - `openspec/changes/<name>/context/run-report.html`（HTML 报告）
 
-这些文件只作为当前 change 的声明层或留档层；权威源仍然是 `tasks.md`、`specs/`、`design.md`。在 gate review 中，`plan-review` 和 `verify` 共享同一个 facts bundle，但不共享彼此的 findings。
+   这些文件只作为当前 change 的声明层或留档层；权威源仍然是 `tasks.md`、`specs/`、`design.md`。
+
+   在 gate review 中，`plan-review` 和 `verify` 使用 **Stage Packet Protocol**（详见 `docs/stage-packet-protocol.md`）：
+   - **StagePacket**：assembler 从产出物中组装的只读事实快照，分为 `core_payload`（结构化摘要）和 `optional_refs`（文件路径引用），供 subagent 消费
+   - **StageResult**：reviewer subagent 的结构化输出，包含 findings、metrics、decision
+   - **Packet Budget**：soft limit 2K / hard limit 4K tokens，超限按固定顺序降维
+   - **Lazy Hydration**：subagent 只能读取 packet 中列出的文件路径，禁止无边界全局扫描
+   - **Blind 隔离**：reviewer 共享 StagePacket，不共享彼此的 StageResult
+
+   首版覆盖：plan-review 和 verify 两个 gate stage。按需使用 `/opsx:report` 生成 HTML 报告。
 
 ## 典型模式
 
