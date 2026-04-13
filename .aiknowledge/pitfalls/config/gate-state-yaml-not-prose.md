@@ -1,3 +1,16 @@
+---
+status: active
+created_at: 2026-04-13
+created_from: metadata-backfill
+last_verified_at: 2026-04-13
+last_verified_by: repository-audit
+verification_basis: repository-audit
+applies_to:
+  - .openspec.yaml
+  - .claude/skills
+superseded_by:
+---
+
 # 纯指令工作流的门控状态应持久化为结构化字段
 
 **标签**：[workflow, gating, yaml, state-persistence]

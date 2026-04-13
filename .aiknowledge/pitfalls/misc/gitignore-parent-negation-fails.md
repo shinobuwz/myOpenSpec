@@ -1,3 +1,16 @@
+---
+status: active
+created_at: 2026-04-13
+created_from: metadata-backfill
+last_verified_at: 2026-04-13
+last_verified_by: repository-audit
+verification_basis: repository-audit
+applies_to:
+  - .gitignore
+  - .claude
+superseded_by:
+---
+
 # git .gitignore 中父目录被忽略后，子目录 `!` 反排除无效
 
 **标签**：[git, gitignore, 文件追踪]

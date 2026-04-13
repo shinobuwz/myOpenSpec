@@ -1,3 +1,16 @@
+---
+status: active
+created_at: 2026-04-13
+created_from: metadata-backfill
+last_verified_at: 2026-04-13
+last_verified_by: repository-audit
+verification_basis: workflow-audit
+applies_to:
+  - scripts/sync.sh
+  - scripts/sync-all.sh
+superseded_by:
+---
+
 # skill-sync
 
 ## 职责

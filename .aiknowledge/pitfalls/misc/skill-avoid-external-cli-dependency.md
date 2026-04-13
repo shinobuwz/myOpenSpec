@@ -1,3 +1,16 @@
+---
+status: active
+created_at: 2026-04-13
+created_from: metadata-backfill
+last_verified_at: 2026-04-13
+last_verified_by: repository-audit
+verification_basis: repository-audit
+applies_to:
+  - .claude/skills
+  - scripts
+superseded_by:
+---
+
 # Skill 中避免依赖外部 CLI 命令
 
 **标签**：[skill, workflow, 可用性]

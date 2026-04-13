@@ -1,3 +1,16 @@
+---
+status: active
+created_at: 2026-04-13
+created_from: metadata-backfill
+last_verified_at: 2026-04-13
+last_verified_by: repository-audit
+verification_basis: repository-audit
+applies_to:
+  - .aiknowledge/pitfalls
+  - .claude/skills
+superseded_by:
+---
+
 # 知识库三层披露的消费侧缺口
 
 **标签**：[workflow, knowledge, aiknowledge, progressive-disclosure]

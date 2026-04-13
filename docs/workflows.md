@@ -19,6 +19,7 @@
    - `.aiknowledge/codemap/` 保存模块地图、关键文件和跨模块链路，供 `explore`、`plan`、`implement`、`bugfix` 复用。
    - `.aiknowledge/pitfalls/` 保存可复用经验，供 `plan`、`tdd`、`bugfix` 复用。
    - `archive` 结束时会强制回写 `knowledge` 和 `codemap`，让后续 workflow 继续复用这些知识。
+   - 这两类知识都采用**事件驱动 freshness 管理**：命中时复核、漂移时标记 `stale`、被推翻时标记 `superseded`，而不是按时间自动过期。
 
 3. **change 级共享事实**
    - `openspec/changes/<name>/context/knowledge-refs.md`

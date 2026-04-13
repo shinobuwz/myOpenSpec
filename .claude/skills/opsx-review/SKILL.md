@@ -110,7 +110,11 @@ subagent 只读取代码和文档，不做任何修改。审查结果由 subagen
 读取 `.aiknowledge/pitfalls/` 后，将已知易错点作为**重点核对清单**：
 
 - 对于 diff 中涉及相关领域的代码，**主动核对**是否命中已知坑
+- 仅 `active` 条目可直接作为高权重核查项
+- `stale` 条目只能作为调查线索，不得直接当作结论
+- `superseded` / `deprecated` 条目默认不作为当前依据
 - 命中时提高审查权重，在 issue 描述中引用 pitfall ID
+- 如果 diff 证明某个 `active` 条目已不再成立，输出一个 `knowledge drift` 问题，建议归档前更新 `.aiknowledge/`
 - 未命中的领域不强行审查，避免噪声
 
 常见的共性坑类型（即使项目无 pitfalls 也应关注）：

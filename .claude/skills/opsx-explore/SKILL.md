@@ -349,14 +349,17 @@ ls openspec/changes/ | grep -v archive
 
 **进入探索时（强制检查）：**
 1. 读取 `.aiknowledge/codemap/index.md`（无论是否存在都要尝试）
-2. 如果存在 → 以它作为探索起点，避免重复发现已知脉络
+2. 如果存在 → 检查目标模块在 index 中的 freshness 状态：
+   - `active` → 可以作为探索起点，避免重复发现已知脉络
+   - `stale` → 只能作为线索，**先调用 `opsx-codemap` 刷新后再依赖**
+   - `superseded` → 优先跳转到替代条目，不继续依赖旧条目
 3. 如果不存在或目标模块未被覆盖 → **当场调用 `opsx-codemap` skill**，不要等到探索结束
 
 > 注意：codemap 的调用时机是**搜索源码之前**，而不是探索结束之后。"先画地图，再开始探索"是硬性规则。
 
 **codemap 文档过时时：**
-- 发现文档与代码不一致 → 提议更新，不要默默使用过时信息
-- 确认过时后立即调用 `opsx-codemap` skill 刷新对应模块
+- 发现文档与代码不一致 → 先将其视为 `stale`，不要默默使用过时信息
+- 确认过时后立即调用 `opsx-codemap` skill 刷新对应模块，并更新 `last_verified_at`
 
 地图文档的原则：
 - **地图而非百科**：告诉 AI 去哪里找，不替代读代码

@@ -33,3 +33,28 @@
 ## 条目模板
 
 每条经验包含：现象、根因、修复前 diff、修复后 diff、要点、来源。
+
+## Freshness 机制
+
+pitfall 条目采用事件驱动的 freshness 管理，而不是按时间自动过期。
+
+- `active`：当前可直接作为约束输入
+- `stale`：只能作为调查线索，使用前需要复核
+- `superseded`：已被新条目替代，默认跳转到替代条目
+- `deprecated`：仅保留历史，不参与当前决策
+
+推荐 frontmatter：
+
+```md
+---
+status: active
+created_at: YYYY-MM-DD
+created_from: metadata-backfill | change:<name> | commit:<sha>
+last_verified_at: YYYY-MM-DD
+last_verified_by: opsx-archive | opsx-bugfix | opsx-knowledge
+verification_basis: archive | bugfix | review | repository-audit
+applies_to:
+  - path/or/module
+superseded_by:
+---
+```

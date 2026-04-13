@@ -1,3 +1,17 @@
+---
+status: active
+created_at: 2026-04-13
+created_from: metadata-backfill
+last_verified_at: 2026-04-13
+last_verified_by: repository-audit
+verification_basis: repository-audit
+applies_to:
+  - .openspec.yaml
+  - .claude/skills/opsx-verify
+  - .claude/skills/opsx-archive
+superseded_by:
+---
+
 # 门控机制修改时的自举悖论
 
 **标签**：[workflow, gating, bootstrap, yaml]

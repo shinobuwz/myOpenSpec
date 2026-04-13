@@ -1,3 +1,17 @@
+---
+status: active
+created_at: 2026-04-13
+created_from: metadata-backfill
+last_verified_at: 2026-04-13
+last_verified_by: repository-audit
+verification_basis: repository-audit
+applies_to:
+  - .claude/skills/opsx-plan
+  - .claude/skills/opsx-plan-review
+  - design.md
+superseded_by:
+---
+
 # design.md 中出现 spec 未定义的 GHOST_R
 
 ## 现象

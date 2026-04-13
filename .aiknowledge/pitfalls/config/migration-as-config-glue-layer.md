@@ -1,3 +1,16 @@
+---
+status: active
+created_at: 2026-04-13
+created_from: metadata-backfill
+last_verified_at: 2026-04-13
+last_verified_by: repository-audit
+verification_basis: repository-audit
+applies_to:
+  - openspec/config.yaml
+  - scripts
+superseded_by:
+---
+
 # migration.ts 作为跨模块 config 同步的粘合层
 
 **标签**：[TypeScript, CLI, config-management, migration]

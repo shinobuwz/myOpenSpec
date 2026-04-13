@@ -1,3 +1,16 @@
+---
+status: active
+created_at: 2026-04-13
+created_from: metadata-backfill
+last_verified_at: 2026-04-13
+last_verified_by: repository-audit
+verification_basis: repository-audit
+applies_to:
+  - .aiknowledge/pitfalls
+  - .claude/skills/opsx-knowledge
+superseded_by:
+---
+
 # knowledge skill 将经验写入错误目录
 
 ## 现象
