@@ -63,5 +63,4 @@ OpenSpec 支持 Claude Code 和 Codex 两种 AI 编码助手。当您运行 `./s
 ## 相关内容
 
 - [工作流参考](workflows.md) — 默认主线、旁路与 gate 顺序
-- [兼容入口](commands.md) — 旧技能参考链接的兼容页
 - [入门指南](getting-started.md) — 首次设置

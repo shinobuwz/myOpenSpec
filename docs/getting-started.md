@@ -108,4 +108,3 @@ AI：正在处理任务...
 
 - [支持的工具](supported-tools.md)
 - [工作流](workflows.md)
-- [CLI](cli.md)
