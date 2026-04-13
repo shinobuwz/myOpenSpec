@@ -32,11 +32,12 @@ description: 规划审查：检查 specs 需求是否完整进入 design。在 p
    - 如文件存在但 JSON 解析失败，必须中止并报错，禁止覆盖；由用户手动确认后才可重置
    - 否则生成新的 `run_id`（格式：`<ISO8601>-<short-hash>`）
 
+6. **写入 packet 文件**：将完整 PlanReviewPacket JSON 写入 `openspec/changes/<name>/context/packet-plan-review.json`（context/ 目录不存在时先创建）
+
 ## 审查方式
 
 使用 Agent tool 启动 1 个 subagent 进行独立审查：
-- reviewer 收到的输入 = PlanReviewPacket JSON
-- reviewer 只能读取 packet 中 `source_refs` 和 `knowledge_refs` 列出的文件（Lazy Hydration）
+- reviewer 从文件读取 PlanReviewPacket，只能读取 packet 中 `source_refs` 和 `knowledge_refs` 列出的文件（Lazy Hydration）
 - reviewer 必须输出符合 **StageResult schema** 的 JSON（见 `docs/stage-packet-protocol.md` 第 3 节）
 
 subagent prompt 模板：
@@ -45,7 +46,8 @@ subagent prompt 模板：
 你是 plan-review reviewer。
 
 ## 输入 Packet
-{PlanReviewPacket JSON}
+读取文件 `openspec/changes/<name>/context/packet-plan-review.json` 获取 PlanReviewPacket。
+你只能读取 packet 中 source_refs 和 knowledge_refs 列出的文件路径（Lazy Hydration）。
 
 ## 你的审查任务
 在同一轮审查中覆盖 trace、granularity、uniqueness、design-integrity 四类检查。
@@ -54,10 +56,10 @@ subagent prompt 模板：
 你必须输出一个符合 StageResult schema 的 JSON 对象。格式：
 {
   "version": 1,
-  "run_id": "{packet.run_id}",
-  "change_id": "{packet.change_id}",
+  "run_id": "<来自 packet 的 run_id>",
+  "change_id": "<来自 packet 的 change_id>",
   "stage": "plan-review",
-  "packet_id": "{packet.packet_id}",
+  "packet_id": "<来自 packet 的 packet_id>",
   "agent_role": "plan-reviewer",
   "summary": "一句话总结",
   "decision": "pass|pass_with_warnings|fail",
@@ -66,8 +68,6 @@ subagent prompt 模板：
     {"id": "F1", "severity": "critical|warning|suggestion", "dimension": "TRACE_GAP|COARSE_R|DUPLICATE_R|GHOST_R|ORPHAN", "message": "...", "trace_id": "R?"}
   ]
 }
-
-如需读取文件，只能读取 packet 的 source_refs 和 knowledge_refs 中列出的路径。
 ```
 
 ## 审查维度

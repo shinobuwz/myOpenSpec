@@ -26,94 +26,85 @@ description: 按 tasks.md 逐项实施，每项强制 TDD 循环。当 OpenSpec 
 5. 确认测试框架已配置并可运行
 6. 找到第一个未完成的任务
 
-## 并行实施策略
+## 实施上下文组装
 
-在逐项执行前，先分析 tasks.md 的依赖关系，识别可并行的独立任务组：
+从 tasks.md 和产出物中提取结构化信息，写入 `openspec/changes/<name>/context/impl-context.json`：
 
-### 依赖分析
+```json
+{
+  "change_id": "<name>",
+  "tasks": [
+    {
+      "id": "Task N",
+      "description": "任务描述",
+      "acceptance": ["验收标准 1", "验收标准 2"],
+      "mode": "test-first|characterization-first|direct",
+      "r_ids": ["R1"],
+      "u_ids": ["U1"],
+      "files": ["涉及文件路径"],
+      "depends_on": ["Task M"]
+    }
+  ],
+  "test_commands": ["项目级测试命令或任务级验证命令"],
+  "source_refs": [
+    {"path": "openspec/changes/<name>/proposal.md", "kind": "proposal"},
+    {"path": "openspec/changes/<name>/design.md", "kind": "design"},
+    {"path": "openspec/changes/<name>/specs/<capability>/spec.md", "kind": "spec"}
+  ],
+  "knowledge_refs": [
+    {"path": ".aiknowledge/codemap/<module>.md", "kind": "codemap"},
+    {"path": ".aiknowledge/pitfalls/<domain>/<slug>.md", "kind": "pitfall"}
+  ]
+}
+```
 
-1. 解析 tasks.md 中每个任务的依赖标注（如”依赖 Task 1”、”blockedBy”等）
-2. 构建任务依赖 DAG
-3. 识别同一层级（无互相依赖）的任务组
+context/ 目录不存在时先创建。
 
-### 并行条件
+同时创建 `openspec/changes/<name>/context/impl-progress.json`，初始内容至少包含：
 
-任务组满足**全部**以下条件时，可以并行派遣：
-- 组内任务之间无依赖关系
-- 组内任务修改的文件路径无重叠（通过任务描述中的文件路径判断）
-- 组内至少有 2 个任务
+```json
+{
+  "change_id": "<name>",
+  "current_task": null,
+  "completed_tasks": [],
+  "last_test_command": null,
+  "dirty_files": [],
+  "updated_at": "<ISO8601>"
+}
+```
 
-### 并行执行
+## subagent 实施
 
-对可并行的任务组，在**同一条消息**中使用 Agent tool 派遣多个 worktree-isolated subagent：
+使用 Agent tool 启动 **1 个** subagent，实施全部任务：
 
 ```
 Agent({
-  description: “实施 Task N”,
+  description: “实施 <name> 全部任务”,
   subagent_type: “general-purpose”,
-  isolation: “worktree”,
-  prompt: `在隔离 worktree 中实施以下任务：
+  prompt: `你是 implement agent。
 
-  任务编号：N
-  任务描述：<从 tasks.md 摘取>
-  验收标准：<从 tasks.md 摘取>
-  执行方式：[test-first|characterization-first|direct]
+## 输入
+读取 openspec/changes/<name>/context/impl-context.json 获取实施上下文。
+读取 openspec/changes/<name>/context/impl-progress.json 获取最近 checkpoint。
 
-  上下文文件：
-  <列出 proposal.md, design.md, specs/ 的路径>
+## 实施规则
+按 tasks 数组顺序逐一实施，对每个任务：
+1. 按需读取 source_refs 中对应的设计文档理解设计意图
+2. 先校验 depends_on 中列出的前置任务均已完成；如未完成则暂停并报告 task 依赖异常
+3. 按 mode 字段执行：
+   - test-first：先写失败测试 → 实现 → 确认测试通过
+   - characterization-first：先固化旧行为测试 → 再修改代码
+   - direct：纯配置/脚手架场景直接执行
+4. 优先使用 impl-context.json 中的 test_commands；如需降级到临时命令，必须记录原因
+5. 确保每条验收标准有对应测试或显式"不需要测试"理由
+6. 每完成一个任务，立即更新 impl-progress.json，至少记录 current_task、completed_tasks、last_test_command、dirty_files、updated_at
+7. 在 tasks.md 中将该任务标记为已完成
+8. 不要求在 implement 阶段执行 git commit；只有用户明确要求或外部工作流明确要求时才提交，并将 commit 信息写入 impl-progress.json
 
-  执行步骤：
-  1. 读取上下文文件理解设计意图
-  2. 按执行方式进行 TDD 循环（test-first: 先写失败测试→实现→重构）
-  3. 确保所有验收标准有对应测试
-  4. git commit 所有变更
-
-  完成后报告：修改了哪些文件、测试结果、commit hash`
+## 完成后报告
+每个任务：修改了哪些文件、测试结果（通过/失败数）、是否产生 commit；并输出最终 impl-progress.json 摘要`
 })
 ```
-
-### 合并策略
-
-所有并行 subagent 完成后：
-1. 检查每个 subagent 的返回结果（worktree 路径和分支名）
-2. 逐个合并 worktree 分支到当前分支（`git merge <worktree-branch>`）
-3. 如果合并冲突：暂停，提示用户手动解决
-4. 合并成功后在 tasks.md 中标记对应任务为 `[x]`
-5. 提交 tasks.md 更新
-
-### 回退机制
-
-- subagent 报告失败 → 不合并该 worktree，标记任务为”需要手动处理”
-- 合并冲突 → 暂停并行，回退到串行模式处理剩余任务
-- 测试不通过 → 回退该 worktree 的合并（`git revert`）
-
-## 串行流程
-
-对有依赖关系的任务、或并行组执行完毕后的剩余任务，按以下循环逐个执行：
-
-### 1. 展示任务
-- 显示当前任务的编号、描述和验收标准
-- 解析并展示任务标签：需求 [R?]、实施单元 [U?]、执行方式 [test-first|characterization-first|direct]
-- 确认用户理解任务内容
-
-### 2. TDD 循环
-- 如果任务是 `[test-first]`：调用 opsx-tdd 执行红绿重构循环
-- 如果任务是 `[characterization-first]`：先固化旧行为测试，再修改代码
-- 如果任务是 `[direct]`：仅在纯样式、纯配置、纯脚手架场景直接执行
-- 确保每个验收标准都有对应的测试或显式的”不需要测试”理由
-- 所有验证通过后才算任务完成
-
-### 3. 标记完成
-- 在 tasks.md 中将任务标记为已完成
-- 记录完成时间和关键实现细节
-
-### 4. 提交
-- 将任务相关的所有变更提交到 git
-- 提交信息包含任务编号和简要描述
-
-### 5. 下一个
-- 自动进入下一个未完成的任务
-- 如果所有任务完成，进入完成条件检查
 
 ## 暂停条件
 
@@ -127,7 +118,7 @@ Agent({
 
 - tasks.md 中所有任务标记为已完成
 - 所有测试通过
-- 所有变更已提交到 git
+- impl-progress.json 已反映最终完成状态
 
 ## 退出契约
 
