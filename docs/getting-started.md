@@ -5,12 +5,14 @@
 ## 最短路径
 
 ```text
-1. 同步 skills        ./scripts/sync.sh /path/to/project
+1. 安装到仓库列表     ./scripts/install-repos.sh /path/to/repo-a /path/to/repo-b
 2. 规划变更           请使用 `opsx-plan` 创建一个新变更
 3. 生成任务           请继续使用 `opsx-tasks`
 4. 实施代码           请使用 `opsx-implement`
 5. 验证与归档         请使用 `opsx-verify` -> `opsx-review` -> `opsx-archive`
 ```
+
+如果您希望安装到全局配置目录，可运行 `./scripts/install-global.sh`；它会同步到 `~/.claude`，并将 `~/.codex` 下的相关目录软链接到 `~/.claude`。
 
 ## 目录结构
 

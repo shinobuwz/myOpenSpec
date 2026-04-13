@@ -1,6 +1,6 @@
 # 支持的工具
 
-OpenSpec 支持 Claude Code 和 Codex 两种 AI 编码助手。当您运行 `./scripts/sync.sh` 时，系统会将 skill 文件同步到目标项目。
+OpenSpec 支持 Claude Code 和 Codex 两种 AI 编码助手。您可以安装到指定仓库列表，或安装到全局 `~/.claude` / `~/.codex`。
 
 ## 工作原理
 
@@ -18,19 +18,21 @@ OpenSpec 支持 Claude Code 和 Codex 两种 AI 编码助手。当您运行 `./s
 | Claude Code | `.claude/skills/opsx-*/SKILL.md` |
 | Codex | 复用同一仓库内的 OPSX 文档与 skill 源，不提供单独 prompt 产物 |
 
-## 同步设置
+## 安装方式
 
-将 skill 文件同步到目标项目：
+将 skill 文件安装到指定仓库列表：
 
 ```bash
-# 同步 skill 到目标项目
-./scripts/sync.sh /path/to/your-project
+# 安装到一个或多个仓库
+./scripts/install-repos.sh /path/to/repo-a /path/to/repo-b
 
-# 批量同步多个仓库
-./scripts/sync-all.sh
+# 安装到全局 ~/.claude 和 ~/.codex
+./scripts/install-global.sh
 ```
 
-如果不需要同步，可跳过此步骤。
+其中全局安装会先同步到 `~/.claude`，再将 `~/.codex/skills` 和 `~/.codex/opsx` 软链接到对应的 `~/.claude` 目录。
+
+如果不需要安装，可跳过此步骤。
 
 ## 安装内容
 

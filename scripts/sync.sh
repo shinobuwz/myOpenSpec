@@ -30,8 +30,11 @@ for target_skill_dir in "$TARGET/.claude/skills"/opsx-*/; do
   fi
 done
 # Copy current skills from source to target.
+# Remove the existing target directory first so stale files inside a skill do not linger.
 # Strip the trailing slash so BSD cp preserves the skill directory name on macOS.
 for skill_dir in "$REPO_ROOT/.claude/skills"/opsx-*/; do
+  skill_name="$(basename "$skill_dir")"
+  rm -rf "$TARGET/.claude/skills/$skill_name"
   cp -r "${skill_dir%/}" "$TARGET/.claude/skills/"
 done
 
@@ -40,21 +43,20 @@ if [ -d "$REPO_ROOT/.claude/opsx" ]; then
   mkdir -p "$TARGET/.claude/opsx"
 
   if [ -d "$REPO_ROOT/.claude/opsx/bin" ]; then
+    rm -rf "$TARGET/.claude/opsx/bin"
     mkdir -p "$TARGET/.claude/opsx/bin"
     cp "$REPO_ROOT/.claude/opsx/bin"/* "$TARGET/.claude/opsx/bin/" 2>/dev/null || true
     chmod +x "$TARGET/.claude/opsx/bin"/* 2>/dev/null || true
   fi
 
   if [ -d "$REPO_ROOT/.claude/opsx/schemas" ]; then
+    rm -rf "$TARGET/.claude/opsx/schemas"
     mkdir -p "$TARGET/.claude/opsx/schemas"
     for schema_dir in "$REPO_ROOT/.claude/opsx/schemas"/*/; do
       [ -d "$schema_dir" ] || continue
-      schema_name="$(basename "$schema_dir")"
-      rm -rf "$TARGET/.claude/opsx/schemas/$schema_name"
       cp -r "${schema_dir%/}" "$TARGET/.claude/opsx/schemas/"
     done
   fi
 fi
 
-# Sync Codex commands (optional)
 echo "✓ synced: $TARGET"
