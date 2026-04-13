@@ -102,10 +102,10 @@ AI：正在处理任务...
 - `opsx-plan-review`、`opsx-task-analyze`、`opsx-verify` 是强制关卡。
 - `opsx-continue` 用于恢复中断的 change；它会自动检测当前状态并跳到下一合法步骤。
 - 当前仓库不再维护 `.claude/commands/opsx/`。
-- 若其他旧文档仍出现 `/opsx:*`，请优先以 [技能参考](commands.md) 为准。
+- 若其他旧文档仍出现 `/opsx:*`，请优先以 [支持的工具](supported-tools.md) 和 [工作流](workflows.md) 为准。
 
 ## 下一步
 
-- [技能参考](commands.md)
+- [支持的工具](supported-tools.md)
 - [工作流](workflows.md)
 - [CLI](cli.md)

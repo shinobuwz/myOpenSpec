@@ -56,12 +56,12 @@ OpenSpec 支持 Claude Code 和 Codex 两种 AI 编码助手。当您运行 `./s
 | `opsx-codemap` | 维护 `.aiknowledge/codemap/` |
 | `opsx-auto-drive` | 自动驱动完整工作流 |
 
-推荐直接在对话中点名 skill，例如“请使用 `opsx-plan` 创建一个新变更”、“请使用 `opsx-continue` 恢复当前 change”或“继续用 `opsx-implement` 完成剩余任务”。完整列表请参阅 [技能参考](commands.md)。
+推荐直接在对话中点名 skill，例如“请使用 `opsx-plan` 创建一个新变更”、“请使用 `opsx-continue` 恢复当前 change”或“继续用 `opsx-implement` 完成剩余任务”。
 
 ---
 
 ## 相关内容
 
-- [工作流参考](cli.md) — 工作流与配置
-- [技能参考](commands.md) — OPSX skills 与用法
+- [工作流参考](workflows.md) — 默认主线、旁路与 gate 顺序
+- [兼容入口](commands.md) — 旧技能参考链接的兼容页
 - [入门指南](getting-started.md) — 首次设置
