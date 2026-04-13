@@ -1,11 +1,6 @@
 ---
 name: opsx-tasks
 description: 生成 tasks.md，强制为每个 task 分配正确的 TDD 执行模式标签。在 plan-review 通过后使用。
-license: MIT
-compatibility: 直接文件操作，无需外部 CLI。
-metadata:
-  author: openspec
-  version: "1.0"
 ---
 
 任务生成 Skill。将 design.md + specs/ 转化为带 TDD 标签的 tasks.md。

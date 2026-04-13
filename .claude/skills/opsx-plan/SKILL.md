@@ -1,12 +1,6 @@
 ---
 name: opsx-plan
 description: 创建 OpenSpec change 并生成规划产出物（proposal/design/specs）。当需求已明确、准备进入规划阶段时使用。
-license: MIT
-compatibility: 不需要外部 CLI，直接读取文件系统。
-metadata:
-  author: openspec
-  version: "1.0"
-  generatedBy: "1.2.0-cc.4"
 ---
 
 规划 Skill。创建 OpenSpec change 并生成规划阶段的产出物集合。

@@ -1,12 +1,6 @@
 ---
 name: opsx-apply
 description: 实现 OpenSpec 变更中的任务。当用户想要开始实现、继续实现或处理任务时使用。
-license: MIT
-compatibility: 不需要外部 CLI，直接读取文件系统。
-metadata:
-  author: openspec
-  version: "1.0"
-  generatedBy: "1.2.0-cc.4"
 ---
 
 实现 OpenSpec 变更中的任务。

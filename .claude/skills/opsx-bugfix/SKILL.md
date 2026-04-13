@@ -1,12 +1,6 @@
 ---
 name: opsx-bugfix
 description: 精简 bugfix 工作流。适用于明确缺陷的快速修复：定位问题、判断测试策略、修复、验证并沉淀经验。
-license: MIT
-compatibility: 需要 openspec CLI。
-metadata:
-  author: openspec
-  version: "1.0"
-  generatedBy: "1.2.0-cc.4"
 ---
 
 执行精简 bugfix 工作流。目标是用最少步骤完成一个明确缺陷的修复，不为简单问题引入多余文档。

@@ -1,12 +1,6 @@
 ---
 name: opsx-tdd
 description: 测试先行铁律。强制红绿重构循环，自动探测多语言测试框架。任何需要编写产品代码的时刻必须使用。
-license: MIT
-compatibility: 需要 openspec CLI。
-metadata:
-  author: openspec
-  version: "1.0"
-  generatedBy: "1.2.0-cc.4"
 ---
 
 测试驱动开发 Skill。强制执行红绿重构循环，确保所有产品代码都有测试覆盖。

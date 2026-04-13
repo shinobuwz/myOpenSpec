@@ -1,12 +1,6 @@
 ---
 name: opsx-archive
 description: 归档实验性工作流中已完成的变更。当用户想要在实现完成后最终确定并归档变更时使用。
-license: MIT
-compatibility: 直接文件操作，无需外部 CLI。
-metadata:
-  author: openspec
-  version: "1.0"
-  generatedBy: "1.2.0-cc.4"
 ---
 
 归档实验性工作流中已完成的变更。

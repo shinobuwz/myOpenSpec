@@ -1,12 +1,6 @@
 ---
 name: opsx-ff
 description: 快速创建实现所需的所有产出物。当用户想要快速创建实现所需的所有产出物，而不是逐个创建时使用。
-license: MIT
-compatibility: 直接文件操作，无需外部 CLI。
-metadata:
-  author: openspec
-  version: "1.0"
-  generatedBy: "1.2.0-cc.4"
 ---
 
 提案新变更 - 创建所有产出物并强制执行三道质量关卡后进入实施。

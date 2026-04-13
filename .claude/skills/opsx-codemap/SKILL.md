@@ -1,12 +1,6 @@
 ---
 name: opsx-codemap
 description: 独立维护 .aiknowledge/codemap/ 架构认知地图。初始化缺失模块的 codemap，或在变更后更新受影响模块。
-license: MIT
-compatibility: 需要 openspec CLI。
-metadata:
-  author: openspec
-  version: "1.0"
-  generatedBy: "1.2.0-cc.4"
 ---
 
 执行 codemap 维护工作流。目标是把项目的架构认知固化为可复用的地图文档，写入 `.aiknowledge/codemap/`。

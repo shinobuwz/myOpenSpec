@@ -1,12 +1,6 @@
 ---
 name: opsx-plan-review
 description: 规划审查：检查 specs 需求是否完整进入 design。在 plan 生成 design 后、生成 tasks 之前使用。
-license: MIT
-compatibility: 直接文件操作，无需外部 CLI。
-metadata:
-  author: openspec
-  version: "1.0"
-  generatedBy: "1.2.0-cc.4"
 ---
 
 # 规划审查：spec↔plan 一致性检查

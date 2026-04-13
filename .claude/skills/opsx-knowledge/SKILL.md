@@ -1,12 +1,6 @@
 ---
 name: opsx-knowledge
 description: 独立的经验沉淀工作流。将一次修复、开发或排障中的可复用经验整理到 .aiknowledge/ 知识库。
-license: MIT
-compatibility: 需要 openspec CLI。
-metadata:
-  author: openspec
-  version: "2.0"
-  generatedBy: "1.2.0-cc.4"
 ---
 
 执行经验沉淀工作流。目标是把一次具体工作中的可复用信息整理为可检索、可复用的知识条目，写入 `.aiknowledge/pitfalls/`。

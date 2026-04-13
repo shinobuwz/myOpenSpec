@@ -1,12 +1,6 @@
 ---
 name: opsx-verify
 description: 验证实现是否与变更产出物匹配（完整性/正确性/一致性）。实施完成后或归档前使用。
-license: MIT
-compatibility: 不需要外部 CLI，直接读取文件系统。
-metadata:
-  author: openspec
-  version: "1.0"
-  generatedBy: "1.2.0-cc.4"
 ---
 
 验证实现是否与变更产出物（规范、任务、设计）匹配。

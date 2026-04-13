@@ -1,12 +1,6 @@
 ---
 name: opsx-continue
 description: 创建新变更或继续处理已有变更，每次推进一个产出物。替代 opsx-plan。
-license: MIT
-compatibility: 直接文件操作，无需外部 CLI。
-metadata:
-  author: openspec
-  version: "1.0"
-  generatedBy: "1.2.0-cc.4"
 ---
 
 创建新变更或继续处理已有变更，每次推进一个产出物。

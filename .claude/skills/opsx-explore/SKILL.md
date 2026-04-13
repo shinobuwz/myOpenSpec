@@ -1,12 +1,6 @@
 ---
 name: opsx-explore
 description: 进入探索模式 - 一个用于探索想法、调查问题和澄清需求的思考伙伴。当用户想要在进行更改之前或期间深入思考某事时使用。
-license: MIT
-compatibility: 直接文件操作，无需外部 CLI。
-metadata:
-  author: openspec
-  version: "1.0"
-  generatedBy: "1.2.0-cc.4"
 ---
 
 进入探索模式。深入思考。自由想象。跟随对话的任何方向。

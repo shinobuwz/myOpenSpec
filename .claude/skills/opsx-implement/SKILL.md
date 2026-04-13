@@ -1,12 +1,6 @@
 ---
 name: opsx-implement
 description: 按 tasks.md 逐项实施，每项强制 TDD 循环。当 OpenSpec change 的 artifact 全部就绪、准备开始编码时使用。
-license: MIT
-compatibility: 不需要外部 CLI，直接读取文件系统。
-metadata:
-  author: openspec
-  version: "1.0"
-  generatedBy: "1.2.0-cc.4"
 ---
 
 实施 Skill。按照 tasks.md 逐项实施，每项任务强制执行 TDD 循环。

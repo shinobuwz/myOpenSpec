@@ -1,12 +1,6 @@
 ---
 name: opsx-auto-drive
 description: 自动驱动引擎（Auto-Opt）。设定目标和量化标准后 AI 自主驱动完整 OpenSpec 工作流循环。当用户想要自动迭代优化时使用。
-license: MIT
-compatibility: 需要 openspec CLI。
-metadata:
-  author: openspec
-  version: "1.0"
-  generatedBy: "1.2.0-cc.4"
 ---
 
 Auto-Opt 自动驱动引擎。设定目标和量化标准后，AI 自主驱动完整的 OpenSpec 工作流循环。
