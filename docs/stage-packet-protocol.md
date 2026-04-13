@@ -173,20 +173,14 @@ subagent 的文件读取边界由 packet 中的引用严格控制：
 | **默认读取范围** | subagent 只能读取 `source_refs` 和 `knowledge_refs` 中列出的文件路径 |
 | **禁止全局扫描** | 不允许无边界的 glob/grep/find |
 | **扩展读取** | subagent 必须在 StageResult 的 `next_actions` 中声明所需路径，等待主 agent 决策 |
-| **arbiter 边界** | arbiter 只能读取冲突相关的 `evidence_refs`，禁止重做全量探索 |
 
-### 2.5 Blind 隔离协议
+### 2.5 Single Reviewer Contract
 
-同一 stage 的多个 reviewer subagent 之间：
+当前协议中，每个 stage 固定派发 1 个 reviewer subagent：
 
-| 共享 | 隔离 |
-|------|------|
-| 同一个 StagePacket | 各自的 StageResult |
-| — | 其他 reviewer 的 findings |
-| — | 主 agent 的怀疑点或预设严重级别 |
-
-- 每个 reviewer 收到的输入 = StagePacket + 该 reviewer 自身的维度清单
-- 主 agent 是唯一能看到全部 reviewer 输出的汇总点
+- reviewer 收到的输入 = StagePacket
+- 同一 stage 内的多个检查维度由同一个 reviewer 顺序完成
+- 主 agent 只消费 1 个 StageResult，不再做 reviewer 间冲突仲裁
 
 ## 3. StageResult Schema
 
@@ -201,7 +195,7 @@ StageResult 是 reviewer subagent 的结构化输出。
 | `change_id` | string | 与消费的 StagePacket 的 `change_id` 一致 |
 | `stage` | string | 与消费的 StagePacket 的 `stage` 一致 |
 | `packet_id` | string | 与消费的 StagePacket 的 `packet_id` 一致 |
-| `agent_role` | string | reviewer 维度标识（如 `trace-reviewer`、`verify-completeness`） |
+| `agent_role` | string | stage 级 reviewer 标识（如 `plan-reviewer`、`verify-reviewer`） |
 | `summary` | string | 一句话总结（如 `"2 warnings, no critical"`） |
 | `decision` | enum | `pass` / `pass_with_warnings` / `fail` / `skip` |
 
@@ -209,7 +203,6 @@ StageResult 是 reviewer subagent 的结构化输出。
 
 | 字段 | 类型 | 说明 |
 |------|------|------|
-| `needs_arbiter` | boolean | 是否建议触发 arbiter |
 | `metrics` | object | `{findings_total, critical, warning, suggestion}` 计数 |
 | `findings` | array | finding 条目数组（见 3.3） |
 | `evidence_refs` | array | 证据文件引用，每条：`{path, line_range?}` |
@@ -225,7 +218,7 @@ StageResult 是 reviewer subagent 的结构化输出。
 |------|------|------|------|
 | `id` | string | 是 | finding 唯一标识（如 `"F1"`） |
 | `severity` | enum | 是 | `critical` / `warning` / `suggestion` |
-| `dimension` | string | 是 | 审查维度标签（如 `TRACE_GAP`、`verify-completeness`） |
+| `dimension` | string | 是 | 审查维度标签（如 `TRACE_GAP`、`VERIFY_COMPLETENESS`） |
 | `message` | string | 是 | 问题描述 |
 | `trace_id` | string | 否 | 关联的 R 编号（如 `"R3"`） |
 | `evidence_ref` | string | 否 | 证据文件路径 + 行号 |
@@ -238,14 +231,11 @@ StageResult 是 reviewer subagent 的结构化输出。
 
 **core_payload 扩展字段：** 无额外字段（基础 schema 的 requirements + trace_mapping + units 已满足 plan-review 审查需求）。
 
-**reviewer 角色：**
+**固定 reviewer 角色：**
 
-| agent_role | 维度 | finding dimension |
+| agent_role | 覆盖维度 | finding dimension |
 |---|---|---|
-| `trace-reviewer` | 需求进入设计 | `TRACE_GAP` |
-| `granularity-reviewer` | 需求颗粒度 | `COARSE_R` |
-| `uniqueness-reviewer` | Trace 唯一性 | `DUPLICATE_R` |
-| `design-integrity-reviewer` | 设计完整性 | `GHOST_R` / `ORPHAN` |
+| `plan-reviewer` | 需求进入设计、需求颗粒度、Trace 唯一性、设计完整性 | `TRACE_GAP` / `COARSE_R` / `DUPLICATE_R` / `GHOST_R` / `ORPHAN` |
 
 **示例实例：**
 
@@ -314,14 +304,11 @@ StageResult 是 reviewer subagent 的结构化输出。
 | `tdd_summary` | object | `{test_first: N, characterization_first: M, direct: K}` | core_payload |
 | `test_report_present` | boolean | test-report.md 是否存在 | core_payload |
 
-**reviewer 角色：**
+**固定 reviewer 角色：**
 
-| agent_role | 维度 |
-|---|---|
-| `verify-completeness` | 任务完成情况 + 规范覆盖率 |
-| `verify-correctness` | 需求实现映射 + 场景覆盖率 |
-| `verify-consistency` | 设计遵循 + 代码模式一致性 |
-| `verify-test-report` | TDD 留档检查 |
+| agent_role | 覆盖维度 | finding dimension |
+|---|---|---|
+| `verify-reviewer` | 完整性、正确性、一致性、测试留档检查 | `VERIFY_COMPLETENESS` / `VERIFY_CORRECTNESS` / `VERIFY_CONSISTENCY` / `VERIFY_TEST_REPORT` |
 
 **消除双读规则：** subagent 从 `core_payload` 获取结构化事实（task_completion、task_traces、tdd_summary 等），只在需要验证具体代码证据时通过 `optional_refs.source_refs` 中 `kind: "code"` 的路径回读文件。禁止重读 tasks.md / specs / design 全文来获取 core_payload 中已存在的信息。
 

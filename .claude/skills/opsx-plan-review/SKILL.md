@@ -34,22 +34,21 @@ description: 规划审查：检查 specs 需求是否完整进入 design。在 p
 
 ## 审查方式
 
-使用 Agent tool 启动 subagent 进行独立审查。所有 reviewer 共享同一个 PlanReviewPacket 作为事实底座（blind 隔离协议）：
-- 每个 reviewer 收到的输入 = PlanReviewPacket JSON + 该 reviewer 的维度清单
-- reviewer 之间不得共享 findings、主 agent 怀疑点或预设严重级别
+使用 Agent tool 启动 1 个 subagent 进行独立审查：
+- reviewer 收到的输入 = PlanReviewPacket JSON
 - reviewer 只能读取 packet 中 `source_refs` 和 `knowledge_refs` 列出的文件（Lazy Hydration）
 - reviewer 必须输出符合 **StageResult schema** 的 JSON（见 `docs/stage-packet-protocol.md` 第 3 节）
 
 subagent prompt 模板：
 
 ```
-你是 plan-review 的 {agent_role} reviewer。
+你是 plan-review reviewer。
 
 ## 输入 Packet
 {PlanReviewPacket JSON}
 
-## 你的审查维度
-{当前维度的审查清单}
+## 你的审查任务
+在同一轮审查中覆盖 trace、granularity、uniqueness、design-integrity 四类检查。
 
 ## 输出要求
 你必须输出一个符合 StageResult schema 的 JSON 对象。格式：
@@ -59,7 +58,7 @@ subagent prompt 模板：
   "change_id": "{packet.change_id}",
   "stage": "plan-review",
   "packet_id": "{packet.packet_id}",
-  "agent_role": "{agent_role}",
+  "agent_role": "plan-reviewer",
   "summary": "一句话总结",
   "decision": "pass|pass_with_warnings|fail",
   "metrics": {"findings_total": N, "critical": N, "warning": N, "suggestion": N},
@@ -73,31 +72,33 @@ subagent prompt 模板：
 
 ## 审查维度
 
-### trace-reviewer：需求进入设计（specs → design）
+单 reviewer 需要覆盖以下四类检查：
+
+### 1. 需求进入设计（specs → design）
 - 逐条检查 core_payload.requirements 中的每个 R
 - 在 core_payload.trace_mapping 中必须存在 R→U 映射
 - 标记未进入设计的需求为 **TRACE_GAP**（severity: critical）
 
-### granularity-reviewer：需求颗粒度审查
+### 2. 需求颗粒度审查
 - 检查每条需求是否只描述一个独立的可验证行为
 - 如果一条需求同时包含多个独立行为，标记为 **COARSE_R**（severity: critical）
 - 需要时通过 source_refs 回读 spec 原文验证颗粒度
 
-### uniqueness-reviewer：Trace 唯一性审查
+### 3. Trace 唯一性审查
 - 收集 core_payload.requirements 中所有 R 编号
 - 任意两条需求复用同一 R 编号，标记为 **DUPLICATE_R**（severity: critical）
 
-### design-integrity-reviewer：设计完整性（design 自洽检查）
+### 4. 设计完整性（design 自洽检查）
 - trace_mapping 中的每个 R 编号必须在 requirements 中存在，否则标记为 **GHOST_R**（severity: critical）
 - 每个 U 必须有至少一个 R 驱动，否则标记为 **ORPHAN**（severity: critical）
 
 ## 汇总逻辑
 
-主 agent 收集所有 reviewer 的 StageResult JSON：
+主 agent 收集该 reviewer 的 StageResult JSON：
 
-1. **合并 findings**：从各 StageResult 的 `findings` 数组合并到统一列表
-2. **计算汇总 metrics**：汇总 critical / warning / suggestion 计数
-3. **生成追踪矩阵**：基于 core_payload 的 requirements + trace_mapping + 各 reviewer findings
+1. **读取 findings**：使用 StageResult 的 `findings` 作为统一问题列表
+2. **读取汇总 metrics**：使用 StageResult 的 `metrics`
+3. **生成追踪矩阵**：基于 core_payload 的 requirements + trace_mapping + StageResult findings
 
 ## 输出格式
 
@@ -116,8 +117,8 @@ subagent prompt 模板：
 [COARSE_R] RX 颗粒度过粗，包含多个独立行为，需回 specs 拆分
 [DUPLICATE_R] RX 在多个需求或多个 spec 文件中重复使用，需统一重新编号
 
-### Reviewer Results（JSON）
-（各 reviewer 的 StageResult JSON，供 RunReport 数据源使用）
+### Stage Result（JSON）
+（单 reviewer 的 StageResult JSON，供 RunReport 数据源使用）
 
 ### 结论
 通过 / 需修正后重审
@@ -133,11 +134,11 @@ subagent prompt 模板：
 
 - **如"通过"**：
   1. 写入门控状态：在 `openspec/changes/<name>/.openspec.yaml` 的 `gates:` 下添加 `plan-review: "<ISO8601 时间戳>"`
-  2. 将 PlanReviewPacket + 所有 StageResult 写入 `openspec/changes/<name>/context/run-report-data.json`（追加式更新：不存在则创建，已存在且 JSON 合法则合并，JSON 损坏则中止并报错，见步骤 5）
+  2. 将 PlanReviewPacket + StageResult 写入 `openspec/changes/<name>/context/run-report-data.json`（追加式更新：不存在则创建，已存在且 JSON 合法则合并，JSON 损坏则中止并报错，见步骤 5）
   3. 必须转入 **opsx-tasks** 生成 tasks.md。这不是建议，是强制要求。
 - **如"需修正"**：
   1. 不写入 gates
-  2. 仍将 packet + results 写入 `context/run-report-data.json`（状态为 fail；JSON 损坏则中止并报错，见步骤 5）
+  2. 仍将 packet + result 写入 `context/run-report-data.json`（状态为 fail；JSON 损坏则中止并报错，见步骤 5）
   3. 必须回到 **opsx-plan** 修正 design.md 和 specs/。禁止跳过直接生成 tasks
   4. COARSE_R 问题需在 specs 中将粗粒度需求拆分为多条独立需求后重新审查
   5. DUPLICATE_R 问题需在所有相关 spec 文件中统一重新编号后重审

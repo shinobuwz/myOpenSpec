@@ -36,7 +36,7 @@
    - **StageResult**：reviewer subagent 的结构化输出，包含 findings、metrics、decision
    - **Packet Budget**：soft limit 2K / hard limit 4K tokens，超限按固定顺序降维
    - **Lazy Hydration**：subagent 只能读取 packet 中列出的文件路径，禁止无边界全局扫描
-   - **Blind 隔离**：reviewer 共享 StagePacket，不共享彼此的 StageResult
+   - **Single Reviewer**：每个 gate stage 固定使用 1 个 reviewer subagent，避免多 reviewer 汇总开销
 
    首版覆盖：plan-review 和 verify 两个 gate stage。按需使用 `/opsx:report` 生成 HTML 报告。
 
