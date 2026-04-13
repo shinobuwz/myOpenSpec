@@ -43,110 +43,60 @@ metadata:
    - `context/*.md` 是 change-local 声明层，不是权威源；与 specs/design/tasks 冲突时以后者为准
    - facts bundle 只包含事实，不包含 findings、severity 或修复建议
 
-4. **并行 subagent 审查**
+4. **subagent 审查**
 
-   三个维度（完整性、正确性、一致性）**完全独立**，使用 Agent tool 并行派遣 3 个 subagent 同时执行。同时派遣 Subagent D 检查测试留档完整性。所有 reviewer 必须共享同一个 facts bundle（即 `gateReview` 的同等事实底座），并可读取各自所需的目标产出物与代码证据，但不得共享彼此的 findings、主 agent 怀疑点或预设严重级别。
+   使用 Agent tool 派遣 1 个 subagent，顺序执行四个维度的检查：
 
-   在**同一条消息**中发起 4 个 Agent tool 调用（这样它们会并行运行）：
-
-   **Subagent A — 完整性检查**：
    ```
    Agent({
-     description: "验证完整性",
+     description: "验证变更实现",
      subagent_type: "general-purpose",
-     prompt: `检查变更 '<name>' 的完整性。
+     prompt: `验证变更 '<name>' 的实现，顺序执行以下四个维度检查：
 
-     读取以下文件：
-     <列出 openspec/changes/<name>/tasks.md 和 specs/ 路径>
+     变更目录：openspec/changes/<name>/
+     （在每项检查开始前读取所需文件）
+
+     ## 一、完整性检查
+     读取 tasks.md 和 specs/ 下所有 .md 文件（如存在）。
 
      任务完成情况：
-     - 读取 tasks.md，统计 [x] vs [ ] 复选框数量
+     - 统计 tasks.md 中 [x] vs [ ] 复选框数量
      - 为每个未完成任务生成 CRITICAL 问题
 
      规范覆盖率：
-     - 读取 openspec/changes/<name>/specs/ 中的增量规范
-     - 提取所有需求（"### 需求:"）
+     - 提取 specs/ 中所有需求（"### 需求:"）
      - 对每个需求在代码库中搜索实现证据
      - 未实现的需求生成 CRITICAL 问题
+     - 如无 specs/ 则注明跳过
 
-     输出格式：
-     ## 完整性检查报告
-     **任务**: X/Y 已完成
-     **需求覆盖**: M/N
-     ### 问题列表
-     - [CRITICAL/WARNING/SUGGESTION] 具体描述`
-   })
-   ```
-
-   **Subagent B — 正确性检查**：
-   ```
-   Agent({
-     description: "验证正确性",
-     subagent_type: "general-purpose",
-     prompt: `检查变更 '<name>' 的正确性。
-
-     读取以下文件：
-     <列出 openspec/changes/<name>/specs/ 路径>
+     ## 二、正确性检查
+     读取 specs/ 下所有 .md 文件（如存在，否则跳过本节并注明）。
 
      需求实现映射：
-     - 对增量规范中的每个需求，搜索代码库确认实现是否符合需求意图
+     - 对每个需求，搜索代码库确认实现是否符合需求意图
      - 偏差生成 WARNING
 
      场景覆盖率：
      - 对每个场景（"#### 场景:"），检查代码处理和测试覆盖
      - 未覆盖的场景生成 WARNING
 
-     输出格式：
-     ## 正确性检查报告
-     **需求映射**: X/Y 符合
-     **场景覆盖**: M/N
-     ### 问题列表
-     - [CRITICAL/WARNING/SUGGESTION] 具体描述`
-   })
-   ```
-
-   **Subagent C — 一致性检查**：
-   ```
-   Agent({
-     description: "验证一致性",
-     subagent_type: "general-purpose",
-     prompt: `检查变更 '<name>' 的一致性。
-
-     读取以下文件：
-     <列出 openspec/changes/<name>/design.md 路径（如存在）>
+     ## 三、一致性检查
+     读取 design.md（如存在，否则跳过设计遵循检查并注明）。
 
      设计遵循情况：
-     - 如果存在 design.md：提取关键决策，验证代码是否遵循
-     - 矛盾生成 WARNING
+     - 如果存在 design.md：提取关键决策，验证代码是否遵循，矛盾生成 WARNING
      - 无 design.md 则跳过并注明
 
      代码模式一致性：
      - 审查新代码与项目模式的一致性（文件命名、目录结构、编码风格）
      - 重大偏差生成 SUGGESTION
 
-     输出格式：
-     ## 一致性检查报告
-     **设计遵循**: 是/否/跳过
-     **模式一致**: 是/否
-     ### 问题列表
-     - [CRITICAL/WARNING/SUGGESTION] 具体描述`
-   })
-   ```
-
-   **Subagent D — 测试留档完整性检查**：
-   ```
-   Agent({
-     description: "验证测试留档",
-     subagent_type: "general-purpose",
-     prompt: `检查变更 '<name>' 的测试留档完整性。
-
-     读取以下文件：
-     <变更目录>/tasks.md
-     <变更目录>/test-report.md（如存在）
+     ## 四、测试留档检查
+     读取 tasks.md 和 test-report.md（如存在）。
 
      检查逻辑：
-     1. 读取 tasks.md，统计标注 [test-first] 或 [characterization-first] 的 task 数量
-     2. 如果数量为 0：输出 "No TDD tasks — test-report.md check skipped"，结束
+     1. 统计 tasks.md 中标注 [test-first] 或 [characterization-first] 的 task 数量
+     2. 如果数量为 0：输出 "No TDD tasks — test-report.md check skipped"，结束本节
      3. 如果存在 TDD tasks：检查 test-report.md 是否存在
      4. 如果 test-report.md 不存在：报 CRITICAL "test-report.md missing — TDD results not documented"
      5. 如果存在：逐一检查每个 [test-first]/[characterization-first] task 是否有对应的 ## Task N 节
@@ -154,22 +104,16 @@ metadata:
      7. 缺少任意一项：报 CRITICAL，注明具体缺失的 task 编号和阶段名称
      8. 全部完整：报 "Test report complete: N/N TDD tasks documented"
 
-     输出格式：
-     ## 测试留档检查报告
-     **TDD Tasks**: X 个
-     **Test Report**: 存在/不存在/已跳过
-     **覆盖情况**: N/N
+     ## 输出格式
+     ## 验证报告：<name>
+     **完整性**: X/Y 任务，N 需求
+     **正确性**: M/N 需求已覆盖（或"跳过"）
+     **一致性**: 已遵循/存在问题/跳过
+     **测试留档**: N/N TDD tasks（或"跳过"）
      ### 问题列表
-     - [CRITICAL/INFO] 具体描述`
+     - [CRITICAL/WARNING/SUGGESTION/INFO] 具体描述（附文件/行引用）`
    })
    ```
-
-   等待 4 个 subagent 全部返回后，进入汇总步骤。
-
-   **可选 Arbiter（仅冲突时）**：
-   - 如果 reviewer 之间对同一问题存在存在性冲突（一个说缺失，一个说存在）、严重级别冲突，或对 requirement/design 意图理解冲突，主 agent 可以追加派遣一个 arbiter。
-   - arbiter 只允许读取冲突 findings、对应证据和同一个 `gateReview` facts bundle，不得重跑全量验证。
-   - 如果 reviewer 之间不存在相关冲突，则不得触发 arbiter。
 
 5. **汇总验证报告**
 
@@ -199,10 +143,10 @@ metadata:
 
 **优雅降级**
 
-- 如果只存在 tasks.md：仅派遣 Subagent A（完整性）+ Subagent D（测试留档），跳过 B 和 C
-- 如果存在任务 + 规范：派遣 A + B + D，跳过 C
-- 如果存在完整产出物：四个 subagent 全部派遣
-- Subagent D 内部自动降级：无 TDD tasks 时跳过 test-report.md 检查并注明
+subagent prompt 中已内联降级条件，规则如下：
+- 无 specs/：跳过正确性检查，注明原因
+- 无 design.md：跳过设计遵循检查，注明原因
+- 无 TDD tasks：跳过 test-report.md 检查，注明原因
 - 始终注明跳过了哪些检查以及原因
 
 **验证启发式方法**
