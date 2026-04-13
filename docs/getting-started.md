@@ -8,7 +8,7 @@
 1. 同步 skills        ./scripts/sync.sh /path/to/project
 2. 规划变更           请使用 `opsx-plan` 创建一个新变更
 3. 生成任务           请继续使用 `opsx-tasks`
-4. 实施代码           请使用 `opsx-apply`
+4. 实施代码           请使用 `opsx-implement`
 5. 验证与归档         请使用 `opsx-verify` -> `opsx-review` -> `opsx-archive`
 ```
 
@@ -49,7 +49,7 @@ opsx-explore
 -> opsx-plan-review
 -> opsx-tasks
 -> opsx-task-analyze
--> opsx-apply
+-> opsx-implement
 -> opsx-verify
 -> opsx-review
 -> opsx-archive
@@ -62,7 +62,7 @@ opsx-plan
 -> opsx-plan-review
 -> opsx-tasks
 -> opsx-task-analyze
--> opsx-apply
+-> opsx-implement
 -> opsx-verify
 -> opsx-review
 -> opsx-archive
@@ -83,9 +83,9 @@ AI：已创建 openspec/changes/2026-04-10-add-dark-mode/
 
 AI：✓ tasks.md
      ✓ task-analyze 已通过
-     下一步：opsx-apply
+     下一步：opsx-implement
 
-你：请使用 `opsx-apply`
+你：请使用 `opsx-implement`
 
 AI：正在处理任务...
      ✓ 1.1 添加主题上下文
@@ -100,6 +100,7 @@ AI：正在处理任务...
 ## 注意事项
 
 - `opsx-plan-review`、`opsx-task-analyze`、`opsx-verify` 是强制关卡。
+- `opsx-continue` 用于恢复中断的 change；它会自动检测当前状态并跳到下一合法步骤。
 - 当前仓库不再维护 `.claude/commands/opsx/`。
 - 若其他旧文档仍出现 `/opsx:*`，请优先以 [技能参考](commands.md) 为准。
 

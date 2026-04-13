@@ -1,129 +1,104 @@
 ---
 name: opsx-continue
-description: 创建新变更或继续处理已有变更，每次推进一个产出物。轻量路径，不含 codemap/pitfalls 预加载（与 opsx-plan 的区别）。
+description: 恢复中断的 OpenSpec 工作流。自动检测当前 change 的真实状态，并路由到下一合法步骤。
 ---
 
-创建新变更或继续处理已有变更，每次推进一个产出物。
+恢复一个已经开始但中断的 OpenSpec change。
 
-**输入**：可选指定变更名称。如果省略，检查是否可以从对话上下文中推断。如果模糊或不明确，提示选择。
+这个 skill 不再维护另一套“每次推进一个产出物”的独立流程。它的职责只有一个：**读取当前 change 的真实状态，然后恢复到下一步唯一合法动作。**
+
+## 真实状态来源
+
+只使用仓库中真实存在、可验证的状态：
+
+- `openspec/changes/<name>/.openspec.yaml` 中的 `schema` 和 `gates.*`
+- `proposal.md`、`design.md`、`tasks.md` 是否存在
+- `specs/` 下是否已有 `spec.md`
+- `tasks.md` 中是否还有未完成复选框
+- `test-report.md` 是否存在（仅作验证辅助事实，不作为路由前提）
 
 **步骤**
 
-0. **如果指定的变更不存在，先创建它**
+1. **确定要恢复的 change**
 
-   检查变更名称是否已存在（运行 `ls openspec/changes/ | grep -v archive` 确认）。
+   如果用户显式提供了 change 名称，使用它。
 
-   如果变更**不存在**，先创建：
-   - 确定 Schema（默认使用 spec-driven）
-   - 运行：
-     ```bash
-     bash .claude/opsx/bin/changes.sh init <name> spec-driven
-     ```
-   - 创建完成后，继续步骤1
+   如果没有提供：
+   - 运行 `bash .claude/opsx/bin/changes.sh list` 查看活动 change
+   - 如果没有活动 change：停止恢复流程，提示用户改用 `opsx-plan` 创建新 change
+   - 如果只有 1 个活动 change：自动选择它
+   - 如果有多个活动 change：使用 **AskUserQuestion tool** 让用户选择，不要猜测
 
-   如果变更**已存在**，直接进入步骤1。
+2. **读取最小恢复状态**
 
-1. **如果没有提供变更名称，提示选择**
+   读取 `openspec/changes/<name>/.openspec.yaml`，以及以下真实文件状态：
 
-   运行 `ls openspec/changes/ | grep -v archive` 获取按最近修改排序的可用变更。然后使用 **AskUserQuestion tool** 让用户选择要处理哪个变更。
+   - `proposal.md` 是否存在
+   - `specs/` 下是否至少存在一个 `spec.md`
+   - `design.md` 是否存在
+   - `tasks.md` 是否存在
+   - `gates.plan-review` 是否存在
+   - `gates.task-analyze` 是否存在
+   - `gates.verify` 是否存在
+   - `gates.review` 是否存在
+   - 如果存在 `tasks.md`：统计 `- [ ]` 和 `- [x]` 数量
 
-   展示前 3-4 个最近修改的变更作为选项，显示：
-   - 变更名称
-   - Schema（如果存在 `schema` 字段，否则为 "spec-driven"）
-   - 状态（例如："0/5 tasks", "complete", "no tasks"）
-   - 最近修改时间（来自 `lastModified` 字段）
+   **禁止**依赖仓库中并不存在的 `artifacts.status`、`ready/blocked` 等虚构状态。
 
-   将最近修改的变更标记为 "(推荐)"，因为它很可能是用户想要继续的。
+3. **如果还处于规划阶段，继续补齐下一个缺失制品**
 
-   **重要提示**：不要猜测或自动选择变更。始终让用户选择。
+   仅在以下三种情况下，本 skill 自己继续生成产出物；每次只补一个：
 
-2. **知识预加载（index-first）**
+   - 缺 `proposal.md` → 生成 `proposal.md`
+   - 已有 `proposal.md` 但没有任何 `specs/<capability>/spec.md` → 生成 `specs/`
+   - 已有 `proposal.md` + `specs/` 但缺 `design.md` → 生成 `design.md`
 
-   在创建任何产出物之前，先加载共享知识：
-   - 读取 `.aiknowledge/codemap/index.md`（如存在），识别目标模块；已覆盖则读对应 `<module>.md`，未覆盖则调用 `opsx-codemap`
-   - 读取 `.aiknowledge/pitfalls/index.md`（如存在），识别相关领域；读取命中领域的 `<domain>/index.md`，在产出物创建中规避已知陷阱
+   如果要补规划制品，执行以下最小上下文加载：
+   - 读取 `openspec/config.yaml` 中的 `context:` 和 `rules:`
+   - 读取已存在的依赖制品
+   - 读取 `.aiknowledge/codemap/index.md`，按需读取命中模块
+   - 读取 `.aiknowledge/pitfalls/index.md`，按需读取命中领域
 
-3. **检查当前状态**
+   生成完成后立即停止，并输出当前进度与下一步。
 
-   读取 `openspec/changes/<name>/.openspec.yaml` 获取 schema 定义，然后检查各产出物文件是否已存在来判断状态（done/ready/blocked）。
+4. **如果规划制品已齐，按固定判定表恢复下一步**
 
-   解析以了解当前状态：
-   - `schemaName`：正在使用的工作流 schema（例如："spec-driven"）
-   - `artifacts`：产出物数组及其状态（"done"、"ready"、"blocked"）
-   - `isComplete`：是否所有产出物都已完成
+   使用下面的顺序判断，命中第一条就执行，不继续往后猜：
 
-4. **根据状态行动**：
+   - `design.md` 已存在，但缺 `gates.plan-review` → 转入 `opsx-plan-review`
+   - `gates.plan-review` 已存在，但缺 `tasks.md` → 转入 `opsx-tasks`
+   - `tasks.md` 已存在，但缺 `gates.task-analyze` → 转入 `opsx-task-analyze`
+   - `gates.task-analyze` 已存在，且 `tasks.md` 仍有未完成项 → 转入 `opsx-implement`
+   - `tasks.md` 全部完成，但缺 `gates.verify` → 转入 `opsx-verify`
+   - `gates.verify` 已存在，但缺 `gates.review` → 转入 `opsx-review`
+   - `gates.review` 已存在 → 转入 `opsx-archive`
 
-   ---
+5. **输出恢复结果**
 
-   **如果所有产出物已完成 (`isComplete: true`)**：
-   - 祝贺用户
-   - 显示最终状态，包括使用的 Schema
-   - 建议："所有产出物已创建！您现在可以实现此变更或将其归档。"
-   - 停止
+   每次恢复后，输出：
+   - 当前 change 名称
+   - 关键状态摘要（哪些制品已存在，哪些 gate 已通过）
+   - 本次执行了什么
+   - 下一步是什么
 
-   ---
+## 判定优先级（唯一合法顺序）
 
-   **如果产出物准备好创建**（状态显示有 `status: "ready"` 的产出物）：
-   - 从状态输出中选择第一个 `status: "ready"` 的产出物
-   - 获取其指令：读取 `.openspec.yaml` 中的 `artifacts` 配置获取 schema 定义，以及对应的模板文件
-   - 解析关键字段：
-     - `context`：项目背景约束（技术栈、跨平台要求等）——作为生成约束，不要复制进产出物
-     - `rules`：各制品的生成规则——作为生成约束，不要复制进产出物
-     - `template`：输出文件使用的结构
-     - `instruction`：schema 特定指导
-     - `outputPath`：产出物写入路径
-     - `dependencies`：已完成的依赖产出物（用于读取上下文）
-   - **创建产出物文件**：
-     - 阅读任何已完成的依赖文件以获取上下文
-     - 使用 `template` 作为结构 - 填充各个章节
-     - 在编写时将 `context` 和 `rules` 作为约束 - 但不要把它们复制进文件
-     - 写入指令中指定的 outputPath
-   - 展示创建了什么，以及现在解锁了什么
-     - **[门控]** 如果刚创建的产出物 ID 为 `design`：在停止前自动调用 **opsx-plan-review**（subagent 独立执行 spec↔plan 审查）。审查通过后展示进度并停止；未通过则提示修正后重审。
-     - **[门控]** 如果刚创建的产出物 ID 为 `tasks`：在停止前自动调用 **opsx-task-analyze**（subagent 独立执行 plan↔tasks 审查）。审查通过后展示进度并停止；未通过则提示修正后重审。
-     - 其余产出物：创建后直接展示进度并停止。
+```text
+proposal
+-> specs
+-> design
+-> plan-review
+-> tasks
+-> task-analyze
+-> implement
+-> verify
+-> review
+-> archive
+```
 
-   ---
+## 护栏
 
-   **如果没有产出物准备好（全部受阻）**：
-   - 在有效的 Schema 下不应发生这种情况
-   - 显示状态并建议检查问题
-
-5. **创建产出物后，显示进度**
-
-   读取 `openspec/changes/<name>/.openspec.yaml` 获取 schema 定义，检查各产出物文件是否已存在，显示当前状态。
-
-**输出**
-
-每次调用后，显示：
-- 创建了哪个产出物
-- 正在使用的 Schema 工作流
-- 当前进度（N/M 完成）
-- 现在解锁了哪些产出物
-- 提示："想要继续吗？只需让我继续或告诉我下一步做什么。"
-
-**产出物创建指南**
-
-产出物类型及其用途取决于 Schema。使用指令输出中的 `instruction` 字段来了解要创建什么。
-
-常见的产出物模式：
-
-**spec-driven schema**（proposal → specs → design → tasks）：
-- **proposal.md**：如果变更不清楚，先向用户确认。填写"为什么""什么变化""能力""影响"。
-  - "能力"部分很关键——列出的每个能力都需要一个 spec 文件。
-- **specs/<capability>/spec.md**：为提案"能力"部分列出的每个能力创建一个 spec（使用 capability 名称，而不是 change 名称）。
-  - 如果本次 change 有多个 `specs/<capability>/spec.md`，所有 `**Trace**: R<number>` 必须跨文件全局唯一；写当前 spec 前必须先检查已有 spec 中是否已经使用该编号。
-- **design.md**：记录技术决策、架构和实现方法。
-- **tasks.md**：把实现拆分为带复选框的任务。
-
-对于其他 schema，遵循 `.openspec.yaml` 中 `artifacts` 配置的 `instruction` 字段。
-
-**护栏**
-- 每次调用只创建一个产出物
-- 创建新产出物前，总是先阅读依赖产出物
-- 不要跳过产出物，也不要乱序创建
-- 如果上下文不清楚，创建前先询问用户
-- 写入后先确认产出物文件存在，再标记进度
-- 使用 schema 的产出物顺序，不要假设固定的产出物名称
-- **重要**：`context` 和 `rules` 是对你的约束，不是文件内容——不要将它们复制到产出物中
+- `opsx-continue` 不是新的主线入口，只是恢复入口
+- 不要绕过 gate 直接跳到更后面的 skill
+- 不要依赖不存在的元数据状态机
+- 如果发现状态自相矛盾（例如 `gates.review` 存在但 `gates.verify` 缺失），先停下并提示用户修复状态，再继续

@@ -53,14 +53,16 @@ AI：✓ tasks.md     — 实现清单
     ✓ task-analyze — 已通过
     准备进入实现
 
-你：请使用 `opsx-apply`
-AI：开始实现任务...
+你：请使用 `opsx-implement`
+AI：开始按 tasks.md 实施...
     ✓ 1.1 添加主题上下文 Provider
     ✓ 1.2 创建切换组件
     ✓ 2.1 添加 CSS 变量
     ✓ 2.2 接入 localStorage
     所有任务已完成！
 
+你：请使用 `opsx-verify`
+你：请使用 `opsx-review`
 你：请使用 `opsx-archive`
 AI：已归档至 openspec/changes/archive/2025-01-23-add-dark-mode/
     Specs 已更新。可以开始下一个功能了。

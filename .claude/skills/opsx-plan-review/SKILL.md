@@ -13,7 +13,7 @@ description: 规划审查：检查 specs 需求是否完整进入 design。在 p
 
 1. 确认 git 工作区干净
 2. 读取 `openspec/changes/<name>/.openspec.yaml` 获取 schema 定义，然后检查各产出物文件是否已存在，确认 design artifact 已生成
-3. 读取 `.openspec.yaml` 中的 `artifacts` 配置获取 apply 的 `gateReview` facts bundle
+3. 读取 `.openspec.yaml` 中的 `artifacts` 配置，获取本次 gate review 所需的 facts bundle
 4. 渐进加载制品（最小只读范围）：
 
    **从 proposal.md 加载：**

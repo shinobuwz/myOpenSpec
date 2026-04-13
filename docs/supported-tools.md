@@ -42,9 +42,8 @@ OpenSpec 支持 Claude Code 和 Codex 两种 AI 编码助手。当您运行 `./s
 | `opsx-bugfix` | 精简 bugfix 工作流 |
 | `opsx-knowledge` | 独立沉淀可复用经验 |
 | `opsx-plan` | 创建变更并生成 proposal / specs / design |
-| `opsx-continue` | 创建下一个制品 |
+| `opsx-continue` | 恢复中断的当前 change，并路由到下一合法步骤 |
 | `opsx-ff` | 一次性推进完整规划链路 |
-| `opsx-apply` | 实施任务 |
 | `opsx-verify` | 验证实现与制品是否一致 |
 | `opsx-archive` | 归档已完成的变更 |
 | `opsx-bootstrap` | 会话启动时的工作流引导 |
@@ -57,7 +56,7 @@ OpenSpec 支持 Claude Code 和 Codex 两种 AI 编码助手。当您运行 `./s
 | `opsx-codemap` | 维护 `.aiknowledge/codemap/` |
 | `opsx-auto-drive` | 自动驱动完整工作流 |
 
-推荐直接在对话中点名 skill，例如“请使用 `opsx-plan` 创建一个新变更”或“继续用 `opsx-apply` 完成剩余任务”。完整列表请参阅 [技能参考](commands.md)。
+推荐直接在对话中点名 skill，例如“请使用 `opsx-plan` 创建一个新变更”、“请使用 `opsx-continue` 恢复当前 change”或“继续用 `opsx-implement` 完成剩余任务”。完整列表请参阅 [技能参考](commands.md)。
 
 ---
 

@@ -38,7 +38,7 @@ opsx-explore
 -> opsx-plan-review
 -> opsx-tasks
 -> opsx-task-analyze
--> opsx-apply
+-> opsx-implement
 -> opsx-verify
 -> opsx-review
 -> opsx-archive
@@ -57,7 +57,7 @@ opsx-plan
 -> opsx-plan-review
 -> opsx-tasks
 -> opsx-task-analyze
--> opsx-apply
+-> opsx-implement
 -> opsx-verify
 -> opsx-review
 -> opsx-archive
@@ -92,7 +92,7 @@ opsx-bugfix
 推荐顺序：
 
 ```text
-plan -> plan-review -> tasks -> task-analyze -> apply -> verify -> review -> archive
+plan -> plan-review -> tasks -> task-analyze -> implement -> verify -> review -> archive
 ```
 
 ## 示例
@@ -104,7 +104,7 @@ AI：已生成 proposal / specs / design
 你：请使用 `opsx-tasks`
 AI：已生成 tasks.md，task-analyze 已通过
 
-你：请使用 `opsx-apply`
+你：请使用 `opsx-implement`
 AI：正在按 tasks.md 推进实现
 
 你：请使用 `opsx-verify`
@@ -123,9 +123,9 @@ AI：已归档，知识与 codemap 已更新
 |------|------------|
 | 需求模糊，先聊思路 | `opsx-explore` |
 | 创建新 change | `opsx-plan` |
-| 基于当前状态前进一步 | `opsx-continue` |
+| 恢复中断的当前 change | `opsx-continue` |
 | 一次性推进完整规划 | `opsx-ff` |
-| 开始或继续编码 | `opsx-apply` |
+| 开始主线实施 | `opsx-implement` |
 | 做最终一致性检查 | `opsx-verify` |
 | 归档 | `opsx-archive` |
 | 快速修复 bug | `opsx-bugfix` |
@@ -133,4 +133,5 @@ AI：已归档，知识与 codemap 已更新
 ## 注意
 
 - 当前仓库没有独立的 `opsx-sync`、`opsx-onboard`、`opsx-bulk-archive` skill。
+- `opsx-continue` 不再维护独立状态机；它只读取真实文件状态和 `gates.*` 来恢复流程。
 - 如需判断当前真相源，请优先看 `.claude/skills/opsx-*/SKILL.md`。
