@@ -7,6 +7,8 @@
 - 行动单元是 skill，不是阶段化命令。
 - 强制关卡写在 skill 本身里，以 skill 为真相源。
 - 规划、任务、实现、验证可以串成闭环，但不再需要额外命令包装层。
+- `change` 的默认粒度是**单一交付单元**；一个 change 下允许有多个 spec，但不应把多个可独立排期、独立上线的目标硬塞进同一个 change。
+- 是否拆成多个 change，优先在 `opsx-plan` 的创建前和 proposal/specs 初稿后判断；`opsx-task-analyze` 只做超大 change 的兜底拦截。
 
 ## 公用知识如何共享
 
