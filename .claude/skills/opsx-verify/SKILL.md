@@ -151,5 +151,7 @@ subagent prompt 中已内联降级条件，规则如下：
 ## 退出契约
 
 - 输出验证报告
-- **如果验证通过**：必须转入 **opsx-review** 进行代码审查。这不是建议，是强制要求。
-- **如果验证未通过**：列出需要修复的问题，禁止继续后续流程。必须修复后重新执行 opsx-verify。
+- **如果验证通过**：
+  1. 写入门控状态：`yq -i '.gates.verify = "'$(date -u +%Y-%m-%dT%H:%M:%SZ)'"' openspec/changes/<name>/.openspec.yaml`
+  2. 必须转入 **opsx-review** 进行代码审查。这不是建议，是强制要求。
+- **如果验证未通过**：不写入 gates。列出需要修复的问题，禁止继续后续流程。必须修复后重新执行 opsx-verify。

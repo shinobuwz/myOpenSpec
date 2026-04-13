@@ -1,6 +1,6 @@
 ---
 name: opsx-apply
-description: 实现 OpenSpec 变更中的任务。当用户想要开始实现、继续实现或处理任务时使用。
+description: 轻量实施 OpenSpec 变更中的任务，不强制前置关卡校验。适合灵活推进或部分实现。需严格 TDD 和前置关卡时使用 opsx-implement。
 ---
 
 实现 OpenSpec 变更中的任务。
@@ -43,7 +43,7 @@ description: 实现 OpenSpec 变更中的任务。当用户想要开始实现、
 
    按需读取 `.aiknowledge/`（index-first，不全量扫描）：
    - 先读 `.aiknowledge/codemap/index.md`，仅读取命中模块的 `<module>.md`
-   - 先读 `.aiknowledge/pitfalls/index.md`，仅读取命中领域的 `<domain>/index.md`
+   - 先读 `.aiknowledge/pitfalls/index.md`，仅读取命中领域的 `<domain>/index.md`；如命中具体条目，继续读取 L3 条目文件（`<domain>/<slug>.md`）获取详细修复模式
 
 4. **显示当前进度**
 

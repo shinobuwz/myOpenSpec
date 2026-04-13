@@ -15,14 +15,14 @@ description: 按 tasks.md 逐项实施，每项强制 TDD 循环。当 OpenSpec 
 
 ## 启动序列
 
-1. 确认 opsx-task-analyze 已通过（检查分析报告结论为"可实施"）
+1. 读取 `openspec/changes/<name>/.openspec.yaml`，**校验 `gates.plan-review` 和 `gates.task-analyze` 字段均存在**；任一缺失则拒绝执行并提示缺失的关卡名称
 2. 读取当前变更的 `tasks.md`，获取完整任务列表
 3. 确认所有产出物（proposal/design/specs）已就绪
 4. 按需读取 `.aiknowledge/`（index-first，禁止全量扫描）：
    - 先读 `.aiknowledge/codemap/index.md`，识别本次变更涉及的模块
    - 仅读取命中模块的 `<module>.md`（及必要的 `chains/*.md`），定位代码位置和模块边界
    - 先读 `.aiknowledge/pitfalls/index.md`，识别相关领域
-   - 仅读取命中领域的 `<domain>/index.md`，实施时主动规避已知陷阱
+   - 仅读取命中领域的 `<domain>/index.md`；如命中具体条目，继续读取 L3 条目文件（`<domain>/<slug>.md`）获取详细修复模式，实施时主动规避已知陷阱
 5. 确认测试框架已配置并可运行
 6. 找到第一个未完成的任务
 

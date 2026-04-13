@@ -88,6 +88,8 @@ description: 规划审查：检查 specs 需求是否完整进入 design。在 p
 
 ## 退出契约
 
-- **如"通过"**：必须转入 **opsx-tasks** 生成 tasks.md。这不是建议，是强制要求。
-- **如"需修正"**：必须回到 **opsx-plan** 修正 design.md 和 specs/。禁止跳过直接生成 tasks。COARSE_R 问题需在 specs 中将粗粒度需求拆分为多条独立需求后重新审查；DUPLICATE_R 问题需在所有相关 spec 文件中统一重新编号后重审。
+- **如"通过"**：
+  1. 写入门控状态：`yq -i '.gates.plan-review = "'$(date -u +%Y-%m-%dT%H:%M:%SZ)'"' openspec/changes/<name>/.openspec.yaml`
+  2. 必须转入 **opsx-tasks** 生成 tasks.md。这不是建议，是强制要求。
+- **如"需修正"**：不写入 gates。必须回到 **opsx-plan** 修正 design.md 和 specs/。禁止跳过直接生成 tasks。COARSE_R 问题需在 specs 中将粗粒度需求拆分为多条独立需求后重新审查；DUPLICATE_R 问题需在所有相关 spec 文件中统一重新编号后重审。
 - 所有发现已记录在审查报告中

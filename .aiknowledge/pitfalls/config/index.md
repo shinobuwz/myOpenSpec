@@ -7,3 +7,6 @@
 | 条目 | 摘要 |
 |------|------|
 | [migration.ts 作为跨模块 config 同步的粘合层](migration-as-config-glue-layer.md) | migration.ts 适合放置跨 global-config 与 profiles 的幂等升级逻辑；内部清理同步静默执行，不输出日志 |
+| [门控机制修改时的自举悖论](bootstrap-paradox-in-gating.md) | 修改门控机制本身时，变更无法通过自身新增的校验；需"首次豁免"或手动预填 gates |
+| [纯指令工作流的门控状态应持久化为结构化字段](gate-state-yaml-not-prose.md) | 用 yaml 字段替代文字约束实现门控，使后续环节可程序化校验而非靠 AI 自觉 |
+| [知识库三层披露的消费侧缺口](l3-knowledge-consumption-gap.md) | L3 详细条目写了但消费侧只读到 L2，需显式要求"L2 命中后继续读 L3" |

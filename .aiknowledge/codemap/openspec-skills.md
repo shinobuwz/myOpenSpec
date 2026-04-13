@@ -1,20 +1,64 @@
 # openspec-skills
 
 ## 职责
-OpenSpec 工作流的单一真相源。所有 skill 以 Markdown 文件形式存放于 `.claude/skills/<name>/SKILL.md`，由 `scripts/sync.sh` 分发到目标仓库。
+OpenSpec 工作流的单一真相源。所有 skill 以 Markdown 文件存放于 `.claude/skills/<name>/SKILL.md`，由 `scripts/sync.sh` 分发到目标仓库。
 
-## 关键文件
-| 文件 | 角色 |
-|------|------|
-| `.claude/skills/opsx-bootstrap/SKILL.md` | 会话启动引导，注入 skill 发现规则和工作流优先级 |
-| `.claude/skills/opsx-ff/SKILL.md` | 快速创建变更所有产出物（proposal→specs→design→tasks）并执行三道关卡 |
-| `.claude/skills/opsx-apply/SKILL.md` | 按 tasks.md 逐项实施变更 |
-| `.claude/skills/opsx-archive/SKILL.md` | 归档变更 + knowledge + codemap + git |
-| `.claude/skills/opsx-verify/SKILL.md` | 三维并行验证（完整性/正确性/一致性）|
-| `.claude/skills/opsx-plan-review/SKILL.md` | spec↔design 一致性审查（关卡1）|
-| `.claude/skills/opsx-task-analyze/SKILL.md` | plan↔tasks 一致性审查（关卡2）|
+## Skill 清单（17 个）
+
+| Skill | 角色 | 前置关卡 |
+|-------|------|----------|
+| `opsx-explore` | 思考伙伴，探索想法/调查问题/澄清需求，禁止写代码 | 无 |
+| `opsx-plan` | 创建 change 并生成规划产出物（proposal/design/specs），含 codemap/pitfalls 预加载 | 无 |
+| `opsx-continue` | 轻量路径创建/继续变更，每次推进一个产出物，不含预加载 | 无 |
+| `opsx-ff` | 快速生成全部产出物 + 三道关卡 + 实施 | 无 |
+| `opsx-plan-review` | spec↔plan 一致性审查（关卡1），硬性门控 | design 已生成 |
+| `opsx-tasks` | 将 design+specs 转化为带 TDD 标签的 tasks.md | `gates.plan-review` |
+| `opsx-task-analyze` | plan↔tasks 一致性审查（关卡2），硬性门控 | tasks 已生成 + plan-review 已通过 |
+| `opsx-tdd` | 红绿重构循环，按 task 标签执行（test-first/characterization-first/direct） | 无（被 implement 调用） |
+| `opsx-implement` | 按 tasks.md 逐项实施，每项强制 TDD 循环 | `gates.plan-review` + `gates.task-analyze` |
+| `opsx-apply` | 轻量实施，不强制前置关卡校验 | 无（灵活推进） |
+| `opsx-verify` | 三维验证（完整性/正确性/一致性），subagent 逐维度独立审查 | 实施完成 |
+| `opsx-review` | 独立代码审查，发版风险拦截，分级问题列表 | `gates.verify` 已通过 |
+| `opsx-archive` | 归档变更 + knowledge + codemap + git | `gates.verify` + `gates.review` |
+| `opsx-bugfix` | 精简 bugfix 流程：定位→测试策略→修复→验证→经验沉淀 | 无 |
+| `opsx-codemap` | 维护 `.aiknowledge/codemap/` 架构认知地图 | 无（独立工具） |
+| `opsx-knowledge` | 经验沉淀到 `.aiknowledge/pitfalls/` | 无（独立工具） |
+| `opsx-auto-drive` | 自动驱动引擎，AI 自主执行完整工作流循环 | 无（编排层） |
+
+## 工作流拓扑
+
+```
+explore ─── 需求澄清 ───┐
+                         ▼
+plan / continue / ff ──→ proposal → specs → design
+                                                │
+                         plan-review ◄──────────┘  (关卡1: spec↔plan)
+                              │
+                              ▼
+                           tasks ──→ tasks.md
+                              │
+                         task-analyze ◄─────────── (关卡2: plan↔tasks)
+                              │
+                              ▼
+                    implement / apply ──→ 代码变更
+                         │    │
+                         │    └─── tdd (红绿重构循环)
+                         ▼
+                        verify ────────────────── (关卡3: tasks↔code)
+                         │
+                        review ────────────────── (代码审查)
+                         │
+                        archive ──→ 归档 + knowledge + codemap + git
+```
+
+**旁路流程**：
+- `bugfix`：跳过规划，直接 定位→修复→验证→经验沉淀
+- `apply`：不校验关卡，灵活推进部分实施
+- `codemap` / `knowledge`：独立维护工具，不参与主流程
+- `auto-drive`：编排层，自主驱动上述完整循环
 
 ## 隐式约束
-- `.claude/skills/` 已从 `.gitignore` 中移除（改为精确忽略 `settings.local.json` 等敏感文件），skills 现在被 git 追踪
-- Bootstrap skill 的变更列表逻辑使用 `ls openspec/changes/ | grep -v archive`（不依赖外部 CLI）
-- Skill 文件变更后需手动运行 `scripts/sync.sh` 将最新版本同步到目标仓库
+- Skills 被 git 追踪（`.gitignore` 精确忽略 `settings.local.json` 等敏感文件）
+- 关卡结果写入 `.openspec.yaml` 的 `gates.*` 字段，下游 skill 读取该字段做准入校验
+- 所有 skill 按需读取 `.aiknowledge/`（index-first 策略，禁止全量扫描）
+- Skill 文件变更后需手动运行 `scripts/sync.sh` 同步到目标仓库

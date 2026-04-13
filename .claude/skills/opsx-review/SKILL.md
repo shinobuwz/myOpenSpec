@@ -23,7 +23,7 @@ description: 使用 subagent 进行独立代码审查，输出质量指标和分
    - 先读 `.aiknowledge/codemap/index.md`（如存在），识别本次变更涉及的模块
    - 仅读取命中模块的 `<module>.md`，获取模块边界和调用链，避免重新探索
    - 先读 `.aiknowledge/pitfalls/index.md`（如存在），识别领域
-   - 仅读取命中领域的 `<domain>/index.md`，获取已知易错点清单
+   - 仅读取命中领域的 `<domain>/index.md`；如命中与 diff 相关的具体条目，继续读取 L3 条目文件（`<domain>/<slug>.md`），将其现象/根因作为具体核查项
 
 ## Diff 边界原则
 
@@ -129,5 +129,7 @@ subagent 只读取代码和文档，不做任何修改。审查结果由 subagen
 ## 退出契约
 
 - 输出审查报告，包含质量指标和问题列表
-- 如果没有 CRITICAL 问题，建议用户使用 opsx-archive 归档
-- 如果有 CRITICAL 问题，列出必须修复的项目
+- **如果没有 CRITICAL 问题**：
+  1. 写入门控状态：`yq -i '.gates.review = "'$(date -u +%Y-%m-%dT%H:%M:%SZ)'"' openspec/changes/<name>/.openspec.yaml`
+  2. 建议用户使用 opsx-archive 归档
+- **如果有 CRITICAL 问题**：不写入 gates。列出必须修复的项目

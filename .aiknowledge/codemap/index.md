@@ -11,3 +11,6 @@
 
 | 链路 | 涉及模块 | 说明 |
 |------|----------|------|
+| spec-driven 主流程 | openspec-skills | plan→plan-review→tasks→task-analyze→implement→verify→review→archive |
+| bugfix 旁路 | openspec-skills | bugfix（跳过规划，直接修复） |
+| skill 分发 | openspec-skills → skill-sync | skill 文件变更后通过 sync.sh 同步到目标仓库 |
