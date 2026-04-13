@@ -44,16 +44,12 @@ metadata:
    - `openspec/changes/<name>/design.md`
    - `openspec/changes/<name>/specs/` 下所有 .md 文件
 
-   再读取以下 change-local 声明层（如存在）：
-   - `openspec/changes/<name>/context/knowledge-refs.md`
-   - `openspec/changes/<name>/context/review-scope.md`
-   - `openspec/changes/<name>/context/artifact-index.md`
-   - `openspec/changes/<name>/test-report.md`
+   再读取（如存在）：
+   - `openspec/changes/<name>/test-report.md`（如存在，实现前先读取，避免重复执行或遗漏已有 TDD 留档）
 
-   读取规则：
-   - `context/*.md` 只作为共享事实的声明层，不得覆盖 `tasks.md` / `specs/` / `design.md`
-   - 如果 `knowledge-refs.md` 声明了 `.aiknowledge/` 中的具体条目，只按声明精确读取，不要无界扫描整个知识库
-   - 如果 `test-report.md` 已存在，实现前先读取，避免重复执行或遗漏已有 TDD 留档
+   按需读取 `.aiknowledge/`（index-first，不全量扫描）：
+   - 先读 `.aiknowledge/codemap/index.md`，仅读取命中模块的 `<module>.md`
+   - 先读 `.aiknowledge/pitfalls/index.md`，仅读取命中领域的 `<domain>/index.md`
 
 4. **显示当前进度**
 

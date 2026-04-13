@@ -62,7 +62,6 @@ metadata:
         - `dependencies`：已完成的产出物，用于读取上下文
       - 读取任何已完成的依赖文件以获取上下文
       - 使用 `template` 作为结构创建产出物文件
-      - 应用 `context` 和 `rules` 作为约束 - 但不要将它们复制到文件中
       - 如果当前创建的是 `specs/<capability>/spec.md`，且同一 change 下存在多个 spec 文件：严格检查所有 `**Trace**: R<number>` 是否跨文件唯一；发现重复时先修正编号，禁止继续
       - 显示简短进度："✓ 已创建 <artifact-id>"
 
@@ -112,10 +111,6 @@ metadata:
 - Schema 定义了每个产出物应包含的内容 - 遵循它
 - 在创建新产出物之前阅读依赖产出物以获取上下文
 - 使用 `template` 作为输出文件的结构 - 填充其各个部分
-- **重要提示**：`context` 和 `rules` 是对你的约束，而不是文件内容
-  - 不要将 `<context>`、`<rules>`、`<project_context>` 块复制到产出物中
-  - 这些引导你编写内容，但不应出现在输出中
-
 **护栏**
 - 创建实现所需的所有产出物（由 Schema 的 `apply.requires` 定义）
 - 在创建新产出物之前始终阅读依赖产出物

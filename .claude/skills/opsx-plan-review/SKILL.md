@@ -20,7 +20,20 @@ metadata:
 1. 确认 git 工作区干净
 2. 读取 `openspec/changes/<name>/.openspec.yaml` 获取 schema 定义，然后检查各产出物文件是否已存在，确认 design artifact 已生成
 3. 读取 `.openspec.yaml` 中的 `artifacts` 配置获取 apply 的 `gateReview` facts bundle
-4. 读取 change 的 artifact：proposal.md、design.md、specs/
+4. 渐进加载制品（最小只读范围）：
+
+   **从 proposal.md 加载：**
+   - 变更概述/范围
+   - 变更目标（不读实施细节）
+
+   **从 specs/ 加载：**
+   - 每条需求的 `**Trace**: R?` 声明
+   - 需求描述（一行摘要，不读完整 Given/When/Then 展开内容，除非审查需要验证颗粒度）
+
+   **从 design.md 加载：**
+   - `## 需求追踪` 章节（R→U 映射列表）
+   - 实施单元 [U?] 标题及简述
+   - 不读架构详情、序列图、数据模型等实施内容
 
 ## 审查方式
 

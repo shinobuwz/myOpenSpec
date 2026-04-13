@@ -16,10 +16,15 @@ metadata:
 1. 确认 opsx-verify 验证已通过
 2. 收集本次变更的所有代码差异
 3. 读取相关的设计文档和规格说明
+4. 按需读取 `.aiknowledge/`：
+   - 先读 `.aiknowledge/codemap/index.md`（如存在），识别本次变更涉及的模块
+   - 仅读取命中模块的 `<module>.md`，获取模块边界和调用链，避免重新探索
+   - 先读 `.aiknowledge/pitfalls/index.md`（如存在），识别领域
+   - 仅读取命中领域的 `<domain>/index.md`，审查时重点核对已知易错点
 
 ## 审查方式
 
-使用 Agent tool 启动 subagent 进行独立审查。subagent 只读取代码和文档，不做任何修改。审查结果由 subagent 汇报，主 agent 汇总输出。
+使用 Agent tool 启动 subagent 进行独立审查。subagent 接收上方 codemap/pitfalls 摘要作为上下文，只读取代码和文档，不做任何修改。审查结果由 subagent 汇报，主 agent 汇总输出。
 
 ## 审查维度
 

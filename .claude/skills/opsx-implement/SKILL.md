@@ -24,7 +24,11 @@ metadata:
 1. 确认 opsx-task-analyze 已通过（检查分析报告结论为"可实施"）
 2. 读取当前变更的 `tasks.md`，获取完整任务列表
 3. 确认所有产出物（proposal/design/specs）已就绪
-4. 读取 `.aiknowledge/codemap/` 中涉及模块的文件，定位代码位置和模块边界
+4. 按需读取 `.aiknowledge/`（index-first，禁止全量扫描）：
+   - 先读 `.aiknowledge/codemap/index.md`，识别本次变更涉及的模块
+   - 仅读取命中模块的 `<module>.md`（及必要的 `chains/*.md`），定位代码位置和模块边界
+   - 先读 `.aiknowledge/pitfalls/index.md`，识别相关领域
+   - 仅读取命中领域的 `<domain>/index.md`，实施时主动规避已知陷阱
 5. 确认测试框架已配置并可运行
 6. 找到第一个未完成的任务
 

@@ -20,7 +20,27 @@ metadata:
 1. 确认 git 工作区干净
 2. 读取 `openspec/changes/<name>/.openspec.yaml` 获取 schema 定义，然后检查各产出物文件是否已存在，确认 tasks artifact 已生成
 3. 确认 opsx-plan-review 已通过（spec↔plan 一致性已验证）
-4. 读取 change 的全部 artifact：proposal.md、design.md、specs/、tasks.md
+4. 渐进加载制品（最小只读范围，禁止全量读取）：
+
+   **从 specs/ 加载：**
+   - 每条需求的 `**Trace**: R?` 声明
+   - 需求描述（一行摘要）
+   - 不读 Given/When/Then 展开内容
+
+   **从 design.md 加载：**
+   - `## 需求追踪` 章节（R→U 映射）
+   - 实施单元 [U?] 列表及简述
+   - 架构/技术选型决策（仅关键约束，不读详细说明）
+   - 不读序列图、数据模型、接口定义等实施细节
+
+   **从 tasks.md 加载：**
+   - Task ID 及描述
+   - `[R?][U?][执行模式]` 标签
+   - 涉及的文件路径
+   - 验证方式
+   - 依赖关系（blockedBy）
+
+   **不加载 proposal.md**（plan-review 阶段已验证，此处无需重读）
 
 ## 审查方式
 

@@ -36,11 +36,10 @@ metadata:
    - `specs/` 下所有 .md 文件（如存在）
    - `design.md`（如存在）
    - `proposal.md`（如存在）
-   - `context/knowledge-refs.md`、`context/review-scope.md`、`context/artifact-index.md`（如存在，作为声明性事实输入）
    - `test-report.md` 的存在性，以及 tasks 中 TDD 标签的摘要事实
+   - `.aiknowledge/codemap/index.md`（如存在），再按需读取命中模块的 `<module>.md`，辅助代码定位，不全量扫描
 
    约束：
-   - `context/*.md` 是 change-local 声明层，不是权威源；与 specs/design/tasks 冲突时以后者为准
    - facts bundle 只包含事实，不包含 findings、severity 或修复建议
 
 4. **subagent 审查**

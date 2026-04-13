@@ -18,7 +18,11 @@ metadata:
 
 1. 读取 `openspec/changes/<name>/.openspec.yaml` 中的 `artifacts` 配置获取 tasks 的模板和输出路径
 2. 读取 proposal.md、design.md、所有 specs/ 文件
-3. 主动探测测试框架（见下方）
+3. 按需读取 `.aiknowledge/pitfalls/`：
+   - 先读 `.aiknowledge/pitfalls/index.md`（如存在），识别当前变更涉及的领域
+   - 仅读取命中领域的 `<domain>/index.md`，不全量扫描
+   - 将已知易错点融入对应 task 的验收标准（而非生成额外 task）
+4. 主动探测测试框架（见下方）
 4. 按 TDD 标签决策规则生成 tasks.md
 
 ## 测试框架探测（必须执行）
