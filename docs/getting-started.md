@@ -18,9 +18,6 @@
 
 ```text
 openspec/
-├── specs/
-│   └── <domain>/
-│       └── spec.md
 ├── changes/
 │   └── <change-name>/
 │       ├── proposal.md
@@ -37,7 +34,7 @@ openspec/
 | 制品 | 作用 |
 |------|------|
 | `proposal.md` | 说明为什么做、范围是什么 |
-| `specs/` | 行为增量规范 |
+| `specs/` | 当前 change 的行为规范 |
 | `design.md` | 技术设计与 trace |
 | `tasks.md` | 可执行、可勾选的实现清单 |
 
