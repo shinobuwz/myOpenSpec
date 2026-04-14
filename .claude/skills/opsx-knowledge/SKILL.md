@@ -27,6 +27,22 @@ pitfall 条目采用事件驱动维护，而不是按时间自动过期。
 
 收集上下文 → 判断技术领域 → 写入知识条目 → 更新索引 → 校验可复用性
 
+## 输入 / 输出边界
+
+**读取：**
+- 用户输入、最近修改、相关测试、相关提交信息
+- `.aiknowledge/pitfalls/index.md` 和命中的领域索引
+- 需要引用的最小 git diff 片段
+
+**写入：**
+- `.aiknowledge/pitfalls/index.md`
+- `.aiknowledge/pitfalls/<domain>/index.md`
+- `.aiknowledge/pitfalls/<domain>/<slug>.md`
+
+**边界约束：**
+- knowledge 只维护经验知识库，不修改产品代码、测试代码或 OpenSpec gates
+- 写入前优先复用已有领域和已有条目，不重复制造近义目录或近义条目
+
 ## 目录结构（三层渐进式披露）
 
 ```

@@ -16,7 +16,11 @@ description: 创建 OpenSpec change 并生成规划产出物（proposal/design/s
 - `design.md`（新建）
 - `specs/<capability>/spec.md`（新建，可多个）
 - `.openspec.yaml`（新建，初始化 schema）
-- 不产出 `context/` 目录下任何文件
+
+**边界约束：**
+- plan 只产出规划制品，不生成 `tasks.md`
+- plan 不写任何 gates、`audit-log.md`、`test-report.md`、`review-report.md`
+- 不要求在 plan 阶段执行 git 提交；只有用户明确要求时才提交
 
 ## 启动序列
 
@@ -80,14 +84,13 @@ description: 创建 OpenSpec change 并生成规划产出物（proposal/design/s
 - 不要用“同一个 change 下很多 spec 文件”作为拆分依据；要用“是否仍然是一个交付单元”作为依据
 - 当 scope 已大到 proposal、design、tasks 任一环节明显失去可读性时，应优先拆 change，而不是继续追加 spec 或 task
 
-### 5. 逐个提交
-- 每个产出物完成后单独提交到 git
-- 提交信息遵循项目规范
+### 5. 可选提交
+- 如用户明确要求，可在规划制品确认后再执行 git 提交
+- 未获明确要求时，不把 git 提交视为 plan 的完成条件
 
 ## 完成条件
 
 - 所有产出物已生成并获得用户确认
-- 所有产出物已提交到 git
 
 ## 硬性门控
 

@@ -8,19 +8,19 @@ description: 使用 subagent 进行独立代码审查，输出质量指标和分
 ## 输入 / 输出边界
 
 **读取上游产物：**
+- `openspec/changes/<name>/.openspec.yaml`
 - `git diff`
 - `proposal.md`
 - `design.md`
 - `specs/`
 - 命中的 `.aiknowledge/codemap/` 和 `.aiknowledge/pitfalls/`
+- `openspec/changes/<name>/review-report.md`（追加时）
 
 **写入自身产物：**
 - `openspec/changes/<name>/review-report.md`（新建或追加）
 - `openspec/changes/<name>/.openspec.yaml` 的 `gates.review`（仅无 CRITICAL 时）
 
 **边界约束：**
-- review 不生成 packet
-- review 不写 `run-report-data.json`
 - review 只写审查结果，不复制需求 / 设计上下文到中间文件
 
 ## 角色定位

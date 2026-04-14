@@ -20,8 +20,6 @@ description: 规划审查：检查 specs 需求是否完整进入 design。在 p
 **产出：**
 - `openspec/changes/<name>/audit-log.md`（追加）
 - `openspec/changes/<name>/.openspec.yaml` 的 `gates.plan-review`（仅通过时）
-- 不读取 / 不写入任何 `context/` 目录文件
-- 不写入 `run-report-data.json`
 
 ## 启动序列
 

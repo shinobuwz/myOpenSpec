@@ -27,7 +27,6 @@ description: 按 tasks.md 逐项实施，每项强制 TDD 循环。当 OpenSpec 
 - tasks.md `[ ]` → `[x]`（逐项标记完成）
 - 业务代码和测试代码
 - `openspec/changes/<name>/test-report.md`（TDD 留档）
-- 不产出 `context/` 目录下任何文件
 
 ## 启动序列
 
