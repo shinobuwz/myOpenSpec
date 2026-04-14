@@ -30,7 +30,7 @@ superseded_by:
 | `.claude/skills/opsx-report/SKILL.md` | 渲染侧：读取 audit-log.md（plan-review/verify 记录）、test-report.md（tdd 状态）、review-report.md（review 状态），生成 self-contained HTML RunReport |
 
 ## 隐式约束
-- StageResult 必填字段（version/run_id/change_id/stage/packet_id/agent_role/summary/decision）缺失时消费者必须报错，不得静默降级
+- StageResult 必填字段（version/run_id/change_id/stage/agent_role/summary/decision）缺失时消费者必须报错，不得静默降级
 - audit-log.md 追加写入：文件不存在时创建；已存在时追加；已存在但损坏（无法追加）时中止并报错，禁止覆盖
 - audit-log.md 格式为纯 markdown，无需 JSON 解析；同一 stage 可有多条历史记录，report 取最后一条
 - `.openspec.yaml` gates 时间戳优先于 audit-log.md decision 判断 gate_status，防止重跑后数据未同步误报

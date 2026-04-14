@@ -73,7 +73,6 @@ subagent prompt 模板：
   "run_id": "<生成一个 ISO8601-short-hash 格式的唯一标识>",
   "change_id": "<change 目录名>",
   "stage": "plan-review",
-  "packet_id": "plan-review-001",
   "agent_role": "plan-reviewer",
   "summary": "一句话总结",
   "decision": "pass|pass_with_warnings|fail",

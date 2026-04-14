@@ -18,7 +18,6 @@ StageResult 是 reviewer subagent 的结构化输出。
 | `run_id` | string | 唯一标识，格式 `<ISO8601>-<short-hash>` |
 | `change_id` | string | change 目录名（如 `2026-04-13-add-auth`） |
 | `stage` | string | 阶段名（如 `plan-review`、`verify`） |
-| `packet_id` | string | packet 唯一标识，格式 `<stage>-<seq>`（如 `plan-review-001`） |
 | `agent_role` | string | stage 级 reviewer 标识（如 `plan-reviewer`、`verify-reviewer`） |
 | `summary` | string | 一句话总结 |
 | `decision` | enum | `pass` / `pass_with_warnings` / `fail` / `skip` |

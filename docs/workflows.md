@@ -33,23 +33,20 @@
    |------|--------|--------|------|
    | `.openspec.yaml` | plan / plan-review / task-analyze / verify / review | continue / tasks / implement / verify / review / archive / report | change 的 common config；只保存 schema / gates 等最小状态 |
    | `test-report.md` | opsx-tdd（红/绿/重构追加） | opsx-verify（检查存在性与完整性） | TDD 任务的实时测试留档；无 TDD 任务时不产出 |
-   | `context/run-report-data.json` | opsx-plan-review、opsx-tdd、opsx-verify、opsx-review | opsx-report（渲染 HTML） | 各 stage 判定结果的持久化留档；不复制权威产物上下文 |
-   | `context/packet-<stage>.json` | opsx-plan-review、opsx-verify | 对应 stage 的 reviewer subagent | stage-local transport；仅服务当前 stage，不是共享知识层 |
-   | `context/run-report.html` | opsx-report | 人工阅读 | self-contained HTML 报告，按需生成 |
+   | `audit-log.md` | opsx-plan-review、opsx-task-analyze、opsx-verify（追加） | opsx-report（渲染 HTML） | 各 gate stage 链路正确性校验留档；pass 和 fail 均追加写入 |
+   | `review-report.md` | opsx-review（追加） | opsx-report（渲染 HTML） | 代码审查结论留档；与结构符合性审查分开存放 |
+   | `run-report.html` | opsx-report | 人工阅读 | self-contained HTML 报告，按需生成 |
 
-   权威源始终是 `proposal.md`、`specs/`、`design.md`、`tasks.md`、`test-report.md` 和代码本身。共享文件只承担状态索引、执行留档或 stage-local 传输职责。
+   权威源始终是 `proposal.md`、`specs/`、`design.md`、`tasks.md`、`test-report.md` 和代码本身。共享文件只承担状态索引和执行留档职责。
 
-   **Stage Packet Protocol**（详见 `docs/stage-packet-protocol.md`）是 gate review 的最小传输机制：
+   **Gate Review Protocol**（详见 `docs/stage-packet-protocol.md`）：
 
-   - **StagePacket**：主 agent 从当前 stage 需要的上游产物中组装的只读事实快照，通过 `context/packet-<stage>.json` 文件传递给 reviewer subagent；当前只用于 `plan-review` 和 `verify`
-     - `core_payload`：当前 stage 高频使用、且不适合让 subagent 现算的结构化事实
-     - `optional_refs`：文件路径引用（source_refs + knowledge_refs），subagent 按需回读，禁止超出此范围扫描
-   - **StageResult**：reviewer subagent 的结构化输出（decision / findings / metrics），写回 `context/run-report-data.json`
-   - **Packet Budget**：soft limit 2K / hard limit 4K tokens；超限按固定顺序降维（多行→一行 → 纯引用 → 计数压缩 → 分片）
-   - **Lazy Hydration**：subagent 只能读取 packet 中列出的文件路径，禁止无边界全局扫描
+   - reviewer subagent 直接读取上游权威产物（specs/、design.md、tasks.md、代码文件），不经过 JSON 中间层
+   - **StageResult**：reviewer subagent 的结构化输出（decision / findings / metrics）
+   - 审查结论追加写入 `audit-log.md`（plan-review / task-analyze / verify）或 `review-report.md`（review）
    - **Single Reviewer**：每个 gate stage 固定 1 个 reviewer subagent，不做多 reviewer 仲裁
 
-   按需使用 `/opsx-report` 从 `run-report-data.json` 生成 HTML 报告。
+   按需使用 `/opsx-report` 从 `audit-log.md`、`test-report.md`、`review-report.md` 生成 HTML 报告。
 
 ## 典型模式
 
