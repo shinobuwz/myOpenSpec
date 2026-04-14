@@ -3,3 +3,5 @@ created: 2026-04-14
 gates:
   plan-review: "2026-04-14T06:00:10Z"
   task-analyze: "2026-04-14T06:10:00Z"
+  verify: "2026-04-14T06:30:00Z"
+  review: "2026-04-14T06:30:00Z"
