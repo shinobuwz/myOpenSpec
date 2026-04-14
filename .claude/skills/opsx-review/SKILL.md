@@ -5,6 +5,24 @@ description: 使用 subagent 进行独立代码审查，输出质量指标和分
 
 代码审查 Skill。使用 subagent 进行独立的代码审查，输出质量指标和分级问题列表。
 
+## 输入 / 输出边界
+
+**读取上游产物：**
+- `git diff`
+- `proposal.md`
+- `design.md`
+- `specs/`
+- 命中的 `.aiknowledge/codemap/` 和 `.aiknowledge/pitfalls/`
+
+**写入自身产物：**
+- `openspec/changes/<name>/review-report.md`（新建或追加）
+- `openspec/changes/<name>/.openspec.yaml` 的 `gates.review`（仅无 CRITICAL 时）
+
+**边界约束：**
+- review 不生成 packet
+- review 不写 `run-report-data.json`
+- review 只写审查结果，不复制需求 / 设计上下文到中间文件
+
 ## 角色定位
 
 你是一个**发版风险拦截器**，不是代码风格顾问。
@@ -18,7 +36,7 @@ description: 使用 subagent 进行独立代码审查，输出质量指标和分
 3. 读取当前 change 目录下的需求文档作为业务审查上下文：
    - `proposal.md` — 变更动机和目标
    - `design.md` — 设计方案
-   - `specs.md` — 详细规格说明
+   - `specs/` — 详细规格说明
 4. 按需读取 `.aiknowledge/`：
    - 先读 `.aiknowledge/codemap/index.md`（如存在），识别本次变更涉及的模块
    - 仅读取命中模块的 `<module>.md`，获取模块边界和调用链，避免重新探索
@@ -135,6 +153,20 @@ subagent 只读取代码和文档，不做任何修改。审查结果由 subagen
 - 输出审查报告，包含质量指标和问题列表
 - **如果没有 CRITICAL 问题**：
   1. 写入门控状态：`yq -i '.gates.review = "'$(date -u +%Y-%m-%dT%H:%M:%SZ)'"' openspec/changes/<name>/.openspec.yaml`
-  2. 将审查结果写入 `openspec/changes/<name>/context/run-report-data.json` 的 `stages.review`（追加式更新：不存在则创建，已存在且 JSON 合法则合并，JSON 解析失败则中止并报错）。写入字段：`decision`（pass/pass_with_warnings/fail）、`findings`（每条含 `severity`、`category`、`message`、`file_path`）、`metrics`（按 severity 分类计数）、`reviewed_at` 时间戳。`run_id` 从已有 JSON 中复用；文件不存在则生成新 `run_id`。
+  2. 将审查结果追加到 `openspec/changes/<name>/review-report.md`（新建或追加），追加一节：
+     ```
+     ## code-review | <ISO8601 时间戳> | pass/pass_with_warnings
+     findings：
+     - <每条 finding，格式：[severity] category: message (file_path)>
+     无发现时写"无发现"
+     ```
   3. 建议用户使用 opsx-archive 归档
-- **如果有 CRITICAL 问题**：不写入 gates。仍将审查结果写入 `stages.review`（decision 为 fail）。列出必须修复的项目
+- **如果有 CRITICAL 问题**：
+  1. 不写入 gates
+  2. 将审查结果追加到 `openspec/changes/<name>/review-report.md`（新建或追加），追加一节：
+     ```
+     ## code-review | <ISO8601 时间戳> | fail
+     findings：
+     - <每条 finding，格式：[CRITICAL] category: message (file_path)>
+     ```
+  3. 列出必须修复的项目

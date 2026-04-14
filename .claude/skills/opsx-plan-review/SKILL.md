@@ -9,57 +9,71 @@ description: 规划审查：检查 specs 需求是否完整进入 design。在 p
 
 **这是强制关卡。** 在本 skill 输出"通过"结论之前，禁止生成 tasks.md 或进入任何后续阶段。
 
+## 输入 / 输出边界
+
+**读取：**
+- `openspec/changes/<name>/.openspec.yaml`
+- `openspec/changes/<name>/specs/**/*.md`
+- `openspec/changes/<name>/design.md`
+- 命中的 `.aiknowledge/codemap/` 和 `.aiknowledge/pitfalls/`（按需）
+
+**产出：**
+- `openspec/changes/<name>/audit-log.md`（追加）
+- `openspec/changes/<name>/.openspec.yaml` 的 `gates.plan-review`（仅通过时）
+- 不读取 / 不写入任何 `context/` 目录文件
+- 不写入 `run-report-data.json`
+
 ## 启动序列
 
 1. 确认 git 工作区干净
-2. 读取 `openspec/changes/<name>/.openspec.yaml` 获取 schema 定义，然后检查各产出物文件是否已存在，确认 design artifact 已生成
-3. **组装 PlanReviewPacket**（参照 `docs/stage-packet-protocol.md` 第 4.1 节）：
-
-   **core_payload 组装：**
-   - `artifact_presence`：检查 proposal.md / specs/ / design.md 是否存在
-   - `requirements`：从 specs/ 收集每条需求的 `**Trace**: R?` 声明和一行摘要（不读完整 Given/When/Then）
-   - `trace_mapping`：从 design.md 的 `## 需求追踪` 章节提取 R→U 映射
-   - `units`：从 design.md 提取 [U?] 标题列表
-
-   **optional_refs 组装：**
-   - `source_refs`：列出所有存在的产出物文件路径和 kind
-   - `knowledge_refs`：读取 `.aiknowledge/codemap/index.md` 和 `.aiknowledge/pitfalls/index.md`，识别命中模块/领域，只记录路径引用
-
-4. **校验 Packet Budget**：计算 estimated_tokens（字符数/4）。如超过 soft_limit(2000) 记录警告；如需要预降维则记录到 `budget.truncated_fields`；超过 hard_limit(4000) 必须按固定降维顺序截断后再发送（见协议文档第 2.2 节）
-
-5. 填充 packet 元数据（version, change_id, stage, packet_id, created_at, producer, budget）
-   - 如 `openspec/changes/<name>/context/run-report-data.json` 已存在且 JSON 合法且包含 `run_id`，必须复用该 `run_id`
-   - 如文件存在但 JSON 解析失败，必须中止并报错，禁止覆盖；由用户手动确认后才可重置
-   - 否则生成新的 `run_id`（格式：`<ISO8601>-<short-hash>`）
-
-6. **写入 packet 文件**：将完整 PlanReviewPacket JSON 写入 `openspec/changes/<name>/context/packet-plan-review.json`（context/ 目录不存在时先创建）
+2. 读取 `openspec/changes/<name>/.openspec.yaml`，确认 design artifact 已生成
+3. 直接读取 `specs/**/*.md` 和 `design.md` 作为审查输入
 
 ## 审查方式
 
 使用 Agent tool 启动 1 个 subagent 进行独立审查：
-- reviewer 从文件读取 PlanReviewPacket，只能读取 packet 中 `source_refs` 和 `knowledge_refs` 列出的文件（Lazy Hydration）
-- reviewer 必须输出符合 **StageResult schema** 的 JSON（见 `docs/stage-packet-protocol.md` 第 3 节）
+
+subagent 直接读取 `openspec/changes/<name>/specs/**/*.md` 和 `openspec/changes/<name>/design.md`，在同一轮覆盖 trace、granularity、uniqueness、design-integrity 四类检查，并输出 1 个符合 **StageResult schema** 的 JSON（见 `docs/stage-packet-protocol.md` 第 1 节）。
 
 subagent prompt 模板：
 
 ```
 你是 plan-review reviewer。
 
-## 输入 Packet
-读取文件 `openspec/changes/<name>/context/packet-plan-review.json` 获取 PlanReviewPacket。
-你只能读取 packet 中 source_refs 和 knowledge_refs 列出的文件路径（Lazy Hydration）。
+## 输入
+直接读取以下文件：
+- `openspec/changes/<name>/specs/**/*.md` — 所有规格文件
+- `openspec/changes/<name>/design.md` — 设计文档
 
-## 你的审查任务
+## 审查任务
 在同一轮审查中覆盖 trace、granularity、uniqueness、design-integrity 四类检查。
 
+## 审查维度
+
+### 1. 需求进入设计（specs → design）
+- 逐条检查每个 **Trace**: R? 声明
+- 在 design.md 的 ## 需求追踪 章节必须存在 R→U 映射
+- 标记未进入设计的需求为 **TRACE_GAP**（severity: critical）
+
+### 2. 需求颗粒度审查
+- 检查每条需求是否只描述一个独立的可验证行为
+- 如果一条需求同时包含多个独立行为，标记为 **COARSE_R**（severity: critical）
+
+### 3. Trace 唯一性审查
+- 收集所有 R 编号，任意两条复用同一 R 编号标记为 **DUPLICATE_R**（severity: critical）
+
+### 4. 设计完整性（design 自洽检查）
+- trace_mapping 中的每个 R 必须在 specs 中存在，否则标记为 **GHOST_R**（severity: critical）
+- 每个 U 必须有至少一个 R 驱动，否则标记为 **ORPHAN**（severity: critical）
+
 ## 输出要求
-你必须输出一个符合 StageResult schema 的 JSON 对象。格式：
+输出一个符合 StageResult schema 的 JSON 对象：
 {
   "version": 1,
-  "run_id": "<来自 packet 的 run_id>",
-  "change_id": "<来自 packet 的 change_id>",
+  "run_id": "<生成一个 ISO8601-short-hash 格式的唯一标识>",
+  "change_id": "<change 目录名>",
   "stage": "plan-review",
-  "packet_id": "<来自 packet 的 packet_id>",
+  "packet_id": "plan-review-001",
   "agent_role": "plan-reviewer",
   "summary": "一句话总结",
   "decision": "pass|pass_with_warnings|fail",
@@ -70,35 +84,9 @@ subagent prompt 模板：
 }
 ```
 
-## 审查维度
-
-单 reviewer 需要覆盖以下四类检查：
-
-### 1. 需求进入设计（specs → design）
-- 逐条检查 core_payload.requirements 中的每个 R
-- 在 core_payload.trace_mapping 中必须存在 R→U 映射
-- 标记未进入设计的需求为 **TRACE_GAP**（severity: critical）
-
-### 2. 需求颗粒度审查
-- 检查每条需求是否只描述一个独立的可验证行为
-- 如果一条需求同时包含多个独立行为，标记为 **COARSE_R**（severity: critical）
-- 需要时通过 source_refs 回读 spec 原文验证颗粒度
-
-### 3. Trace 唯一性审查
-- 收集 core_payload.requirements 中所有 R 编号
-- 任意两条需求复用同一 R 编号，标记为 **DUPLICATE_R**（severity: critical）
-
-### 4. 设计完整性（design 自洽检查）
-- trace_mapping 中的每个 R 编号必须在 requirements 中存在，否则标记为 **GHOST_R**（severity: critical）
-- 每个 U 必须有至少一个 R 驱动，否则标记为 **ORPHAN**（severity: critical）
-
 ## 汇总逻辑
 
-主 agent 收集该 reviewer 的 StageResult JSON：
-
-1. **读取 findings**：使用 StageResult 的 `findings` 作为统一问题列表
-2. **读取汇总 metrics**：使用 StageResult 的 `metrics`
-3. **生成追踪矩阵**：基于 core_payload 的 requirements + trace_mapping + StageResult findings
+主 agent 收集 subagent 的 StageResult JSON，基于 specs/ + design.md 生成追踪矩阵。
 
 ## 输出格式
 
@@ -118,7 +106,7 @@ subagent prompt 模板：
 [DUPLICATE_R] RX 在多个需求或多个 spec 文件中重复使用，需统一重新编号
 
 ### Stage Result（JSON）
-（单 reviewer 的 StageResult JSON，供 RunReport 数据源使用）
+（subagent 输出的 StageResult JSON）
 
 ### 结论
 通过 / 需修正后重审
@@ -133,12 +121,25 @@ subagent prompt 模板：
 ## 退出契约
 
 - **如"通过"**：
-  1. 写入门控状态：在 `openspec/changes/<name>/.openspec.yaml` 的 `gates:` 下添加 `plan-review: "<ISO8601 时间戳>"`
-  2. 将 StageResult 的判定结果写入 `openspec/changes/<name>/context/run-report-data.json` 的 `stages.plan-review`（追加式更新：不存在则创建，已存在且 JSON 合法则合并，JSON 损坏则中止并报错，见步骤 5）。写入字段：`decision`、`findings`、`metrics`、`reviewed_at`。packet 文件（`packet-plan-review.json`）保持不变。
+  1. 追加 `openspec/changes/<name>/audit-log.md`，格式：
+     ```
+     ## plan-review | <ISO8601 时间戳> | pass
+     方向：specs/**/*.md + design.md → tasks.md
+     修正：<修正项列表，每行一条；无发现时写"无发现">
+     ```
+     若写入 audit-log.md 时文件损坏（已存在但无法追加），中止并报错，禁止继续。
+  2. 写入门控状态：在 `.openspec.yaml` 的 `gates:` 下添加 `plan-review: "<ISO8601 时间戳>"`
   3. 必须转入 **opsx-tasks** 生成 tasks.md。这不是建议，是强制要求。
 - **如"需修正"**：
-  1. 不写入 gates
-  2. 仍将 StageResult 判定结果写入 `context/run-report-data.json` 的 `stages.plan-review`（decision 为 fail；JSON 损坏则中止并报错，见步骤 5）
+  1. 追加 `openspec/changes/<name>/audit-log.md`，格式：
+     ```
+     ## plan-review | <ISO8601 时间戳> | fail
+     方向：specs/**/*.md + design.md → tasks.md
+     问题：<问题列表，每行一条>
+     需修正：<需修正内容，每行一条>
+     ```
+     若写入时文件损坏，中止并报错。
+  2. 不写入 gates
   3. 必须回到 **opsx-plan** 修正 design.md 和 specs/。禁止跳过直接生成 tasks
   4. COARSE_R 问题需在 specs 中将粗粒度需求拆分为多条独立需求后重新审查
   5. DUPLICATE_R 问题需在所有相关 spec 文件中统一重新编号后重审

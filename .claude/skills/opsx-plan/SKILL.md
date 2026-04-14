@@ -5,6 +5,19 @@ description: 创建 OpenSpec change 并生成规划产出物（proposal/design/s
 
 规划 Skill。创建 OpenSpec change 并生成规划阶段的产出物集合。
 
+## 输入 / 输出边界
+
+**读取：**
+- `.aiknowledge/codemap/index.md` + 命中模块（按需）
+- `.aiknowledge/pitfalls/index.md` + 命中领域（按需）
+
+**产出：**
+- `proposal.md`（新建）
+- `design.md`（新建）
+- `specs/<capability>/spec.md`（新建，可多个）
+- `.openspec.yaml`（新建，初始化 schema）
+- 不产出 `context/` 目录下任何文件
+
 ## 启动序列
 
 1. 确认需求已经过脑暴或探索阶段的澄清
