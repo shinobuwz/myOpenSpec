@@ -37,8 +37,19 @@ description: 创建 OpenSpec change 并生成规划产出物（proposal/design/s
 
 1. 确认需求已经过脑暴或探索阶段的澄清
 2. 执行 `bash .claude/opsx/bin/changes.sh` 检查是否已有相关变更（含阶段和进度）
-3. 如果用户已经经过 `opsx-slice`，先消费对应 subchange 的 `proposal.md`，只为**当前选中的单一交付单元**做规划
-4. 如果用户没有经过 `opsx-slice`，但当前范围明显就是一个单一交付单元，可继续；如果范围明显过大或存在多个弱依赖能力簇，停止并要求先执行 `opsx-slice`
+3. **【硬性门控 · 不可跳过】slice 前置检查**
+   - 执行 `bash .claude/opsx/bin/changes.sh resolve <name>` 解析 change root
+   - 检查 resolved change root 下是否存在 `proposal.md`
+   - **如果不存在 `proposal.md`**：立即停止，输出以下提示并拒绝继续：
+     ```
+     ❌ opsx-plan 拒绝启动：当前 change 尚未经过 opsx-slice。
+     proposal.md 不存在，无法确认交付边界已被定义。
+
+     请先执行：opsx-slice
+     slice 完成后，每个 subchange 的 proposal.md 会由 slice 初始化，届时可重新进入 opsx-plan。
+     ```
+   - **只有 `proposal.md` 已存在**，才允许继续后续步骤
+4. 消费对应 subchange 的 `proposal.md`，只为**当前选中的单一交付单元**做规划
 5. 先读 `.aiknowledge/codemap/index.md`，判断目标模块是否已有 codemap；已有则继续读对应 `<module>.md` 和必要的 `chains/*.md`，没有则先调用 `opsx-codemap`
 6. 读取 `.aiknowledge/pitfalls/index.md` 和相关领域的 `index.md`，在设计中规避已知陷阱
 7. 收集必要的上下文信息
