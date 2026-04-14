@@ -2,14 +2,14 @@
 
 ## 概述
 
-opsx-report 从只渲染 plan-review 和 verify 扩展到渲染 plan-review、tdd、verify、review 四个 stage。trace 矩阵等上下文数据从产出物文件实时读取，不再依赖 JSON 中的副本。
+opsx-report 从只渲染 plan-review 和 verify 扩展到渲染 plan-review、tdd、verify、review 四个 stage。trace 矩阵等上下文数据从产出物文件实时读取，不再依赖 JSON 中的副本，也不读取 packet 文件。
 
 ## 需求
 
 ### 数据源分层
 
 **Trace**: R8
-opsx-report 渲染时从两处读取数据：(1) `run-report-data.json` 提供各 stage 的判定结果；(2) 产出物文件（specs/、design.md、tasks.md）提供上下文（trace 矩阵、需求列表、task 列表）。当产出物文件不存在时（如已删除），对应板块显示"数据不可用"。
+opsx-report 渲染时从两处读取数据：(1) `run-report-data.json` 提供各 stage 的判定结果；(2) 产出物文件（specs/、design.md、tasks.md）提供上下文（trace 矩阵、需求列表、task 列表）。不得从 `packet-<stage>.json` 恢复这些上下文。当产出物文件不存在时（如已删除），对应板块显示"数据不可用"。
 
 ### TDD 板块渲染
 

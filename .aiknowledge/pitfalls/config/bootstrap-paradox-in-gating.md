@@ -2,9 +2,9 @@
 status: active
 created_at: 2026-04-13
 created_from: metadata-backfill
-last_verified_at: 2026-04-13
-last_verified_by: repository-audit
-verification_basis: repository-audit
+last_verified_at: 2026-04-14
+last_verified_by: opsx-knowledge
+verification_basis: archive
 applies_to:
   - .openspec.yaml
   - .claude/skills/opsx-verify

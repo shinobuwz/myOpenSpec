@@ -1,24 +1,42 @@
-# Design: 精简 run-report-data.json 并扩展 report 覆盖范围
+# Design: 精简 run-report-data.json 并收缩 stage 中间上下文
 
 ## 架构决策
 
-### D1: JSON 只存判定结果，上下文从权威源实时读取
+### D1: 权威产物、最小状态、阶段传输三层分离
 
-**决策**：`run-report-data.json` 中只保留各 stage 的 decision/findings/metrics/时间戳。opsx-report 渲染 trace 矩阵和 task 列表时从 specs/、design.md、tasks.md 实时读取。
+**决策**：
 
-**理由**：避免数据冗余和同步问题。权威源在归档后仍存在于 archive 目录中。
+- `proposal.md`、`specs/`、`design.md`、`tasks.md`、`test-report.md` 和代码文件是权威产物
+- `.openspec.yaml` 是 common config，只保存 schema / gates 等最小状态
+- `context/packet-<stage>.json` 是 stage-local transport，只服务当前 stage 的 subagent
 
-### D2: tdd 和 review 采用与 plan-review/verify 相同的 JSON 写入规则
+**理由**：中间文件不再承担“共享知识层”职责，避免多个来源同时描述同一语义。
 
-**决策**：所有 4 个 stage 遵循统一的写入规则：文件不存在则创建，合法则合并，损坏则中止。run_id 跨 stage 复用。
+### D2: run-report-data.json 只存不可稳定重建的 stage 结果
 
-**理由**：复用已验证的安全写入机制，不引入新的数据完整性风险。
+**决策**：`run-report-data.json` 中只保留各 stage 的 decision / findings / metrics / 时间戳，以及 tdd task 级执行结果。trace 矩阵和 task 列表由 report 渲染时从权威产物实时读取。
 
-### D3: packet 文件保持不变
+**理由**：避免数据冗余和同步问题。归档后权威源仍存在于 archive 目录中。
 
-**决策**：`context/packet-plan-review.json` 和 `context/packet-verify.json` 仍包含完整的 core_payload，不受本次精简影响。
+### D3: packet 保留，但收缩为当前 stage 最小输入
 
-**理由**：packet 是传递给 subagent 的输入，subagent 需要完整上下文做判断。精简的是持久化到 run-report-data.json 的内容。
+**决策**：
+
+- `packet-plan-review.json` / `packet-verify.json` 继续保留，便于 reviewer 读取和调试
+- `core_payload` 删除 `artifact_presence`、`test_report_present` 这类重复存在性缓存
+- `source_refs` 从“列出所有现有产物”改为“只列本 stage 明确需要读取的输入”
+
+**理由**：packet 仍然有价值，但应当是传输协议，而不是共享知识副本。
+
+### D4: tdd / review 只写自身结果，不参与 packet
+
+**决策**：
+
+- tdd 只写 `test-report.md` 和 `run-report-data.json.stages.tdd`
+- review 只写 `run-report-data.json.stages.review` 和 `.openspec.yaml.gates.review`
+- 二者都不引入新的 packet 或中间上下文字段
+
+**理由**：它们没有独立 reviewer packet 的必要，直接留档结果即可。
 
 ## run-report-data.json 新数据模型
 
@@ -71,66 +89,65 @@
 
 ## 实施单元
 
-### [U1] plan-review / verify 退出契约精简
+### [U1] plan-review / verify packet 与结果留档收缩
 
 **Trace**: R1, R2, R7
 
 **模块边界**：
-- `.claude/skills/opsx-plan-review/SKILL.md` — 退出契约中 JSON 写入部分
-- `.claude/skills/opsx-verify/SKILL.md` — 退出契约中 JSON 写入部分
+- `.claude/skills/opsx-plan-review/SKILL.md`
+- `.claude/skills/opsx-verify/SKILL.md`
+- `context/packet-plan-review.json`
+- `context/packet-verify.json`
 
 **变更内容**：
-- plan-review 退出时：写入 `stages.plan-review` 只含 `decision`、`findings`、`metrics`、`reviewed_at`。不再将整个 PlanReviewPacket 写入。
-- verify 退出时：写入 `stages.verify` 只含 `decision`、`findings`、`metrics`、`verified_at`。不再将整个 VerifyPacket 写入。
-- packet 文件（`packet-plan-review.json`、`packet-verify.json`）保持原样。
+- plan-review / verify 退出时只写 stage 结果到 `run-report-data.json`
+- packet 中删除 `artifact_presence`、`test_report_present`
+- `source_refs` 改为只列当前 stage 实际需要读取的文件
 
 ### [U2] opsx-tdd 退出时写入 JSON
 
 **Trace**: R3, R4, R6
 
 **模块边界**：
-- `.claude/skills/opsx-tdd/SKILL.md` — 红绿重构循环退出后新增 JSON 写入步骤
+- `.claude/skills/opsx-tdd/SKILL.md`
 
 **变更内容**：
-- 每个 task 的重构阶段完成后，读取 `run-report-data.json`（遵循 R6 写入规则），将该 task 的 TDD 结果追加到 `stages.tdd.tasks[]`
-- 同时更新 `stages.tdd` 顶层汇总字段（total_tasks / completed_tasks / all_green）
-- run_id 从已有 JSON 中读取复用；JSON 不存在则生成新 run_id
+- 每个 task 的重构阶段完成后，将 TDD 结果追加到 `stages.tdd.tasks[]`
+- 同时更新 `total_tasks / completed_tasks / all_green`
+- 不生成 packet
 
 ### [U3] opsx-review 退出时写入 JSON
 
 **Trace**: R5, R6
 
 **模块边界**：
-- `.claude/skills/opsx-review/SKILL.md` — 审查完成后新增 JSON 写入步骤
+- `.claude/skills/opsx-review/SKILL.md`
 
 **变更内容**：
-- review 退出时，读取 `run-report-data.json`（遵循 R6 写入规则），写入 `stages.review`
-- 内容：`decision`、`findings`（含 severity/category/message/file_path）、`metrics`、`reviewed_at`
-- run_id 从已有 JSON 中读取复用
+- review 退出时写入 `stages.review`
+- 不生成 packet
 
-### [U4] opsx-report 扩展到 4 stage
+### [U4] opsx-report 只读结果留档 + 权威产物
 
 **Trace**: R8, R9, R10, R11
 
 **模块边界**：
-- `.claude/skills/opsx-report/SKILL.md` — 数据读取和 HTML 渲染逻辑
+- `.claude/skills/opsx-report/SKILL.md`
 
 **变更内容**：
-- 数据读取分层：JSON 提供判定结果，产出物文件提供 trace 矩阵和 task 列表
-- Run Overview：gate_status 从 2 个扩展到 4 个（plan_review / tdd / verify / review）
-- Stage Results：新增 tdd 卡片（task 级红/绿/重构状态 + 汇总）和 review 卡片
-- tdd 卡片样式：全部 green → 绿色左边框；有 red/未完成 → 红色左边框
-- 缺失 stage 显示灰色 pending
-- 产出物文件不存在时对应板块显示"数据不可用"
+- `run-report-data.json` 仅提供判定结果
+- `specs/`、`design.md`、`tasks.md` 提供 trace / task 上下文
+- report 不再读取 packet
 
 ### [U5] 文档更新
 
 **Trace**: R12
 
 **模块边界**：
-- `docs/stage-packet-protocol.md` — 第 5 节 RunReport 数据模型
-- `docs/workflows.md` — opsx-report 引用语法
+- `docs/stage-packet-protocol.md`
+- `docs/workflows.md`
 
 **变更内容**：
-- stage-packet-protocol.md 第 5.1 节：`gate_status` 扩展到 4 个；第 5.3 节：stages 覆盖从 2 个扩展到 4 个
-- workflows.md：`/opsx:report` 改为 `/opsx-report`
+- 明确 `.openspec.yaml` 是 common config
+- 明确 packet 是 stage-local transport
+- 明确 `run-report-data.json` 是 result ledger，而不是 context 聚合

@@ -1,58 +1,61 @@
-# Tasks: 精简 run-report-data.json 并扩展 report 覆盖范围
+# Tasks: 精简 stage 结果留档并收缩 stage 中间上下文
 
-## Task 1: plan-review 退出契约精简 [direct]
+## Task 1: plan-review 明确输入输出并收缩 packet [direct]
 
 **U**: U1 | **R**: R1, R7
 
-修改 `.claude/skills/opsx-plan-review/SKILL.md` 的退出契约：
-- 将"将 PlanReviewPacket + StageResult 写入 run-report-data.json"改为"将 StageResult 的判定结果（decision/findings/metrics/reviewed_at）写入 run-report-data.json 的 stages.plan-review"
-- 明确 packet 文件（packet-plan-review.json）保持原样不受影响
-- 通过和未通过两个分支都只写判定结果
+修改 `.claude/skills/opsx-plan-review/SKILL.md`：
+- 增加“输入 / 输出边界”说明
+- 将 packet 的 `core_payload` 收缩为 `requirements`、`trace_mapping`、`units`
+- 删除 `artifact_presence`
+- 将 `source_refs` 改为只列 `specs/**/*.md` 和 `design.md`
+- 退出时只写 `stages.plan-review`
 
-## Task 2: verify 退出契约精简 [direct]
+## Task 2: verify 明确输入输出并收缩 packet [direct]
 
 **U**: U1 | **R**: R2, R7
 
-修改 `.claude/skills/opsx-verify/SKILL.md` 的退出契约：
-- 将"将 VerifyPacket + StageResult 写入 run-report-data.json"改为"将 StageResult 的判定结果（decision/findings/metrics/verified_at）写入 run-report-data.json 的 stages.verify"
-- 明确 packet 文件（packet-verify.json）保持原样不受影响
+修改 `.claude/skills/opsx-verify/SKILL.md`：
+- 增加“输入 / 输出边界”说明
+- 删除 `artifact_presence`、`test_report_present`
+- 将 `test-report.md` / `specs/` / `design.md` 的存在性改为从 `source_refs.kind` 推导
+- 将 `source_refs` 改为只列 tasks / spec / design / test-report（存在时）以及需要的 code/context 证据
+- 退出时只写 `stages.verify`
 
-## Task 3: opsx-tdd 新增 JSON 写入 [direct]
+## Task 3: opsx-tdd 写入自身结果且不生成 packet [direct]
 
 **U**: U2 | **R**: R3, R4, R6
 
 修改 `.claude/skills/opsx-tdd/SKILL.md`：
-- 在重构阶段完成后新增步骤：读取 run-report-data.json（遵循写入规则），将 task TDD 结果追加到 stages.tdd.tasks[]
-- 写入字段：task_id, mode, red_passed, green_passed, refactor_passed, coverage, completed_at
-- 同时更新 stages.tdd 顶层汇总：total_tasks, completed_tasks, all_green
-- run_id 复用规则同 plan-review/verify
+- 增加“输入 / 输出边界”说明
+- 明确 tdd 只写 `test-report.md` 和 `stages.tdd`
+- 不生成 packet，不写 gates
 
-## Task 4: opsx-review 新增 JSON 写入 [direct]
+## Task 4: opsx-review 写入自身结果且不生成 packet [direct]
 
 **U**: U3 | **R**: R5, R6
 
 修改 `.claude/skills/opsx-review/SKILL.md`：
-- 在审查完成后新增步骤：读取 run-report-data.json（遵循写入规则），写入 stages.review
-- 写入字段：decision, findings[], metrics, reviewed_at
-- run_id 复用规则同 plan-review/verify
+- 增加“输入 / 输出边界”说明
+- 明确 review 只写 `stages.review` 和 `gates.review`
+- 不生成 packet
 
-## Task 5: opsx-report 扩展到 4 stage [direct]
+## Task 5: opsx-report 只读结果留档和权威产物 [direct]
 
 **U**: U4 | **R**: R8, R9, R10, R11
 
 修改 `.claude/skills/opsx-report/SKILL.md`：
-- 数据读取分层：JSON 提供判定结果，产出物文件（specs/、design.md、tasks.md）提供 trace 矩阵和 task 列表
-- Run Overview：gate_status 从 2 个扩展到 4 个（plan_review/tdd/verify/review）
-- Stage Results：新增 tdd 卡片和 review 卡片
-- tdd 卡片：task 级红/绿/重构状态 + 汇总统计
-- review 卡片：decision + findings + metrics，样式与其他卡片一致
-- 缺失 stage 显示灰色 pending；产出物文件不存在时显示"数据不可用"
-- gate_status 判断逻辑（遵循 R11）：优先看 `.openspec.yaml` gates 时间戳 → pass；其次看 JSON decision 为 fail → fail；否则 → pending；tdd 的 pass 判断为 `stages.tdd.all_green: true`
-- 去掉对 core_payload 中 requirements/trace_mapping/units 的依赖
+- 增加“输入 / 输出边界”说明
+- 明确 report 只从 `run-report-data.json` 读结果
+- 明确 trace / task / requirement 信息只从 `specs/`、`design.md`、`tasks.md` 实时读取
+- 明确 report 不读取 packet
 
-## Task 6: 文档更新 [direct]
+## Task 6: 协议与 workflow 文档同步 [direct]
 
 **U**: U5 | **R**: R12
 
-- `docs/stage-packet-protocol.md` 第 5 节：gate_status 扩展到 4 个，stages 覆盖从 2 个扩展到 4 个，更新数据模型示例
-- `docs/workflows.md`：`/opsx:report` 改为 `/opsx-report`
+修改 `docs/stage-packet-protocol.md` 和 `docs/workflows.md`：
+- 定义 `.openspec.yaml` 是 common config，只保存最小状态
+- 定义 `run-report-data.json` 是 result ledger，不是 context 聚合
+- 定义 `packet-<stage>.json` 是 stage-local transport，不是共享知识层
+- 定义 `source_refs` 只列当前 stage 实际输入

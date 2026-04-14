@@ -2,13 +2,14 @@
 status: active
 created_at: 2026-04-13
 created_from: change:2026-04-13-stage-packet-protocol
-last_verified_at: 2026-04-13
+last_verified_at: 2026-04-14
 last_verified_by: opsx-codemap
-verification_basis: archive:2026-04-13-stage-packet-protocol
+verification_basis: archive:2026-04-14-simplify-skill-artifacts
 applies_to:
   - docs/stage-packet-protocol.md
   - .claude/skills/opsx-plan-review
   - .claude/skills/opsx-verify
+  - .claude/skills/opsx-task-analyze
   - .claude/skills/opsx-report
 superseded_by:
 ---
@@ -16,23 +17,22 @@ superseded_by:
 # stage-packet-protocol
 
 ## 职责
-定义 gate stage 间的显式通信协议：StagePacket（主 agent 组装的只读事实快照）和 StageResult（reviewer subagent 的结构化输出）。约束 plan-review 和 verify 两个 gate 的 subagent 输入/输出格式，以及 RunReport 的数据聚合和 HTML 渲染规则。
+定义 gate stage 审查结论的输出结构和留档格式。包含两部分：（1）StageResult schema——reviewer subagent 的结构化 JSON 输出规范；（2）audit-log.md 格式规范——change 级链路正确性审查的追加式留档格式。不再包含 StagePacket 组装协议或 RunReport 数据模型。
 
 ## 关键文件
 
 | 文件 | 角色 |
 |------|------|
-| `docs/stage-packet-protocol.md` | 协议规范正文，定义 StagePacket/StageResult schema、Budget 校验/降维规则、阶段特化类型（PlanReviewPacket/VerifyPacket）和 RunReport 数据模型 |
-| `.claude/skills/opsx-plan-review/SKILL.md` | 消费侧：组装 PlanReviewPacket，派遣 4 个 blind reviewer subagent，汇总 StageResult 写入 run-report-data.json |
-| `.claude/skills/opsx-verify/SKILL.md` | 消费侧：组装 VerifyPacket，派遣单一 subagent 顺序执行 4 个维度，汇总结果写入 run-report-data.json |
-| `.claude/skills/opsx-report/SKILL.md` | 渲染侧：读取 run-report-data.json，生成 self-contained HTML RunReport（4 个板块） |
+| `docs/stage-packet-protocol.md` | 协议规范正文，定义 StageResult schema（必填/可选字段、Finding 结构）和 audit-log.md 格式（条目格式、写入规则、写入者） |
+| `.claude/skills/opsx-plan-review/SKILL.md` | 消费侧：派遣 1 个 subagent 直接读取文件审查，获取 StageResult JSON，追加写 audit-log.md |
+| `.claude/skills/opsx-task-analyze/SKILL.md` | 消费侧：同上，负责 task-analyze stage 的审查留档 |
+| `.claude/skills/opsx-verify/SKILL.md` | 消费侧：派遣 1 个 subagent 直接读取文件顺序执行 4 维度审查，获取 StageResult JSON，追加写 audit-log.md |
+| `.claude/skills/opsx-report/SKILL.md` | 渲染侧：读取 audit-log.md（plan-review/verify 记录）、test-report.md（tdd 状态）、review-report.md（review 状态），生成 self-contained HTML RunReport |
 
 ## 隐式约束
-- StagePacket 必填字段缺失时，consumer 必须拒绝并报错，不得静默降级
-- `core_payload` 只含结构化事实摘要，正文禁止复制进 packet（Lazy Hydration 合同）
-- Budget hard_limit 为 4000 tokens（字符数/4）；超限必须按固定顺序降维：一行摘要→纯引用→计数/索引→分片
-- `run_id` 在同一 change 内跨 stage 不变；`context/run-report-data.json` JSON 损坏时必须中止，禁止覆盖
-- plan-review 的 4 个 reviewer 之间执行 Blind 隔离：共享同一 packet，各自独立输出 StageResult，主 agent 是唯一汇总点
-- verify 使用单一 subagent 顺序执行 4 个维度（消除双读规则：core_payload 已有的结构化事实禁止重读原文获取）
-- opsx-report 判断 gate_status 的优先级：.openspec.yaml gates 字段时间戳 > run-report-data.json results decision；前者优先，防止重跑后数据未同步误报
-- 首版只覆盖 plan-review 和 verify 两个 stage；其他 stage 在 HTML 中显示 "not_tracked"
+- StageResult 必填字段（version/run_id/change_id/stage/packet_id/agent_role/summary/decision）缺失时消费者必须报错，不得静默降级
+- audit-log.md 追加写入：文件不存在时创建；已存在时追加；已存在但损坏（无法追加）时中止并报错，禁止覆盖
+- audit-log.md 格式为纯 markdown，无需 JSON 解析；同一 stage 可有多条历史记录，report 取最后一条
+- `.openspec.yaml` gates 时间戳优先于 audit-log.md decision 判断 gate_status，防止重跑后数据未同步误报
+- opsx-tdd 不写 audit-log.md（状态在 test-report.md 留档）；opsx-review 不写 audit-log.md（状态在 review-report.md 留档）
+- 无 StagePacket 组装步骤，无 context/ JSON 文件，无 run_id 跨 stage 复用约束

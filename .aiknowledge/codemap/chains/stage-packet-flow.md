@@ -1,16 +1,16 @@
 ---
-status: active
+status: superseded
 created_at: 2026-04-13
 created_from: change:2026-04-13-stage-packet-protocol
-last_verified_at: 2026-04-13
+last_verified_at: 2026-04-14
 last_verified_by: opsx-codemap
-verification_basis: archive:2026-04-13-stage-packet-protocol
+verification_basis: archive:2026-04-14-simplify-skill-artifacts
 applies_to:
   - .claude/skills/opsx-plan-review
   - .claude/skills/opsx-verify
   - .claude/skills/opsx-report
   - docs/stage-packet-protocol.md
-superseded_by:
+superseded_by: "StagePacket/run-report-data.json 流已废弃；plan-review/verify 改为 subagent 直读文件 + audit-log.md 留档；report 改从 .md 文件聚合数据"
 ---
 
 # Stage Packet 数据流（plan-review → verify → report）

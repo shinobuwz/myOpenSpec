@@ -1,5 +1,5 @@
 ---
-status: active
+status: superseded
 created_at: 2026-04-14
 created_from: change:2026-04-14-slim-run-report
 last_verified_at: 2026-04-14
@@ -12,7 +12,7 @@ applies_to:
   - .claude/skills/opsx-review/SKILL.md
   - .claude/skills/opsx-report/SKILL.md
   - docs/stage-packet-protocol.md
-superseded_by:
+superseded_by: misc/artifact-as-source-of-truth.md
 ---
 
 # run-report-data.json 只存判定结果，不存上下文副本

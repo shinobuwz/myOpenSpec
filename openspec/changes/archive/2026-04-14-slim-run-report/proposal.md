@@ -1,39 +1,45 @@
-# Proposal: 精简 run-report-data.json 并扩展 report 覆盖范围
+# Proposal: 精简 run-report-data.json 并收缩 stage 中间上下文
 
 ## 问题陈述
 
-当前 `run-report-data.json` 存在两个问题：
+当前 workflow 的中间上下文有两个结构性问题：
 
-1. **数据冗余**：plan-review 和 verify 的 StagePacket 将 specs/design/tasks 的上下文摘要（core_payload）复制到 JSON 中，但这些信息在权威源（specs/、design.md、tasks.md）中已存在。归档后权威源仍在 archive 目录中，无需在 JSON 里保留副本。
+1. **共享层与传输层混用**：`run-report-data.json` 和 `packet-<stage>.json` 都保存了来自 `specs/`、`design.md`、`tasks.md` 的摘要，导致同一语义在多个地方重复存在。
+2. **skill 边界不够清晰**：一些 stage 默认把“所有现有产物”都塞进 `source_refs` 或 `core_payload`，而不是显式声明“本 stage 实际读取什么、写出什么”。
 
-2. **覆盖不全**：只有 plan-review 和 verify 往 JSON 写数据。tdd 和 review 的结果分散在 `test-report.md` 和 `.openspec.yaml` 中，opsx-report 只能渲染 2 个 stage，无法呈现完整的 change 生命周期。
+结果是：
+
+- `run-report-data.json` 膨胀成上下文副本，而不是结果留档
+- packet 看起来像共享知识层，而不是 stage-local transport
+- `opsx-report` 等下游 skill 容易错误依赖中间产物，而不是回到权威源
 
 ## 目标
 
-- `run-report-data.json` 只存判定结果（decision/findings/metrics/时间戳），不复制上下文
-- tdd 和 review 退出时将判定结果写入同一个 JSON
-- opsx-report 扩展到 4 个 stage（plan-review / tdd / verify / review），trace 矩阵从产出物实时读取
+- `run-report-data.json` 只存 stage 判定结果，不复制上下文
+- 每个 skill 明确自己的上游输入、产出文件和状态更新
+- `.openspec.yaml` 继续作为 common config，只承载 schema / gates 等最小状态
+- `packet-<stage>.json` 保留为 stage-local transport，但内容收缩为当前 stage 必需 facts + refs
 
 ## 范围
 
 ### 做什么
 
-- 精简 plan-review 和 verify 写入 JSON 的内容（去掉 core_payload 中的上下文数据）
-- tdd 退出时追加 tdd stage 数据到 JSON
-- review 退出时追加 review stage 数据到 JSON
-- opsx-report 扩展渲染逻辑到 4 个 stage
-- 更新 stage-packet-protocol.md 的 RunReport 数据模型
-- 更新 workflows.md 的说明
-- 同步更新 codemap 和链路文档
+- 精简 plan-review / verify 写入 `run-report-data.json` 的内容
+- 收缩 plan-review / verify 的 packet：移除重复存在性字段，只保留当前 stage 必需的结构化事实
+- 将 `source_refs` 从“所有现有产物”改为“当前 stage 明确需要读取的上游输入”
+- 让 tdd / review 只写自身 stage 结果，不引入新的中间上下文层
+- 让 `opsx-report` 只从 `run-report-data.json` 读结果、从权威产物读上下文
+- 更新协议与 workflow 文档，明确 shared state / stage-local transport 的边界
 
 ### 不做什么
 
-- 不改变 StagePacket 传递给 subagent 的内容（packet 文件仍保留 core_payload，用于 subagent 判断）
-- 不改变 gate 机制（gates.* 写入 .openspec.yaml 不变）
+- 不新增新的全局 context 文件
+- 不把 packet 升格为共享知识层
 - 不改变主流程顺序
 
 ## 成功标准
 
-- plan-review 和 verify 退出后，JSON 中不再包含 requirements/trace_mapping/units 等上下文副本
-- tdd 和 review 退出后，JSON 中有对应 stage 数据
-- opsx-report 能从 JSON + 产出物文件渲染完整 4-stage HTML
+- `run-report-data.json` 中不再出现 requirements / trace_mapping / units 等上下文副本
+- `packet-plan-review.json` / `packet-verify.json` 不再包含 `artifact_presence`、`test_report_present` 等重复缓存
+- `source_refs` 只包含当前 stage 实际需要读取的文件
+- `opsx-report` 不依赖 packet 恢复 trace / task / requirement 信息

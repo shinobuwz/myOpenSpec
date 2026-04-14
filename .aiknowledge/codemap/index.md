@@ -10,9 +10,9 @@
 
 | 模块 | 状态 | 最近复核 | 职责 | 入口 |
 |------|------|----------|------|------|
-| [openspec-skills](openspec-skills.md) | active | 2026-04-13 | OpenSpec 工作流 skill 的单一真相源，被 git 追踪并通过 sync.sh 分发 | `.claude/skills/` |
+| [openspec-skills](openspec-skills.md) | active | 2026-04-14 | OpenSpec 工作流 skill 的单一真相源，被 git 追踪并通过 sync.sh 分发 | `.claude/skills/` |
 | [skill-sync](skill-sync.md) | active | 2026-04-13 | 将 skill 文件同步到目标仓库的 shell 脚本，替代已删除的 TypeScript CLI | `scripts/sync.sh`, `scripts/sync-all.sh` |
-| [stage-packet-protocol](stage-packet-protocol.md) | active | 2026-04-13 | gate stage 间的显式通信协议：StagePacket/StageResult schema、Budget 校验/降维、RunReport 数据模型 | `docs/stage-packet-protocol.md` |
+| [stage-packet-protocol](stage-packet-protocol.md) | active | 2026-04-14 | gate stage 审查结论的输出结构和留档格式：StageResult schema + audit-log.md 规范 | `docs/stage-packet-protocol.md` |
 
 ## 链路
 
@@ -21,4 +21,4 @@
 | spec-driven 主流程 | active | 2026-04-13 | openspec-skills | plan→plan-review→tasks→task-analyze→implement→verify→review→archive |
 | bugfix 旁路 | active | 2026-04-13 | openspec-skills | bugfix（跳过规划，直接修复） |
 | skill 分发 | active | 2026-04-13 | openspec-skills → skill-sync | skill 文件变更后通过 sync.sh 同步到目标仓库 |
-| [stage-packet 数据流](chains/stage-packet-flow.md) | active | 2026-04-13 | openspec-skills, stage-packet-protocol | plan-review/verify 组装 Packet → subagent 输出 StageResult → run-report-data.json → report 渲染 HTML |
+| [stage-packet 数据流](chains/stage-packet-flow.md) | superseded | 2026-04-14 | openspec-skills, stage-packet-protocol | ~~已废弃：原 Packet/run-report-data.json 流已被 audit-log.md 直读模式替代~~ |

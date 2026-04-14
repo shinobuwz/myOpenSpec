@@ -1,14 +1,14 @@
 ---
-status: active
+status: superseded
 created_at: 2026-04-13
 created_from: change:2026-04-13-stage-packet-protocol
-last_verified_at: 2026-04-13
+last_verified_at: 2026-04-14
 last_verified_by: opsx-knowledge
-verification_basis: review
+verification_basis: archive
 applies_to:
   - openspec/verify/VerifyPacket
   - .claude/skills/opsx-verify/
-superseded_by:
+superseded_by: N/A（VerifyPacket 已在 change:2026-04-14-simplify-skill-artifacts 中整体删除，source_refs 规则不再适用）
 ---
 
 # VerifyPacket source_refs 中协议/工作流文档应使用 kind: "context"

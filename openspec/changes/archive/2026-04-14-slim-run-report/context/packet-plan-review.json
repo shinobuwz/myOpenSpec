@@ -14,13 +14,6 @@
     "shard_count": 1
   },
   "core_payload": {
-    "artifact_presence": {
-      "proposal": true,
-      "specs": true,
-      "design": true,
-      "tasks": false,
-      "test_report": false
-    },
     "requirements": [
       {"id": "R1", "summary": "plan-review 退出时 JSON 只保留判定结果，去掉 core_payload 上下文"},
       {"id": "R2", "summary": "verify 退出时 JSON 只保留判定结果，去掉 core_payload 上下文"},
@@ -28,7 +21,7 @@
       {"id": "R4", "summary": "stages.tdd 顶层含汇总字段，每次追加 task 结果时更新"},
       {"id": "R5", "summary": "opsx-review 退出时将审查结果写入 JSON"},
       {"id": "R6", "summary": "JSON 写入规则不变：不存在则创建/合法则合并/损坏则中止，run_id 复用"},
-      {"id": "R7", "summary": "packet 文件保持不变，仍含完整 core_payload"},
+      {"id": "R7", "summary": "packet 保留为 stage-local transport，只含当前 stage 必需 facts + refs"},
       {"id": "R8", "summary": "opsx-report 从 JSON 读判定结果 + 从产出物文件读上下文"},
       {"id": "R9", "summary": "HTML 新增 tdd 卡片：task 级红/绿/重构状态 + 汇总"},
       {"id": "R10", "summary": "HTML 新增 review 卡片：decision + findings + metrics"},
@@ -50,19 +43,18 @@
       {"r_id": "R12", "u_ids": ["U5"]}
     ],
     "units": [
-      {"id": "U1", "title": "plan-review / verify 退出契约精简"},
-      {"id": "U2", "title": "opsx-tdd 退出时写入 JSON"},
-      {"id": "U3", "title": "opsx-review 退出时写入 JSON"},
-      {"id": "U4", "title": "opsx-report 扩展到 4 stage"},
-      {"id": "U5", "title": "文档更新"}
+      {"id": "U1"},
+      {"id": "U2"},
+      {"id": "U3"},
+      {"id": "U4"},
+      {"id": "U5"}
     ]
   },
   "optional_refs": {
     "source_refs": [
-      {"path": "openspec/changes/2026-04-14-slim-run-report/proposal.md", "kind": "proposal"},
-      {"path": "openspec/changes/2026-04-14-slim-run-report/specs/slim-stage-data/spec.md", "kind": "spec"},
-      {"path": "openspec/changes/2026-04-14-slim-run-report/specs/report-4stage/spec.md", "kind": "spec"},
-      {"path": "openspec/changes/2026-04-14-slim-run-report/design.md", "kind": "design"}
+      {"path": "openspec/changes/archive/2026-04-14-slim-run-report/specs/slim-stage-data/spec.md", "kind": "spec"},
+      {"path": "openspec/changes/archive/2026-04-14-slim-run-report/specs/report-4stage/spec.md", "kind": "spec"},
+      {"path": "openspec/changes/archive/2026-04-14-slim-run-report/design.md", "kind": "design"}
     ],
     "knowledge_refs": {
       "codemap": [

@@ -6,9 +6,11 @@
 
 - 行动单元是 skill，不是阶段化命令。
 - 强制关卡写在 skill 本身里，以 skill 为真相源。
+- 每个 skill 必须明确声明自己读取哪些上游产物、写入哪些自身产物。
 - 规划、任务、实现、验证可以串成闭环，但不再需要额外命令包装层。
 - `change` 的默认粒度是**单一交付单元**；一个 change 下允许有多个 spec，但不应把多个可独立排期、独立上线的目标硬塞进同一个 change。
 - 是否拆成多个 change，优先在 `opsx-plan` 的创建前和 proposal/specs 初稿后判断；`opsx-task-analyze` 只做超大 change 的兜底拦截。
+- 共享状态保持最小化：可从权威产物稳定重建的内容，不应再缓存成中间知识。
 
 ## 公用知识如何共享
 
@@ -23,22 +25,24 @@
    - `archive` 结束时会强制回写 `knowledge` 和 `codemap`，让后续 workflow 继续复用这些知识。
    - 这两类知识都采用**事件驱动 freshness 管理**：命中时复核、漂移时标记 `stale`、被推翻时标记 `superseded`，而不是按时间自动过期。
 
-3. **change 级共享事实（Stage Packet Protocol）**
+3. **change 级运行状态与留档**
 
    change 运行期间产生的共享文件：
 
    | 文件 | 写入者 | 消费者 | 说明 |
    |------|--------|--------|------|
+   | `.openspec.yaml` | plan / plan-review / task-analyze / verify / review | continue / tasks / implement / verify / review / archive / report | change 的 common config；只保存 schema / gates 等最小状态 |
    | `test-report.md` | opsx-tdd（红/绿/重构追加） | opsx-verify（检查存在性与完整性） | TDD 任务的实时测试留档；无 TDD 任务时不产出 |
-   | `context/run-report-data.json` | opsx-plan-review、opsx-tdd、opsx-verify、opsx-review | opsx-report（渲染 HTML） | 各 stage 判定结果的持久化聚合 |
+   | `context/run-report-data.json` | opsx-plan-review、opsx-tdd、opsx-verify、opsx-review | opsx-report（渲染 HTML） | 各 stage 判定结果的持久化留档；不复制权威产物上下文 |
+   | `context/packet-<stage>.json` | opsx-plan-review、opsx-verify | 对应 stage 的 reviewer subagent | stage-local transport；仅服务当前 stage，不是共享知识层 |
    | `context/run-report.html` | opsx-report | 人工阅读 | self-contained HTML 报告，按需生成 |
 
-   权威源仍然是 `tasks.md`、`specs/`、`design.md`；上述文件只作留档和可观测层。
+   权威源始终是 `proposal.md`、`specs/`、`design.md`、`tasks.md`、`test-report.md` 和代码本身。共享文件只承担状态索引、执行留档或 stage-local 传输职责。
 
-   **Stage Packet Protocol**（详见 `docs/stage-packet-protocol.md`）是 gate review 的上下文传递机制，当前覆盖 `plan-review`、`tdd`、`verify`、`review` 四个 stage：
+   **Stage Packet Protocol**（详见 `docs/stage-packet-protocol.md`）是 gate review 的最小传输机制：
 
-   - **StagePacket**：主 agent 从产出物中组装的只读事实快照，通过 `context/packet-<stage>.json` 文件传递给 reviewer subagent
-     - `core_payload`：结构化摘要（需求全集、R→U 映射、产出物存在性、task 完成度等），subagent 的主要判断依据
+   - **StagePacket**：主 agent 从当前 stage 需要的上游产物中组装的只读事实快照，通过 `context/packet-<stage>.json` 文件传递给 reviewer subagent；当前只用于 `plan-review` 和 `verify`
+     - `core_payload`：当前 stage 高频使用、且不适合让 subagent 现算的结构化事实
      - `optional_refs`：文件路径引用（source_refs + knowledge_refs），subagent 按需回读，禁止超出此范围扫描
    - **StageResult**：reviewer subagent 的结构化输出（decision / findings / metrics），写回 `context/run-report-data.json`
    - **Packet Budget**：soft limit 2K / hard limit 4K tokens；超限按固定顺序降维（多行→一行 → 纯引用 → 计数压缩 → 分片）
