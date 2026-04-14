@@ -22,9 +22,9 @@ OpenSpec 工作流的单一真相源。所有 skill 以 Markdown 文件存放于
 | Skill | 角色 | 前置关卡 |
 |-------|------|----------|
 | `opsx-explore` | 思考伙伴，探索想法/调查问题/澄清需求，禁止写代码 | 无 |
-| `opsx-slice` | 在规划前切分交付单元，判断应保持一个 change 还是拆成多个 change | 无 |
-| `opsx-plan` | 创建 change 并生成规划产出物（proposal/design/specs），含 codemap/pitfalls 预加载 | 无 |
-| `opsx-continue` | 恢复中断的当前 change，按真实文件状态和 `gates.*` 路由下一合法步骤 | 无 |
+| `opsx-slice` | 创建父 change + subchanges，初始化每个 subchange 的 proposal，并定义执行拓扑（execution_mode / recommended_order / 可选 suggested_focus） | 无 |
+| `opsx-plan` | 为当前 resolved change root 生成/修订 specs + design，必要时小修 proposal | 无 |
+| `opsx-continue` | 恢复中断的当前 change；group 场景下先按 active_subchange，否则按 suggested_focus / recommended_order / 唯一 subchange 路由 | 无 |
 | `opsx-ff` | 快速生成全部产出物 + 三道关卡 + 实施 | 无 |
 | `opsx-plan-review` | spec↔plan 一致性审查（关卡1），硬性门控；派遣 1 个 subagent 直接读取 specs/+design.md，输出 StageResult JSON，写 audit-log.md | design 已生成 |
 | `opsx-tasks` | 将 design+specs 转化为带 TDD 标签的 tasks.md | `gates.plan-review` |
@@ -45,7 +45,7 @@ OpenSpec 工作流的单一真相源。所有 skill 以 Markdown 文件存放于
 ```
 explore ─── 需求澄清 ───┐
                          ▼
-slice ──── 交付切分 ─────┤
+slice ──── 父 change / subchanges / active_subchange ───┤
                          ▼
 plan / ff ──────────────→ proposal → specs → design
                                           │

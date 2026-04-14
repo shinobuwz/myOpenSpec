@@ -32,13 +32,14 @@
 
    | 文件 | 写入者 | 消费者 | 说明 |
    |------|--------|--------|------|
-   | `.openspec.yaml` | plan / plan-review / task-analyze / verify / review | continue / tasks / implement / verify / review / archive / report | change 的 common config；只保存 schema / gates 等最小状态 |
+   | `.openspec.group.yaml` | slice / continue | slice / plan / continue | 父 change 的最小拓扑与路由状态；保存 `execution_mode`、`recommended_order`、`suggested_focus` 及可选 `active_subchange` |
+   | `.openspec.yaml` | slice / plan / plan-review / task-analyze / verify / review | continue / tasks / implement / verify / review / archive / report | subchange 的 common config；只保存 schema / gates 等最小状态 |
    | `test-report.md` | opsx-tdd（红/绿/重构追加） | opsx-verify（检查存在性与完整性） | TDD 任务的实时测试留档；无 TDD 任务时不产出 |
    | `audit-log.md` | opsx-plan-review、opsx-task-analyze、opsx-verify（追加） | opsx-report（渲染 HTML） | 各 gate stage 链路正确性校验留档；pass 和 fail 均追加写入 |
    | `review-report.md` | opsx-review（追加） | opsx-report（渲染 HTML） | 代码审查结论留档；与结构符合性审查分开存放 |
    | `run-report.html` | opsx-report | 人工阅读 | self-contained HTML 报告，按需生成 |
 
-   权威源始终是 `proposal.md`、`specs/`、`design.md`、`tasks.md`、`test-report.md` 和代码本身。共享文件只承担状态索引和执行留档职责。
+   grouped change 场景下，父级 `index.md` + `.openspec.group.yaml` 负责切分与路由；subchange 下的 `proposal.md`、`specs/`、`design.md`、`tasks.md`、`test-report.md` 和代码本身仍是权威源。
 
    **Gate Review Protocol**（详见 `docs/stage-packet-protocol.md`）：
 
@@ -141,9 +142,9 @@ slice -> plan -> plan-review -> tasks -> task-analyze -> implement -> verify -> 
 
 ```text
 你：请使用 `opsx-slice` 看看 lucky-guess 应该怎么拆
-AI：已给出切分结论，建议先做 `2026-04-14-lucky-guess-mvp`
+AI：已创建父 change `2026-04-14-lucky-guess`，并写入 execution_mode=serial、recommended_order=01-mvp,02-tasks,03-rank
 
-你：请使用 `opsx-plan` 为 lucky-guess-mvp 创建变更
+你：请使用 `opsx-plan` 为 2026-04-14-lucky-guess 继续规划
 AI：已生成 proposal / specs / design
 
 你：请使用 `opsx-tasks`
@@ -179,5 +180,5 @@ AI：已归档，知识与 codemap 已更新
 ## 注意
 
 - 当前仓库没有独立的 `opsx-sync`、`opsx-onboard`、`opsx-bulk-archive` skill。
-- `opsx-continue` 不再维护独立状态机；它只读取真实文件状态和 `gates.*` 来恢复流程。
+- `opsx-continue` 不再维护独立状态机；它只读取 group/subchange 的真实文件状态和 `gates.*` 来恢复流程。
 - 如需判断当前真相源，请优先看 `.claude/skills/opsx-*/SKILL.md`。

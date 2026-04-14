@@ -5,6 +5,12 @@ description: 规划审查：检查 specs 需求是否完整进入 design。在 p
 
 # 规划审查：spec↔plan 一致性检查
 
+## Change Root 解析
+
+- `<name>` 可以是单个 change、父 change 或 `group/subchange` 简写。
+- 执行前先运行 `bash .claude/opsx/bin/changes.sh resolve <name>` 获取真实 change root。
+- 后文所有 `specs/**/*.md`、`design.md`、`audit-log.md`、`.openspec.yaml` 路径均指 resolved change root。
+
 ## 硬性门控
 
 **这是强制关卡。** 在本 skill 输出"通过"结论之前，禁止生成 tasks.md 或进入任何后续阶段。

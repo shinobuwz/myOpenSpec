@@ -3,6 +3,12 @@ name: opsx-review
 description: 使用 subagent 进行独立代码审查，输出质量指标和分级问题。当验证通过后需要更深入的代码质量评估时使用。
 ---
 
+## Change Root 解析
+
+- `<name>` 可以是单个 change、父 change 或 `group/subchange` 简写。
+- 执行前先运行 `bash .claude/opsx/bin/changes.sh resolve <name>` 获取真实 change root。
+- 后文所有 `proposal.md`、`review-report.md`、`.openspec.yaml` 路径均指 resolved change root。
+
 代码审查 Skill。使用 subagent 进行独立的代码审查，输出质量指标和分级问题列表。
 
 ## 输入 / 输出边界

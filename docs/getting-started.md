@@ -21,12 +21,17 @@
 openspec/
 ├── changes/
 │   └── <change-name>/
-│       ├── proposal.md
-│       ├── design.md
-│       ├── tasks.md
-│       └── specs/
-│           └── <domain>/
-│               └── spec.md
+│       ├── index.md                  # 父 change 总览（group 场景）
+│       ├── .openspec.group.yaml      # active_subchange 等最小路由状态
+│       └── subchanges/
+│           └── <subchange-name>/
+│               ├── proposal.md
+│               ├── design.md
+│               ├── tasks.md
+│               ├── .openspec.yaml
+│               └── specs/
+│                   └── <domain>/
+│                       └── spec.md
 └── config.yaml
 ```
 
@@ -88,11 +93,11 @@ opsx-plan
 ```text
 你：请使用 `opsx-slice` 判断会员中心改造要不要拆
 
-AI：建议拆成 2 个 change，当前先做 `profile-mvp`
+AI：已创建父 change 和 2 个 subchange，execution_mode=serial，recommended_order=01-profile-mvp,02-profile-security
 
-你：请使用 `opsx-plan` 为 profile-mvp 创建新变更
+你：请使用 `opsx-plan` 为 2026-04-10-profile-center 开始规划
 
-AI：已创建 openspec/changes/2026-04-10-profile-mvp/
+AI：已在 openspec/changes/2026-04-10-profile-center/subchanges/01-profile-mvp/
      ✓ proposal.md
      ✓ specs/profile/spec.md
      ✓ design.md
@@ -120,7 +125,7 @@ AI：正在处理任务...
 
 - `opsx-plan-review`、`opsx-task-analyze`、`opsx-verify` 是强制关卡。
 - 涉及全栈、多模块、多 capability 时，先使用 `opsx-slice` 再进入 `opsx-plan`。
-- `opsx-continue` 用于恢复中断的 change；它会自动检测当前状态并跳到下一合法步骤。
+- `opsx-continue` 用于恢复中断的 change；如果你传入父 change，它会先看 `active_subchange`，否则再按 `suggested_focus` / `recommended_order` / 唯一 subchange 路由。
 - 当前仓库不再维护 `.claude/commands/opsx/`。
 - 若其他旧文档仍出现 `/opsx:*`，请优先以 [支持的工具](supported-tools.md) 和 [工作流](workflows.md) 为准。
 

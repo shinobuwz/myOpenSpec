@@ -3,6 +3,12 @@ name: opsx-report
 description: 生成 change 的 RunReport HTML 报告。在任意时刻可按需触发。
 ---
 
+## Change Root 解析
+
+- `<name>` 可以是单个 change、父 change 或 `group/subchange` 简写。
+- 执行前先运行 `bash .claude/opsx/bin/changes.sh resolve <name>` 获取真实 change root。
+- 后文所有 `run-report.html`、`audit-log.md`、`review-report.md`、`.openspec.yaml` 路径均指 resolved change root。
+
 # RunReport HTML 生成
 
 从 `audit-log.md`、`test-report.md`、`review-report.md` 读取各 stage 的判定结果，结合产出物文件（specs/、design.md、tasks.md）渲染为 self-contained HTML 报告。

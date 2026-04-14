@@ -111,7 +111,7 @@ explore/plan 阶段收敛的核心决策（1-3 句）
 
 **Phase 2 - 探索**：使用 opsx-explore 探索方案并收敛设计
 
-**Phase 3 - 切分与规划**：复杂需求先用 opsx-slice 判断交付单元，再对选中的 slice 使用 opsx-plan 创建变更（生成 proposal + design + specs），plan-review 通过后由 opsx-tasks 生成 tasks，task-analyze 通过后进入实施
+**Phase 3 - 切分与规划**：复杂需求先用 opsx-slice 创建父 change + subchanges，并写入执行拓扑；随后对当前焦点 subchange 使用 opsx-plan 生成/修订 proposal + design + specs，plan-review 通过后由 opsx-tasks 生成 tasks，task-analyze 通过后进入实施
 
 **Phase 4 - 实施**：使用 opsx-implement 逐项实施
 

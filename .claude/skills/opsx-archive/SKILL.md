@@ -3,6 +3,12 @@ name: opsx-archive
 description: 归档已完成的变更。当用户想要在实现完成后最终确定并归档变更时使用。
 ---
 
+## Change Root 解析
+
+- `<name>` 可以是单个 change、父 change 或 `group/subchange` 简写。
+- 执行前先运行 `bash .claude/opsx/bin/changes.sh resolve <name>` 获取真实 change root。
+- grouped change 场景下，archive 归档的是当前 subchange；父 group 只有在所有 subchange 完成后才应整体归档。
+
 归档已完成的变更。
 
 **输入**：可选指定变更名称。如果省略，检查是否可以从对话上下文中推断。如果模糊或不明确，你**必须**提示获取可用变更。

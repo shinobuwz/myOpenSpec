@@ -3,7 +3,7 @@ name: opsx-plan
 description: 创建 OpenSpec change 并生成规划产出物（proposal/design/specs）。当需求已明确、准备进入规划阶段时使用。
 ---
 
-规划 Skill。创建 OpenSpec change 并生成规划阶段的产出物集合。
+规划 Skill。为当前选中的 change root 补齐规划产出物集合；在 grouped change 场景下，它主要消费 slice 已生成的 `proposal.md`，并专注于 `specs/` 与 `design.md`。
 
 ## 输入 / 输出边界
 
@@ -12,7 +12,7 @@ description: 创建 OpenSpec change 并生成规划产出物（proposal/design/s
 - `.aiknowledge/pitfalls/index.md` + 命中领域（按需）
 
 **产出：**
-- `proposal.md`（新建）
+- `proposal.md`（新建或基于 slice 已初始化的 proposal 小修）
 - `design.md`（新建）
 - `specs/<capability>/spec.md`（新建，可多个）
 - `.openspec.yaml`（新建，初始化 schema）
@@ -23,11 +23,21 @@ description: 创建 OpenSpec change 并生成规划产出物（proposal/design/s
 - 不要求在 plan 阶段执行 git 提交；只有用户明确要求时才提交
 - 如请求明显涉及全栈、多模块、多 capability 或用户正在纠结是否拆分 change，应先转入 `opsx-slice`
 
+## Change Root 解析
+
+- 用户输入的 `<name>` 可以是：
+  - 顶层单个 change：`2026-04-14-add-auth`
+  - 父 change：`2026-04-14-lucky-guess`
+  - subchange 简写：`2026-04-14-lucky-guess/01-auth`
+- 执行前必须先运行 `bash .claude/opsx/bin/changes.sh resolve <name>`，得到真实 change root。
+- 如果 `<name>` 是父 change，则优先用 `active_subchange`；若为空，再退化到 `suggested_focus`、`recommended_order` 的首项或唯一 subchange。
+- 后文所有 `proposal.md`、`design.md`、`specs/`、`tasks.md` 路径，均指 **resolved change root** 下的文件。
+
 ## 启动序列
 
 1. 确认需求已经过脑暴或探索阶段的澄清
 2. 执行 `bash .claude/opsx/bin/changes.sh` 检查是否已有相关变更（含阶段和进度）
-3. 如果用户已经经过 `opsx-slice`，先消费其切分结论，只为**当前选中的单一交付单元**做规划
+3. 如果用户已经经过 `opsx-slice`，先消费对应 subchange 的 `proposal.md`，只为**当前选中的单一交付单元**做规划
 4. 如果用户没有经过 `opsx-slice`，但当前范围明显就是一个单一交付单元，可继续；如果范围明显过大或存在多个弱依赖能力簇，停止并要求先执行 `opsx-slice`
 5. 先读 `.aiknowledge/codemap/index.md`，判断目标模块是否已有 codemap；已有则继续读对应 `<module>.md` 和必要的 `chains/*.md`，没有则先调用 `opsx-codemap`
 6. 读取 `.aiknowledge/pitfalls/index.md` 和相关领域的 `index.md`，在设计中规避已知陷阱
@@ -36,7 +46,8 @@ description: 创建 OpenSpec change 并生成规划产出物（proposal/design/s
 ## 流程
 
 ### 1. 创建变更
-- 使用 `bash .claude/opsx/bin/changes.sh init YYYY-MM-DD-<name> spec-driven` 创建新变更目录结构
+- 如果是未切分的小 change：使用 `bash .claude/opsx/bin/changes.sh init YYYY-MM-DD-<name> spec-driven` 创建新变更目录结构
+- 如果是 grouped change：不得重新创建 change；直接在 resolved subchange root 下继续
 - **变更名称必须带日期前缀**（如 `2026-04-03-add-auth`），便于按时间追溯
 - 名称部分简洁、描述性强，使用 kebab-case
 
@@ -47,6 +58,7 @@ description: 创建 OpenSpec change 并生成规划产出物（proposal/design/s
 - 问题陈述和目标
 - 范围界定（做什么、不做什么）
 - 成功标准
+- grouped change 场景下优先沿用 slice 已生成的 `proposal.md`，只在发现边界偏差时修订
 
 **design.md** - 设计
 - 架构方案和关键决策
