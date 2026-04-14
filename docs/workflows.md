@@ -24,23 +24,28 @@
    - 这两类知识都采用**事件驱动 freshness 管理**：命中时复核、漂移时标记 `stale`、被推翻时标记 `superseded`，而不是按时间自动过期。
 
 3. **change 级共享事实（Stage Packet Protocol）**
-   - `openspec/changes/<name>/context/knowledge-refs.md`
-   - `openspec/changes/<name>/context/review-scope.md`
-   - `openspec/changes/<name>/context/artifact-index.md`
-   - `openspec/changes/<name>/test-report.md`
-   - `openspec/changes/<name>/context/run-report-data.json`（stage packet + result 数据）
-   - `openspec/changes/<name>/context/run-report.html`（HTML 报告）
 
-   这些文件只作为当前 change 的声明层或留档层；权威源仍然是 `tasks.md`、`specs/`、`design.md`。
+   change 运行期间产生的共享文件：
 
-   在 gate review 中，`plan-review` 和 `verify` 使用 **Stage Packet Protocol**（详见 `docs/stage-packet-protocol.md`）：
-   - **StagePacket**：assembler 从产出物中组装的只读事实快照，分为 `core_payload`（结构化摘要）和 `optional_refs`（文件路径引用），供 subagent 消费
-   - **StageResult**：reviewer subagent 的结构化输出，包含 findings、metrics、decision
-   - **Packet Budget**：soft limit 2K / hard limit 4K tokens，超限按固定顺序降维
+   | 文件 | 写入者 | 消费者 | 说明 |
+   |------|--------|--------|------|
+   | `test-report.md` | opsx-tdd（红/绿/重构追加） | opsx-verify（检查存在性与完整性） | TDD 任务的实时测试留档；无 TDD 任务时不产出 |
+   | `context/run-report-data.json` | opsx-plan-review、opsx-tdd、opsx-verify、opsx-review | opsx-report（渲染 HTML） | 各 stage 判定结果的持久化聚合 |
+   | `context/run-report.html` | opsx-report | 人工阅读 | self-contained HTML 报告，按需生成 |
+
+   权威源仍然是 `tasks.md`、`specs/`、`design.md`；上述文件只作留档和可观测层。
+
+   **Stage Packet Protocol**（详见 `docs/stage-packet-protocol.md`）是 gate review 的上下文传递机制，当前覆盖 `plan-review`、`tdd`、`verify`、`review` 四个 stage：
+
+   - **StagePacket**：主 agent 从产出物中组装的只读事实快照，通过 `context/packet-<stage>.json` 文件传递给 reviewer subagent
+     - `core_payload`：结构化摘要（需求全集、R→U 映射、产出物存在性、task 完成度等），subagent 的主要判断依据
+     - `optional_refs`：文件路径引用（source_refs + knowledge_refs），subagent 按需回读，禁止超出此范围扫描
+   - **StageResult**：reviewer subagent 的结构化输出（decision / findings / metrics），写回 `context/run-report-data.json`
+   - **Packet Budget**：soft limit 2K / hard limit 4K tokens；超限按固定顺序降维（多行→一行 → 纯引用 → 计数压缩 → 分片）
    - **Lazy Hydration**：subagent 只能读取 packet 中列出的文件路径，禁止无边界全局扫描
-   - **Single Reviewer**：每个 gate stage 固定使用 1 个 reviewer subagent，避免多 reviewer 汇总开销
+   - **Single Reviewer**：每个 gate stage 固定 1 个 reviewer subagent，不做多 reviewer 仲裁
 
-   首版覆盖：plan-review 和 verify 两个 gate stage。按需使用 `/opsx:report` 生成 HTML 报告。
+   按需使用 `/opsx-report` 从 `run-report-data.json` 生成 HTML 报告。
 
 ## 典型模式
 

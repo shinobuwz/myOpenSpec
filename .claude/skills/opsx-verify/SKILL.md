@@ -164,9 +164,9 @@ subagent prompt 中已内联降级条件，规则如下：
 - 输出验证报告
 - **如果验证通过**：
   1. 在 `openspec/changes/<name>/.openspec.yaml` 的 `gates:` 下添加 `verify: "<ISO8601 时间戳>"`
-  2. 将 VerifyPacket + StageResult 写入 `openspec/changes/<name>/context/run-report-data.json`（追加式更新：不存在则创建，已存在且 JSON 合法则合并，JSON 损坏则中止并报错，见步骤 5）
+  2. 将 StageResult 的判定结果写入 `openspec/changes/<name>/context/run-report-data.json` 的 `stages.verify`（追加式更新：不存在则创建，已存在且 JSON 合法则合并，JSON 损坏则中止并报错，见步骤 5）。写入字段：`decision`、`findings`、`metrics`、`verified_at`。packet 文件（`packet-verify.json`）保持不变。
   3. 必须转入 **opsx-review** 进行代码审查。这不是建议，是强制要求。
 - **如果验证未通过**：
   1. 不写入 gates
-  2. 仍将 packet + result 写入 `context/run-report-data.json`（状态为 fail；JSON 损坏则中止并报错，见步骤 5）
+  2. 仍将 StageResult 判定结果写入 `context/run-report-data.json` 的 `stages.verify`（decision 为 fail；JSON 损坏则中止并报错，见步骤 5）
   3. 列出需要修复的问题，禁止继续后续流程。必须修复后重新执行 opsx-verify。

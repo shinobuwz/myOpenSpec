@@ -13,3 +13,4 @@
 | cli-removal-skill-drift | [CLI 删除后 skill 文件未同步更新](cli-removal-skill-drift.md) | active | 2026-04-13 | CLI, skill, 残留引用, sync.sh, prune |
 | verify-packet-source-refs-doc-kind-context | [VerifyPacket source_refs 中协议/工作流文档应使用 kind: "context"](verify-packet-source-refs-doc-kind-context.md) | active | 2026-04-13 | openspec, verify, source_refs, kind, context, code |
 | skill-exit-contract-must-reference-error-rules | [SKILL.md exit 契约必须显式引用前置步骤的错误处理规则](skill-exit-contract-must-reference-error-rules.md) | active | 2026-04-13 | SKILL.md, exit-contract, 错误处理, 覆盖缺口 |
+| skill-slash-command-syntax | [workflows.md 中 skill 引用使用连字符语法，不用冒号](skill-slash-command-syntax.md) | active | 2026-04-14 | skill, workflows, 语法, /opsx-report |

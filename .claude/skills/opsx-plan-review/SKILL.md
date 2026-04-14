@@ -134,11 +134,11 @@ subagent prompt 模板：
 
 - **如"通过"**：
   1. 写入门控状态：在 `openspec/changes/<name>/.openspec.yaml` 的 `gates:` 下添加 `plan-review: "<ISO8601 时间戳>"`
-  2. 将 PlanReviewPacket + StageResult 写入 `openspec/changes/<name>/context/run-report-data.json`（追加式更新：不存在则创建，已存在且 JSON 合法则合并，JSON 损坏则中止并报错，见步骤 5）
+  2. 将 StageResult 的判定结果写入 `openspec/changes/<name>/context/run-report-data.json` 的 `stages.plan-review`（追加式更新：不存在则创建，已存在且 JSON 合法则合并，JSON 损坏则中止并报错，见步骤 5）。写入字段：`decision`、`findings`、`metrics`、`reviewed_at`。packet 文件（`packet-plan-review.json`）保持不变。
   3. 必须转入 **opsx-tasks** 生成 tasks.md。这不是建议，是强制要求。
 - **如"需修正"**：
   1. 不写入 gates
-  2. 仍将 packet + result 写入 `context/run-report-data.json`（状态为 fail；JSON 损坏则中止并报错，见步骤 5）
+  2. 仍将 StageResult 判定结果写入 `context/run-report-data.json` 的 `stages.plan-review`（decision 为 fail；JSON 损坏则中止并报错，见步骤 5）
   3. 必须回到 **opsx-plan** 修正 design.md 和 specs/。禁止跳过直接生成 tasks
   4. COARSE_R 问题需在 specs 中将粗粒度需求拆分为多条独立需求后重新审查
   5. DUPLICATE_R 问题需在所有相关 spec 文件中统一重新编号后重审

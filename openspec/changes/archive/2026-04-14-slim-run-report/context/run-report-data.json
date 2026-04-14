@@ -1,0 +1,33 @@
+{
+  "run_id": "2026-04-14T14:30:00Z-c7d8e9",
+  "change_id": "2026-04-14-slim-run-report",
+  "stages": {
+    "plan-review": {
+      "decision": "pass_with_warnings",
+      "findings": [
+        {"id": "F1", "severity": "warning", "dimension": "COARSE_R", "message": "R8 同时描述两个独立行为：从 JSON 读判定结果 + 从产出物读上下文", "trace_id": "R8"},
+        {"id": "F2", "severity": "warning", "dimension": "COARSE_R", "message": "R12 同时描述两处独立文档变更", "trace_id": "R12"}
+      ],
+      "metrics": {"findings_total": 2, "critical": 0, "warning": 2, "suggestion": 0},
+      "reviewed_at": "2026-04-14T14:35:00Z"
+    },
+    "verify": {
+      "decision": "pass_with_warnings",
+      "findings": [
+        {"id": "F1", "severity": "warning", "dimension": "VERIFY_CORRECTNESS", "message": "workflows.md 旧 2-stage 覆盖描述（已修复）", "trace_id": "R12"},
+        {"id": "F2", "severity": "warning", "dimension": "VERIFY_CORRECTNESS", "message": "stage-packet-protocol.md 引言旧 2-stage 描述（已修复）", "trace_id": "R12"}
+      ],
+      "metrics": {"findings_total": 2, "critical": 0, "warning": 2, "suggestion": 0},
+      "verified_at": "2026-04-14T15:10:00Z"
+    },
+    "review": {
+      "decision": "pass_with_warnings",
+      "findings": [
+        {"severity": "warning", "category": "documentation", "message": "opsx-implement SKILL.md subagent prompt 含未替换的 <name> 占位符（已有问题，不在本次变更范围）", "file_path": ".claude/skills/opsx-implement/SKILL.md"},
+        {"severity": "suggestion", "category": "documentation", "message": "workflows.md 表格写入者列未包含 tdd/review（已修复）", "file_path": "docs/workflows.md"}
+      ],
+      "metrics": {"findings_total": 2, "critical": 0, "warning": 1, "suggestion": 1},
+      "reviewed_at": "2026-04-14T15:20:00Z"
+    }
+  }
+}
