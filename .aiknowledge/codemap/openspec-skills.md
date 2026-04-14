@@ -17,11 +17,12 @@ superseded_by:
 ## 职责
 OpenSpec 工作流的单一真相源。所有 skill 以 Markdown 文件存放于 `.claude/skills/<name>/SKILL.md`，由 `scripts/sync.sh` 分发到目标仓库。
 
-## Skill 清单（17 个）
+## Skill 清单（18 个）
 
 | Skill | 角色 | 前置关卡 |
 |-------|------|----------|
 | `opsx-explore` | 思考伙伴，探索想法/调查问题/澄清需求，禁止写代码 | 无 |
+| `opsx-slice` | 在规划前切分交付单元，判断应保持一个 change 还是拆成多个 change | 无 |
 | `opsx-plan` | 创建 change 并生成规划产出物（proposal/design/specs），含 codemap/pitfalls 预加载 | 无 |
 | `opsx-continue` | 恢复中断的当前 change，按真实文件状态和 `gates.*` 路由下一合法步骤 | 无 |
 | `opsx-ff` | 快速生成全部产出物 + 三道关卡 + 实施 | 无 |
@@ -43,6 +44,8 @@ OpenSpec 工作流的单一真相源。所有 skill 以 Markdown 文件存放于
 
 ```
 explore ─── 需求澄清 ───┐
+                         ▼
+slice ──── 交付切分 ─────┤
                          ▼
 plan / ff ──────────────→ proposal → specs → design
                                           │

@@ -221,10 +221,10 @@ openspec/changes/add-dark-mode/
 ### 制品流程
 
 ```
-proposal ──────► specs ──────► design ──────► tasks ──────► implement
-    │               │             │              │
-   为什么           改变什么      如何做          实施步骤
- + 范围           变化          方法           要执行
+slice ──────► proposal ──────► specs ──────► design ──────► tasks ──────► implement
+   │              │               │             │              │
+切哪些 change      为什么           改变什么      如何做          实施步骤
+当前做哪个         范围             变化          方法           要执行
 ```
 
 制品相互构建。每个制品为下一个提供上下文。
@@ -460,7 +460,7 @@ artifacts:
 规范驱动开发的标准工作流：
 
 ```
-proposal → specs → design → plan-review → tasks → task-analyze → implement
+slice（复杂需求时） → proposal → specs → design → plan-review → tasks → task-analyze → implement
 ```
 
 最适合：大多数功能工作，希望在实施前完成需求、设计和任务的一致性检查。
@@ -557,7 +557,7 @@ openspec/
 │                              OPENSPEC 流程                                   │
 │                                                                              │
 │   ┌────────────────┐                                                         │
-│   │  1. 开始        │  `opsx-plan` 创建变更文件夹                               │
+│   │  1. 切分        │  `opsx-slice` 判断是否拆成多个 change                      │
 │   │    变更         │                                                         │
 │   └───────┬────────┘                                                         │
 │           │                                                                  │
