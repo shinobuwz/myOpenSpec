@@ -1,0 +1,68 @@
+{
+  "version": 1,
+  "run_id": "2026-04-14T06:00:00Z-a3f9b1",
+  "change_id": "2026-04-14-simplify-skill-artifacts",
+  "stage": "plan-review",
+  "packet_id": "plan-review-001",
+  "created_at": "2026-04-14T06:00:05Z",
+  "producer": "main-agent",
+  "budget": {
+    "estimated_tokens": 320,
+    "soft_limit": 2000,
+    "hard_limit": 4000,
+    "truncated_fields": [],
+    "shard_count": 1
+  },
+  "core_payload": {
+    "requirements": [
+      {"id": "R1",  "summary": "opsx-plan 声明 I/O 边界"},
+      {"id": "R2",  "summary": "opsx-tasks 声明 I/O 边界"},
+      {"id": "R3",  "summary": "opsx-task-analyze 声明 I/O 边界"},
+      {"id": "R4",  "summary": "opsx-implement 声明 I/O 边界"},
+      {"id": "R5",  "summary": "opsx-plan-review 直接读源文件，不组装 packet"},
+      {"id": "R6",  "summary": "opsx-verify 直接读源文件，不组装 packet"},
+      {"id": "R7",  "summary": "opsx-implement 用 tasks.md [x] 跟踪进度"},
+      {"id": "R8",  "summary": "opsx-tdd 只写 test-report.md"},
+      {"id": "R9",  "summary": "opsx-review 写入 review-report.md"},
+      {"id": "R10", "summary": "简化 stage-packet-protocol.md，去掉 Packet schema"},
+      {"id": "R11", "summary": "opsx-plan-review 追加修正记录到 audit-log.md"},
+      {"id": "R12", "summary": "opsx-task-analyze 追加修正记录到 audit-log.md"},
+      {"id": "R13", "summary": "opsx-verify 追加修正记录到 audit-log.md"},
+      {"id": "R14", "summary": "audit-log.md 条目格式统一规范"},
+      {"id": "R15", "summary": "opsx-report 从 audit-log.md 读取 gate 结果"}
+    ],
+    "trace_mapping": [
+      {"r_id": "R1",  "u_ids": ["U1"]},
+      {"r_id": "R2",  "u_ids": ["U2"]},
+      {"r_id": "R3",  "u_ids": ["U3"]},
+      {"r_id": "R4",  "u_ids": ["U4"]},
+      {"r_id": "R5",  "u_ids": ["U5"]},
+      {"r_id": "R6",  "u_ids": ["U6"]},
+      {"r_id": "R7",  "u_ids": ["U4"]},
+      {"r_id": "R8",  "u_ids": ["U7"]},
+      {"r_id": "R9",  "u_ids": ["U8"]},
+      {"r_id": "R10", "u_ids": ["U9"]},
+      {"r_id": "R11", "u_ids": ["U5"]},
+      {"r_id": "R12", "u_ids": ["U3"]},
+      {"r_id": "R13", "u_ids": ["U6"]},
+      {"r_id": "R14", "u_ids": ["U3", "U5", "U6"]},
+      {"r_id": "R15", "u_ids": ["U10"]}
+    ],
+    "units": [
+      {"id": "U1"},  {"id": "U2"},  {"id": "U3"},  {"id": "U4"},  {"id": "U5"},
+      {"id": "U6"},  {"id": "U7"},  {"id": "U8"},  {"id": "U9"},  {"id": "U10"}
+    ]
+  },
+  "optional_refs": {
+    "source_refs": [
+      {"path": "openspec/changes/2026-04-14-simplify-skill-artifacts/specs/explicit-io-boundaries/spec.md", "kind": "spec"},
+      {"path": "openspec/changes/2026-04-14-simplify-skill-artifacts/specs/direct-source-reads/spec.md", "kind": "spec"},
+      {"path": "openspec/changes/2026-04-14-simplify-skill-artifacts/specs/unified-audit-log/spec.md", "kind": "spec"},
+      {"path": "openspec/changes/2026-04-14-simplify-skill-artifacts/design.md", "kind": "design"}
+    ],
+    "knowledge_refs": {
+      "codemap": [{"module": "openspec-skills", "path": ".aiknowledge/codemap/openspec-skills.md"}],
+      "pitfalls": [{"domain": "misc", "path": ".aiknowledge/pitfalls/misc/index.md"}]
+    }
+  }
+}
