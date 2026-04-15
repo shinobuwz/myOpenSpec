@@ -166,7 +166,7 @@ subagent 只读取代码和文档，不做任何修改。审查结果由 subagen
      - <每条 finding，格式：[severity] category: message (file_path)>
      无发现时写"无发现"
      ```
-  3. 建议用户使用 opsx-archive 归档
+  3. 必须转入 **opsx-archive** 归档。这不是建议，是强制要求。
 - **如果有 CRITICAL 问题**：
   1. 不写入 gates
   2. 将审查结果追加到 `openspec/changes/<name>/review-report.md`（新建或追加），追加一节：
