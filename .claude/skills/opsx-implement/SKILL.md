@@ -59,19 +59,21 @@ Agent({
 ## 输入
 读取 openspec/changes/<name>/tasks.md 找到第一个 [ ] 任务作为起点，恢复实施进度。
 读取 openspec/changes/<name>/design.md 和 openspec/changes/<name>/specs/**/*.md 理解设计意图和需求。
+读取 .claude/skills/opsx-tdd/SKILL.md，掌握 TDD 红绿重构循环规则和 test-report.md 格式规范。这是 test-report.md 写入的唯一权威格式定义，必须严格遵守。
 
 ## 实施规则
 按 tasks.md 顺序逐一实施，对每个任务：
 1. 读取 design.md 和 specs/ 中对应部分理解设计意图
 2. 先校验依赖（blockedBy 中列出的前置任务均已 [x]）；如未完成则暂停并报告 task 依赖异常
-3. 按执行方式标签执行：
-   - test-first：先写失败测试 → 实现 → 确认测试通过
-   - characterization-first：先固化旧行为测试 → 再修改代码
-   - direct：纯配置/脚手架场景直接执行
+3. 按执行方式标签执行（详细规则见 opsx-tdd/SKILL.md）：
+   - test-first：严格执行红→绿→重构循环，每个阶段完成后立即追加写入 test-report.md
+   - characterization-first：先固化旧行为测试，再修改代码，同样按红→绿→重构追加写入
+   - direct：纯配置/脚手架场景直接执行，无需写入 test-report.md
 4. 确保每条非 [manual] 验收标准有对应测试或显式"不需要测试"理由
 5. [manual] 验收标准不阻塞 task 完成，但必须在 test-report.md 中记录到「⏳ 待人工验证」清单
 6. 每完成一个任务，立即在 tasks.md 中将该任务的 [ ] 改为 [x]
 7. 不要求在 implement 阶段执行 git commit；只有用户明确要求时才提交
+8. 禁止事后汇总：test-report.md 必须在每个 TDD 阶段完成时实时追加，禁止在所有任务完成后一次性生成
 
 ## 完成后报告
 每个任务：修改了哪些文件、测试结果（通过/失败数）、是否产生 commit；并输出最终任务完成情况摘要`
