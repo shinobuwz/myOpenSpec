@@ -82,6 +82,8 @@ ls src/**/*.test.* tests/ test/ __tests__/ 2>/dev/null | head -5
 
 ## tasks.md 格式
 
+**一个 Task 只允许一个执行方式标签。** 如果一个功能区块同时需要 `[characterization-first]`（保护旧行为）和 `[test-first]`（驱动新行为），必须拆成两个独立 Task，各自持有单一标签。混合标签说明它是两个不同性质的工作。
+
 每个 task 必须包含以下字段：
 
 ```markdown
@@ -95,10 +97,15 @@ ls src/**/*.test.* tests/ test/ __tests__/ 2>/dev/null | head -5
 
 **验收标准**：
 - [ ] <具体可验证的标准 1>
+- [ ] [manual] <需要人工验证的标准，说明验证方法>
 - [ ] <具体可验证的标准 2>
 
 **依赖**：Task M（如有）
 ```
+
+### `[manual]` 标注规则
+
+当验收标准无法通过自动化测试验证时（如需要特定设备、网络环境、UI 交互、第三方服务），在该条前加 `[manual]`。标注时必须附带验证方法描述（如"弱网环境下观察重连行为"）。`[manual]` 项不影响 TDD 标签选择——一个 `[test-first]` task 可以同时包含自动化和人工验收标准。
 
 ## 禁止模式
 
@@ -111,6 +118,7 @@ ls src/**/*.test.* tests/ test/ __tests__/ 2>/dev/null | head -5
 | task 没有"涉及文件"字段 | 无法验证实现边界 |
 | task 没有验收标准 | 无法判断完成 |
 | `[test-first]` task 的涉及文件里没有测试文件 | 缺失测试路径 |
+| 同一 Task 内混合 `[test-first]` 和 `[characterization-first]` 子步骤 | 两种 TDD 模式是不同性质的工作，必须拆为独立 Task |
 
 ## 完成条件
 
@@ -122,4 +130,4 @@ ls src/**/*.test.* tests/ test/ __tests__/ 2>/dev/null | head -5
 ## 退出契约
 
 - **必须**转入 **opsx-task-analyze** 进行 plan↔tasks 一致性审查。这不是建议，是强制要求。
-- 输出摘要：生成了几个 task，其中 test-first/characterization-first/direct 各几个
+- 输出摘要：生成了几个 task，其中 test-first/characterization-first/direct 各几个，包含 `[manual]` 验收标准的 task 数量
