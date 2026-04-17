@@ -15,4 +15,4 @@
 | skill-exit-contract-must-reference-error-rules | [SKILL.md exit 契约必须显式引用前置步骤的错误处理规则](skill-exit-contract-must-reference-error-rules.md) | active | 2026-04-13 | SKILL.md, exit-contract, 错误处理, 覆盖缺口 |
 | skill-slash-command-syntax | [workflows.md 中 skill 引用使用连字符语法，不用冒号](skill-slash-command-syntax.md) | active | 2026-04-14 | skill, workflows, 语法, /opsx-report |
 | artifact-as-source-of-truth | [产物文件即真相源，subagent 直接读上游产物，不经 JSON 中间层](artifact-as-source-of-truth.md) | active | 2026-04-14 | openspec, skill-design, data-model, packet, audit-log |
-| changes-sh-project-first-global-fallback | [changes.sh 默认路径应项目优先并回退到 ~/.claude](changes-sh-project-first-global-fallback.md) | active | 2026-04-17 | changes.sh, path resolution, project-first, global fallback |
+| changes-sh-project-changes-global-schemas | [changes.sh 中 changes 必须项目级，只有 schemas 可回退全局](changes-sh-project-changes-global-schemas.md) | active | 2026-04-17 | changes.sh, changes, schemas, project scope, global fallback |
