@@ -14,8 +14,18 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../../.." && pwd)"
-CHANGES_DIR="$REPO_ROOT/openspec/changes"
-SCHEMAS_DIR="$REPO_ROOT/.claude/opsx/schemas"
+PROJECT_CHANGES_DIR="$REPO_ROOT/openspec/changes"
+PROJECT_SCHEMAS_DIR="$REPO_ROOT/.claude/opsx/schemas"
+GLOBAL_CHANGES_DIR="$HOME/.claude/openspec/changes"
+GLOBAL_SCHEMAS_DIR="$HOME/.claude/opsx/schemas"
+
+READ_CHANGES_DIR="$PROJECT_CHANGES_DIR"
+READ_SCHEMAS_DIR="$PROJECT_SCHEMAS_DIR"
+WRITE_CHANGES_DIR="$PROJECT_CHANGES_DIR"
+WRITE_SCHEMAS_DIR="$PROJECT_SCHEMAS_DIR"
+
+[ -d "$PROJECT_CHANGES_DIR" ] || READ_CHANGES_DIR="$GLOBAL_CHANGES_DIR"
+[ -d "$PROJECT_SCHEMAS_DIR" ] || READ_SCHEMAS_DIR="$GLOBAL_SCHEMAS_DIR"
 
 usage() {
   cat <<'EOF'
@@ -46,12 +56,12 @@ EOF
 }
 
 ensure_changes_dir() {
-  mkdir -p "$CHANGES_DIR"
+  mkdir -p "$WRITE_CHANGES_DIR"
 }
 
 schema_exists() {
   local schema="$1"
-  [ -f "$SCHEMAS_DIR/$schema/schema.yaml" ]
+  [ -f "$READ_SCHEMAS_DIR/$schema/schema.yaml" ]
 }
 
 is_group_dir() {
@@ -132,14 +142,14 @@ resolve_target_dir() {
   if [[ "$target" == */* ]]; then
     local group="${target%%/*}"
     local subchange="${target#*/}"
-    candidate="$CHANGES_DIR/$group/subchanges/$subchange"
+    candidate="$READ_CHANGES_DIR/$group/subchanges/$subchange"
     [ -f "$candidate/.openspec.yaml" ] && {
       printf "%s\n" "$candidate"
       return 0
     }
   fi
 
-  candidate="$CHANGES_DIR/$target"
+  candidate="$READ_CHANGES_DIR/$target"
   if [ -f "$candidate/.openspec.yaml" ]; then
     printf "%s\n" "$candidate"
     return 0
@@ -268,7 +278,7 @@ print_group() {
 }
 
 list_changes() {
-  if [ ! -d "$CHANGES_DIR" ]; then
+  if [ ! -d "$READ_CHANGES_DIR" ]; then
     echo "无活动变更"
     return 0
   fi
@@ -277,7 +287,7 @@ list_changes() {
   while IFS= read -r -d '' d; do
     [[ "$(basename "$d")" == "archive" ]] && continue
     active+=("$d")
-  done < <(find "$CHANGES_DIR" -mindepth 1 -maxdepth 1 -type d -not -name "archive" -print0 | sort -z)
+  done < <(find "$READ_CHANGES_DIR" -mindepth 1 -maxdepth 1 -type d -not -name "archive" -print0 | sort -z)
 
   if [ ${#active[@]} -eq 0 ]; then
     echo "无活动变更"
@@ -310,13 +320,13 @@ init_change() {
   fi
 
   if ! schema_exists "$schema"; then
-    echo "错误: 找不到 schema '$schema' ($SCHEMAS_DIR/$schema/schema.yaml)" >&2
+    echo "错误: 找不到 schema '$schema' ($READ_SCHEMAS_DIR/$schema/schema.yaml)" >&2
     exit 1
   fi
 
   ensure_changes_dir
 
-  local change_dir="$CHANGES_DIR/$name"
+  local change_dir="$WRITE_CHANGES_DIR/$name"
   local meta_file="$change_dir/.openspec.yaml"
   local created
   created="$(date +%F)"
@@ -349,7 +359,7 @@ init_group() {
 
   ensure_changes_dir
 
-  local group_dir="$CHANGES_DIR/$name"
+  local group_dir="$WRITE_CHANGES_DIR/$name"
   local meta_file="$group_dir/.openspec.group.yaml"
   local created
   created="$(date +%F)"
@@ -402,11 +412,11 @@ init_subchange() {
   fi
 
   if ! schema_exists "$schema"; then
-    echo "错误: 找不到 schema '$schema' ($SCHEMAS_DIR/$schema/schema.yaml)" >&2
+    echo "错误: 找不到 schema '$schema' ($READ_SCHEMAS_DIR/$schema/schema.yaml)" >&2
     exit 1
   fi
 
-  local group_dir="$CHANGES_DIR/$group_name"
+  local group_dir="$WRITE_CHANGES_DIR/$group_name"
   if ! is_group_dir "$group_dir"; then
     echo "错误: 父 change '$group_name' 不存在或不是 group" >&2
     exit 1
@@ -439,7 +449,7 @@ set_active_subchange() {
     exit 1
   fi
 
-  local group_dir="$CHANGES_DIR/$group_name"
+  local group_dir="$WRITE_CHANGES_DIR/$group_name"
   local meta_file="$group_dir/.openspec.group.yaml"
 
   if ! is_group_dir "$group_dir"; then
@@ -467,7 +477,7 @@ set_suggested_focus() {
     exit 1
   fi
 
-  local group_dir="$CHANGES_DIR/$group_name"
+  local group_dir="$WRITE_CHANGES_DIR/$group_name"
   local meta_file="$group_dir/.openspec.group.yaml"
 
   if ! is_group_dir "$group_dir"; then
@@ -503,7 +513,7 @@ set_execution_mode() {
       ;;
   esac
 
-  local group_dir="$CHANGES_DIR/$group_name"
+  local group_dir="$WRITE_CHANGES_DIR/$group_name"
   local meta_file="$group_dir/.openspec.group.yaml"
   if ! is_group_dir "$group_dir"; then
     echo "错误: 父 change '$group_name' 不存在或不是 group" >&2
@@ -524,7 +534,7 @@ set_recommended_order() {
     exit 1
   fi
 
-  local group_dir="$CHANGES_DIR/$group_name"
+  local group_dir="$WRITE_CHANGES_DIR/$group_name"
   local meta_file="$group_dir/.openspec.group.yaml"
   if ! is_group_dir "$group_dir"; then
     echo "错误: 父 change '$group_name' 不存在或不是 group" >&2
