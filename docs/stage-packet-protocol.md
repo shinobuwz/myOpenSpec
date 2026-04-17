@@ -99,9 +99,28 @@ StageResult 是 reviewer subagent 的结构化输出。
 
 | stage | 写入者 | 写入时机 |
 |-------|--------|----------|
+| `slice` | opsx-slice | 切分决策完成后（记录 SPLIT/KEEP/NEED_EXPLORE 决策和理由） |
 | `plan-review` | opsx-plan-review | 审查完成后（pass 和 fail 均写入） |
 | `task-analyze` | opsx-task-analyze | 分析完成后（pass 和 fail 均写入） |
 | `verify` | opsx-verify | 验证完成后（pass 和 fail 均写入） |
 
 `opsx-tdd` 不写 `audit-log.md`，其状态在 `test-report.md` 中留档。  
 `opsx-review` 不写 `audit-log.md`，其状态在 `review-report.md` 中留档。
+
+### 2.4 Warning / Critical 处理模型
+
+Gate stage 的 findings 按 severity 分为三级，主 agent 根据级别决定处理方式：
+
+| severity | 阻断？ | 主 agent 行为 | audit-log decision |
+|----------|--------|--------------|-------------------|
+| suggestion | 否 | 记录但不修正 | pass |
+| warning | 否 | 当轮自行修正，修正内容记入"修正"字段 | pass（含修正） |
+| critical | 是 | 禁止自行修正，必须路由回上游 skill | fail |
+
+判定规则：
+
+- **pass**：无 findings，或仅有 suggestion
+- **pass（含修正）**：有 warning 但无 critical，主 agent 已在当轮修正全部 warning，修正内容逐条列入"修正"字段
+- **fail**：存在任意 critical finding
+
+注：StageResult JSON 中 subagent 可输出 `pass_with_warnings` decision，表示"有 warning 但无 critical"。主 agent 收到后应尝试修正 warning，修正成功则 audit-log 写 `pass`，修正失败则升级为 `fail`。

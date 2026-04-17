@@ -9,7 +9,8 @@
 - 每个 skill 必须明确声明自己读取哪些上游产物、写入哪些自身产物。
 - 规划、任务、实现、验证可以串成闭环，但不再需要额外命令包装层。
 - `change` 的默认粒度是**单一交付单元**；一个 change 下允许有多个 spec，但不应把多个可独立排期、独立上线的目标硬塞进同一个 change。
-- 是否拆成多个 change，优先在 `opsx-plan` 的创建前和 proposal/specs 初稿后判断；`opsx-task-analyze` 只做超大 change 的兜底拦截。
+- 多模块、全栈、多 capability 需求，优先使用 `opsx-slice` 做切分，再进入 `opsx-plan`。
+- 是否拆成多个 change，优先在 `opsx-slice` 和 `opsx-plan` 的 proposal/specs 初稿后判断；`opsx-task-analyze` 只做超大 change 的兜底拦截。
 - 共享状态保持最小化：可从权威产物稳定重建的内容，不应再缓存成中间知识。
 
 ## 公用知识如何共享
@@ -20,8 +21,8 @@
    - `openspec/config.yaml` 的 `context:` 和 `rules:` 会为规划类产出物提供统一约束。
 
 2. **长期共享知识**
-   - `.aiknowledge/codemap/` 保存模块地图、关键文件和跨模块链路，供 `explore`、`plan`、`implement`、`bugfix` 复用。
-   - `.aiknowledge/pitfalls/` 保存可复用经验，供 `plan`、`tdd`、`bugfix` 复用。
+   - `.aiknowledge/codemap/` 保存模块地图、关键文件和跨模块链路，供 `explore`、`slice`、`plan`、`implement`、`bugfix` 复用。
+   - `.aiknowledge/pitfalls/` 保存可复用经验，供 `slice`、`plan`、`tdd`、`bugfix` 复用。
    - `archive` 结束时会强制回写 `knowledge` 和 `codemap`，让后续 workflow 继续复用这些知识。
    - 这两类知识都采用**事件驱动 freshness 管理**：命中时复核、漂移时标记 `stale`、被推翻时标记 `superseded`，而不是按时间自动过期。
 
@@ -31,13 +32,14 @@
 
    | 文件 | 写入者 | 消费者 | 说明 |
    |------|--------|--------|------|
-   | `.openspec.yaml` | plan / plan-review / task-analyze / verify / review | continue / tasks / implement / verify / review / archive / report | change 的 common config；只保存 schema / gates 等最小状态 |
+   | `.openspec.group.yaml` | slice / continue | slice / plan / continue | 父 change 的最小拓扑与路由状态；保存 `execution_mode`、`recommended_order`、`suggested_focus` 及可选 `active_subchange` |
+   | `.openspec.yaml` | slice / plan / plan-review / task-analyze / verify / review | continue / tasks / implement / verify / review / archive / report | subchange 的 common config；只保存 schema / gates 等最小状态 |
    | `test-report.md` | opsx-tdd（红/绿/重构追加） | opsx-verify（检查存在性与完整性） | TDD 任务的实时测试留档；无 TDD 任务时不产出 |
    | `audit-log.md` | opsx-plan-review、opsx-task-analyze、opsx-verify（追加） | opsx-report（渲染 HTML） | 各 gate stage 链路正确性校验留档；pass 和 fail 均追加写入 |
    | `review-report.md` | opsx-review（追加） | opsx-report（渲染 HTML） | 代码审查结论留档；与结构符合性审查分开存放 |
    | `run-report.html` | opsx-report | 人工阅读 | self-contained HTML 报告，按需生成 |
 
-   权威源始终是 `proposal.md`、`specs/`、`design.md`、`tasks.md`、`test-report.md` 和代码本身。共享文件只承担状态索引和执行留档职责。
+   grouped change 场景下，父级 `index.md` + `.openspec.group.yaml` 负责切分与路由；subchange 下的 `proposal.md`、`specs/`、`design.md`、`tasks.md`、`test-report.md` 和代码本身仍是权威源。
 
    **Gate Review Protocol**（详见 `docs/stage-packet-protocol.md`）：
 
@@ -54,6 +56,7 @@
 
 ```text
 opsx-explore
+-> opsx-slice
 -> opsx-plan
 -> opsx-plan-review
 -> opsx-tasks
@@ -70,7 +73,27 @@ opsx-explore
 - 需要先调查代码库
 - 需要先做方案对比
 
-### 2. 直接推进
+### 2. 先切分再推进
+
+```text
+opsx-slice
+-> opsx-plan
+-> opsx-plan-review
+-> opsx-tasks
+-> opsx-task-analyze
+-> opsx-implement
+-> opsx-verify
+-> opsx-review
+-> opsx-archive
+```
+
+适合：
+
+- 需求已经明确，但 scope 涉及多个模块
+- 需要先判断是一个 change 还是多个 change
+- 不希望把多个独立交付单元硬塞进同一个计划
+
+### 3. 直接推进
 
 ```text
 opsx-plan
@@ -88,7 +111,7 @@ opsx-plan
 - 功能边界已经明确
 - 只需要快速进入规划和实现
 
-### 3. 明确缺陷修复
+### 4. 明确缺陷修复
 
 ```text
 opsx-bugfix
@@ -112,13 +135,16 @@ opsx-bugfix
 推荐顺序：
 
 ```text
-plan -> plan-review -> tasks -> task-analyze -> implement -> verify -> review -> archive
+slice -> plan -> plan-review -> tasks -> task-analyze -> implement -> verify -> review -> archive
 ```
 
 ## 示例
 
 ```text
-你：请使用 `opsx-plan` 为 add-dark-mode 创建变更
+你：请使用 `opsx-slice` 看看 lucky-guess 应该怎么拆
+AI：已创建父 change `2026-04-14-lucky-guess`，并写入 execution_mode=serial、recommended_order=01-mvp,02-tasks,03-rank
+
+你：请使用 `opsx-plan` 为 2026-04-14-lucky-guess 继续规划
 AI：已生成 proposal / specs / design
 
 你：请使用 `opsx-tasks`
@@ -142,6 +168,7 @@ AI：已归档，知识与 codemap 已更新
 | 场景 | 推荐 skill |
 |------|------------|
 | 需求模糊，先聊思路 | `opsx-explore` |
+| 全栈 / 多模块需求，先判断怎么拆 | `opsx-slice` |
 | 创建新 change | `opsx-plan` |
 | 恢复中断的当前 change | `opsx-continue` |
 | 一次性推进完整规划 | `opsx-ff` |
@@ -153,5 +180,5 @@ AI：已归档，知识与 codemap 已更新
 ## 注意
 
 - 当前仓库没有独立的 `opsx-sync`、`opsx-onboard`、`opsx-bulk-archive` skill。
-- `opsx-continue` 不再维护独立状态机；它只读取真实文件状态和 `gates.*` 来恢复流程。
+- `opsx-continue` 不再维护独立状态机；它只读取 group/subchange 的真实文件状态和 `gates.*` 来恢复流程。
 - 如需判断当前真相源，请优先看 `.claude/skills/opsx-*/SKILL.md`。

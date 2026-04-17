@@ -5,6 +5,12 @@ description: 规划审查：检查 specs 需求是否完整进入 design。在 p
 
 # 规划审查：spec↔plan 一致性检查
 
+## Change Root 解析
+
+- `<name>` 可以是单个 change、父 change 或 `group/subchange` 简写。
+- 执行前先运行 `bash .claude/opsx/bin/changes.sh resolve <name>` 获取真实 change root。
+- 后文所有 `specs/**/*.md`、`design.md`、`audit-log.md`、`.openspec.yaml` 路径均指 resolved change root。
+
 ## 硬性门控
 
 **这是强制关卡。** 在本 skill 输出"通过"结论之前，禁止生成 tasks.md 或进入任何后续阶段。
@@ -61,8 +67,15 @@ subagent prompt 模板：
 - 收集所有 R 编号，任意两条复用同一 R 编号标记为 **DUPLICATE_R**（severity: critical）
 
 ### 4. 设计完整性（design 自洽检查）
-- trace_mapping 中的每个 R 必须在 specs 中存在，否则标记为 **GHOST_R**（severity: critical）
-- 每个 U 必须有至少一个 R 驱动，否则标记为 **ORPHAN**（severity: critical）
+- trace_mapping 中的每个 R 必须在 specs 中存在，否则标记为 **GHOST_R**
+- 每个 U 必须有至少一个 R 驱动，否则标记为 **ORPHAN**
+
+### severity 判定原则
+- 涉及需求完整性的缺失（TRACE_GAP、COARSE_R、DUPLICATE_R）→ **critical**
+- design 自洽问题但可快速修正（GHOST_R 中多余引用可直接删除、ORPHAN 中辅助性单元可补 R 或删除 U）→ **warning**
+- GHOST_R / ORPHAN 涉及核心实施单元或大面积缺失时 → **critical**
+- 交叉引用笔误、格式瑕疵等 → **warning**
+- 不确定时倾向 warning > critical
 
 ## 输出要求
 输出一个符合 StageResult schema 的 JSON 对象：
@@ -117,17 +130,30 @@ subagent prompt 模板：
 
 ## 退出契约
 
-- **如"通过"**：
+- **如"通过"**（无 findings 或仅 suggestion）：
   1. 追加 `openspec/changes/<name>/audit-log.md`，格式：
      ```
      ## plan-review | <ISO8601 时间戳> | pass
      方向：specs/**/*.md + design.md → tasks.md
-     修正：<修正项列表，每行一条；无发现时写"无发现">
+     修正：无发现
      ```
      若写入 audit-log.md 时文件损坏（已存在但无法追加），中止并报错，禁止继续。
   2. 写入门控状态：在 `.openspec.yaml` 的 `gates:` 下添加 `plan-review: "<ISO8601 时间戳>"`
   3. 必须转入 **opsx-tasks** 生成 tasks.md。这不是建议，是强制要求。
-- **如"需修正"**：
+- **如"通过（含修正）"**（有 warning 但无 critical，主 agent 已修正全部 warning）：
+  1. 先修正 design.md / specs 中的 warning 项
+  2. 追加 `openspec/changes/<name>/audit-log.md`，格式：
+     ```
+     ## plan-review | <ISO8601 时间戳> | pass
+     方向：specs/**/*.md + design.md → tasks.md
+     修正：
+     - F1(warning) <修正描述>
+     - F2(warning) <修正描述>
+     ```
+     若写入 audit-log.md 时文件损坏，中止并报错，禁止继续。
+  3. 写入门控状态：在 `.openspec.yaml` 的 `gates:` 下添加 `plan-review: "<ISO8601 时间戳>"`
+  4. 必须转入 **opsx-tasks** 生成 tasks.md。这不是建议，是强制要求。
+- **如"需修正"**（存在 critical findings）：
   1. 追加 `openspec/changes/<name>/audit-log.md`，格式：
      ```
      ## plan-review | <ISO8601 时间戳> | fail

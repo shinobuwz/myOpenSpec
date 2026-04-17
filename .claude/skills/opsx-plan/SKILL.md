@@ -3,7 +3,7 @@ name: opsx-plan
 description: 创建 OpenSpec change 并生成规划产出物（proposal/design/specs）。当需求已明确、准备进入规划阶段时使用。
 ---
 
-规划 Skill。创建 OpenSpec change 并生成规划阶段的产出物集合。
+规划 Skill。为当前选中的 change root 补齐规划产出物集合；在 grouped change 场景下，它主要消费 slice 已生成的 `proposal.md`，并专注于 `specs/` 与 `design.md`。
 
 ## 输入 / 输出边界
 
@@ -12,7 +12,7 @@ description: 创建 OpenSpec change 并生成规划产出物（proposal/design/s
 - `.aiknowledge/pitfalls/index.md` + 命中领域（按需）
 
 **产出：**
-- `proposal.md`（新建）
+- `proposal.md`（新建或基于 slice 已初始化的 proposal 小修）
 - `design.md`（新建）
 - `specs/<capability>/spec.md`（新建，可多个）
 - `.openspec.yaml`（新建，初始化 schema）
@@ -21,28 +21,44 @@ description: 创建 OpenSpec change 并生成规划产出物（proposal/design/s
 - plan 只产出规划制品，不生成 `tasks.md`
 - plan 不写任何 gates、`audit-log.md`、`test-report.md`、`review-report.md`
 - 不要求在 plan 阶段执行 git 提交；只有用户明确要求时才提交
+- 如请求明显涉及全栈、多模块、多 capability 或用户正在纠结是否拆分 change，应先转入 `opsx-slice`
+
+## Change Root 解析
+
+- 用户输入的 `<name>` 可以是：
+  - 顶层单个 change：`2026-04-14-add-auth`
+  - 父 change：`2026-04-14-lucky-guess`
+  - subchange 简写：`2026-04-14-lucky-guess/01-auth`
+- 执行前必须先运行 `bash .claude/opsx/bin/changes.sh resolve <name>`，得到真实 change root。
+- 如果 `<name>` 是父 change，则优先用 `active_subchange`；若为空，再退化到 `suggested_focus`、`recommended_order` 的首项或唯一 subchange。
+- 后文所有 `proposal.md`、`design.md`、`specs/`、`tasks.md` 路径，均指 **resolved change root** 下的文件。
 
 ## 启动序列
 
 1. 确认需求已经过脑暴或探索阶段的澄清
 2. 执行 `bash .claude/opsx/bin/changes.sh` 检查是否已有相关变更（含阶段和进度）
-3. **执行 change cohesion 粗判断（创建前）**：
-   - 先判断这是否还是**一个交付单元**，而不是多个松散需求被捆在一起
-   - 重点检查：
-     - 是否共享同一个用户目标和成功标准
-     - 是否必须一起上线才有意义
-     - 是否共享同一套核心设计决策
-     - 是否存在可独立排期、独立验证、独立上线的子能力
-   - **如果已经明显存在 2 个及以上独立交付单元：不要创建一个大 change，必须先拆成多个 change**
-   - **如果只是一个交付单元里的多个能力切片：保留一个 change，在 `specs/` 下拆多个 capability spec**
-4. 先读 `.aiknowledge/codemap/index.md`，判断目标模块是否已有 codemap；已有则继续读对应 `<module>.md` 和必要的 `chains/*.md`，没有则先调用 `opsx-codemap`
-5. 读取 `.aiknowledge/pitfalls/index.md` 和相关领域的 `index.md`，在设计中规避已知陷阱
-6. 收集必要的上下文信息
+3. **【硬性门控 · 不可跳过】slice 前置检查**
+   - 执行 `bash .claude/opsx/bin/changes.sh resolve <name>` 解析 change root
+   - 检查 resolved change root 下是否存在 `proposal.md`
+   - **如果不存在 `proposal.md`**：立即停止，输出以下提示并拒绝继续：
+     ```
+     ❌ opsx-plan 拒绝启动：当前 change 尚未经过 opsx-slice。
+     proposal.md 不存在，无法确认交付边界已被定义。
+
+     请先执行：opsx-slice
+     slice 完成后，每个 subchange 的 proposal.md 会由 slice 初始化，届时可重新进入 opsx-plan。
+     ```
+   - **只有 `proposal.md` 已存在**，才允许继续后续步骤
+4. 消费对应 subchange 的 `proposal.md`，只为**当前选中的单一交付单元**做规划
+5. 先读 `.aiknowledge/codemap/index.md`，判断目标模块是否已有 codemap；已有则继续读对应 `<module>.md` 和必要的 `chains/*.md`，没有则先调用 `opsx-codemap`
+6. 读取 `.aiknowledge/pitfalls/index.md` 和相关领域的 `index.md`，在设计中规避已知陷阱
+7. 收集必要的上下文信息
 
 ## 流程
 
 ### 1. 创建变更
-- 使用 `bash .claude/opsx/bin/changes.sh init YYYY-MM-DD-<name> spec-driven` 创建新变更目录结构
+- 如果是未切分的小 change：使用 `bash .claude/opsx/bin/changes.sh init YYYY-MM-DD-<name> spec-driven` 创建新变更目录结构
+- 如果是 grouped change：不得重新创建 change；直接在 resolved subchange root 下继续
 - **变更名称必须带日期前缀**（如 `2026-04-03-add-auth`），便于按时间追溯
 - 名称部分简洁、描述性强，使用 kebab-case
 
@@ -53,6 +69,7 @@ description: 创建 OpenSpec change 并生成规划产出物（proposal/design/s
 - 问题陈述和目标
 - 范围界定（做什么、不做什么）
 - 成功标准
+- grouped change 场景下优先沿用 slice 已生成的 `proposal.md`，只在发现边界偏差时修订
 
 **design.md** - 设计
 - 架构方案和关键决策
@@ -69,14 +86,14 @@ description: 创建 OpenSpec change 并生成规划产出物（proposal/design/s
 - **Trace 唯一性铁律**：当 `specs/` 下存在多个 `spec.md` 时，必须把它们视为同一个 change 的统一编号空间；所有 `**Trace**: R<number>` 必须全局唯一，禁止在不同 spec 文件里重复使用同一个 `R<number>`
 
 ### 3. split-or-continue 检查点（proposal + specs 初稿后，design 定稿前）
-- 在 proposal 和 specs 初稿形成后，必须再次判断是否应该拆分 change；这次判断比启动序列更严格，因为已经看到了 capability 切片和需求分布
+- 在 proposal 和 specs 初稿形成后，必须再次判断 `opsx-slice` 的结论是否仍然成立；这次判断比启动序列更严格，因为已经看到了 capability 切片和需求分布
 - 重点检查：
   - `specs/` 是否已经自然分成多个几乎互不依赖的 capability
   - 这些 capability 是否可以各自拥有独立 proposal / design / tasks / verify 结论
   - 是否某一部分延期时，不应阻塞其余部分交付
   - 是否已经无法在一个 design 中清晰讲清全部决策
   - 是否预期会形成一个**难以一次评审、一次验证、一次实现收敛**的大 change
-- **如果命中以上信号**：暂停当前 plan，建议用户拆成多个 change；不要硬把多个独立能力继续塞进一个 design
+- **如果命中以上信号**：暂停当前 plan，回到 `opsx-slice` 重新切分；不要硬把多个独立能力继续塞进一个 design
 - **如果仍是同一个交付单元**：继续在一个 change 中完成 design，并允许 `specs/` 下保留多个 capability spec
 
 ### 4. 工作量护栏

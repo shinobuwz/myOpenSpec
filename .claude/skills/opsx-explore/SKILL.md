@@ -298,8 +298,22 @@ ls openspec/changes/ | grep -v archive
 - 唯一允许的输出是 OpenSpec 产出物（提案、设计文档等）
 
 ### 4. 转入规划
-- 设计确认后，**必须**转入 opsx-plan 创建正式变更
-- 提供清晰的需求摘要供规划使用
+**【硬性门控 · 不可跳过】探索结束后，下一步必须是 `opsx-slice`，而不是 `opsx-plan`。**
+
+- 设计确认后，**必须**先转入 `opsx-slice` 做切分判定
+- `opsx-slice` 可以得出 `KEEP_ONE_CHANGE` 结论（不拆），然后再进入 `opsx-plan`
+- **禁止**从 `opsx-explore` 直接跳转到 `opsx-plan`，即使范围看起来很小
+- 理由：slice 是交付边界的唯一合法定义者；explore 只负责澄清需求，不负责划定边界
+
+转出时的标准提示：
+```
+探索已收敛，下一步：
+
+→ opsx-slice   （切分判定，定义交付边界）
+  slice 完成后再进入 opsx-plan
+
+❌ 不要直接跳到 opsx-plan（缺少 proposal.md，plan 会拒绝启动）
+```
 
 ---
 
@@ -307,7 +321,7 @@ ls openspec/changes/ | grep -v archive
 
 探索可能会：
 
-- **收敛到设计** → 经过上面的收敛阶段后，必须转入 opsx-plan
+- **收敛到设计** → 经过上面的收敛阶段后，**必须先转入 `opsx-slice`**，再由 slice 决定是否进入 `opsx-plan`
 - **导致产出物更新**："已用这些决定更新 design.md"
 - **仅提供清晰度**：用户得到了他们需要的，继续前进
 - **稍后继续**："我们可以随时继续这个话题"
@@ -319,17 +333,17 @@ ls openspec/changes/ | grep -v archive
 
 **问题**：[清晰的理解]
 
-**方案对比**：[如果进入了收敛阶段]
+**方案对比**：[如果进行了收敛阶段]
 
 **选定方案**：[如果已确认]
 
 **未决问题**：[如果还有]
 
 **下一步**（如果准备好了）：
-- 进入规划：opsx-plan（设计已确认时）
-- 创建变更：`opsx-plan <name>`
-- 快进到任务：`opsx-ff <name>`
-- 继续探索：继续交谈
+→ opsx-slice   （切分判定，必经环节）
+  slice 完成后再进入 opsx-plan
+
+❌ 不要直接跳到 opsx-plan（缺少 proposal.md，plan 会拒绝启动）
 ```
 
 但这个总结是可选的。有时思考本身就是价值。
