@@ -39,7 +39,7 @@
    | `review-report.md` | opsx-review（追加） | opsx-report（渲染 HTML） | 代码审查结论留档；与结构符合性审查分开存放 |
    | `run-report.html` | opsx-report | 人工阅读 | self-contained HTML 报告，按需生成 |
 
-   grouped change 场景下，父级 `index.md` + `.openspec.group.yaml` 负责切分与路由；subchange 下的 `proposal.md`、`specs/`、`design.md`、`tasks.md`、`test-report.md` 和代码本身仍是权威源。
+   grouped change 场景下，父级 `index.md` + `.openspec.group.yaml` 负责切分与路由；subchange 下的 `proposal.md`、`specs/`、`design.md`、`tasks.md`、`test-report.md` 和代码本身仍是权威源。执行 `archive` 时，归档单元默认也是 resolved subchange root，目标落在顶层 `openspec/changes/archive/YYYY-MM-DD-<group>-<subchange>/`；不得在活动父 group 下创建 `subchanges/archive/`。
 
    **Gate Review Protocol**（详见 `docs/stage-packet-protocol.md`）：
 

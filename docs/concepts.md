@@ -546,6 +546,10 @@ openspec/
 
 2. **移动到归档。** 变更文件夹移动到 `changes/archive/`，带有日期前缀以便按时间顺序排序。
 
+   grouped change 场景下，默认移动的是当前 resolved subchange root，而不是父 group。也就是说：
+   `changes/<group>/subchanges/<subchange>/` 应归档到顶层 `changes/archive/YYYY-MM-DD-<group>-<subchange>/`，
+   而不是在活动 group 内部创建 `subchanges/archive/`。
+
 3. **保留上下文。** 所有制品在归档中保持完整。你总是可以回顾以理解为什么进行变更。
 
 ### 为什么归档重要

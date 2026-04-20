@@ -126,6 +126,7 @@ AI：正在处理任务...
 - `opsx-plan-review`、`opsx-task-analyze`、`opsx-verify` 是强制关卡。
 - 涉及全栈、多模块、多 capability 时，先使用 `opsx-slice` 再进入 `opsx-plan`。
 - `opsx-continue` 用于恢复中断的 change；如果你传入父 change，它会先看 `active_subchange`，否则再按 `suggested_focus` / `recommended_order` / 唯一 subchange 路由。
+- grouped change 执行 `opsx-archive` 时，默认归档的是当前 resolved subchange，目标应为顶层 `openspec/changes/archive/YYYY-MM-DD-<group>-<subchange>/`；不要在活动 group 下创建 `subchanges/archive/`。
 - 当前仓库不再维护 `.claude/commands/opsx/`。
 - 若其他旧文档仍出现 `/opsx:*`，请优先以 [支持的工具](supported-tools.md) 和 [工作流](workflows.md) 为准。
 
