@@ -188,7 +188,6 @@ This keeps specs readable for humans and consistent for agents.
 
 ```text
 openspec/changes/2026-04-14-lucky-guess/
-├── index.md                    # 父 change 总览、顺序、依赖、关注点
 ├── .openspec.group.yaml        # group 路由元数据（execution_mode / suggested_focus / active_subchange）
 └── subchanges/
     ├── 01-auth/
@@ -206,19 +205,18 @@ openspec/changes/2026-04-14-lucky-guess/
 每个 subchange 都是自包含的。父 change 只负责：
 - **切分结果**——有哪些 subchange、顺序如何、谁是当前焦点
 - **最小拓扑/路由状态**——execution_mode、recommended_order、suggested_focus，以及可选 active_subchange
-- **总览上下文**——帮助恢复和理解整体计划
 
 ### 为什么变更组织为文件夹
 
 将变更打包为文件夹有几个好处：
 
-1. **一切在一起。** 父级看总览，subchange 看执行细节。无需维护第二套平行 proposal 草稿目录。
+1. **一切在一起。** subchange 自己携带执行所需的全部细节；父 group 只保留最小路由状态，无需维护第二套总览草稿目录。
 
 2. **分而不散。** 同一个大需求下的多个 subchange 共享一个父 change，但各自拥有独立 proposal/design/tasks/gates。
 
 3. **清晰历史。** 归档时，变更会移动到 `changes/archive/` 并保留完整上下文。你可以回顾并理解不仅发生了什么变化，还有为什么变化。
 
-4. **便于审查。** 父 change 先解释怎么拆，subchange 再分别解释为什么做、怎么做、如何验证。
+4. **便于审查。** 审查和归档都围绕 subchange 展开，避免父 group 摘要与真实状态漂移。
 
 ## 制品（Artifacts）
 
@@ -549,6 +547,8 @@ openspec/
    grouped change 场景下，默认移动的是当前 resolved subchange root，而不是父 group。也就是说：
    `changes/<group>/subchanges/<subchange>/` 应归档到顶层 `changes/archive/YYYY-MM-DD-<group>-<subchange>/`，
    而不是在活动 group 内部创建 `subchanges/archive/`。
+   如果 group 下仍有未归档的 subchange，父 group 会被清理为只剩 `.openspec.group.yaml` 与 `subchanges/`；
+   如果最后一个 subchange 也已归档，则直接删除活动态父 group 目录。
 
 3. **保留上下文。** 所有制品在归档中保持完整。你总是可以回顾以理解为什么进行变更。
 

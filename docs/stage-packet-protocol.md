@@ -99,7 +99,6 @@ StageResult 是 reviewer subagent 的结构化输出。
 
 | stage | 写入者 | 写入时机 |
 |-------|--------|----------|
-| `slice` | opsx-slice | 切分决策完成后（记录 SPLIT/KEEP/NEED_EXPLORE 决策和理由） |
 | `plan-review` | opsx-plan-review | 审查完成后（pass 和 fail 均写入） |
 | `task-analyze` | opsx-task-analyze | 分析完成后（pass 和 fail 均写入） |
 | `verify` | opsx-verify | 验证完成后（pass 和 fail 均写入） |

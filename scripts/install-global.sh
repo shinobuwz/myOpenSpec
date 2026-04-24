@@ -3,30 +3,26 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-CLAUDE_HOME="${HOME}/.claude"
-CODEX_HOME="${HOME}/.codex"
+REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+AGENTS_SKILLS_HOME="${HOME}/.agents/skills"
 
-ensure_symlink() {
-  local source_path="$1"
-  local link_path="$2"
+mkdir -p "$AGENTS_SKILLS_HOME"
 
-  if [ -e "$link_path" ] && [ ! -L "$link_path" ]; then
-    echo "✗ refused to replace existing path: $link_path"
-    exit 1
+for target_skill_dir in "$AGENTS_SKILLS_HOME"/opsx-*/; do
+  [ -d "$target_skill_dir" ] || continue
+  skill_name="$(basename "$target_skill_dir")"
+  if [ ! -d "$REPO_ROOT/.claude/skills/$skill_name" ]; then
+    rm -rf "$target_skill_dir"
   fi
+done
 
-  ln -sfn "$source_path" "$link_path"
-  echo "✓ linked: $link_path -> $source_path"
-}
-
-"$SCRIPT_DIR/sync.sh" "$HOME"
-
-mkdir -p "$CODEX_HOME"
-
-ensure_symlink "$CLAUDE_HOME/skills" "$CODEX_HOME/skills"
-ensure_symlink "$CLAUDE_HOME/opsx" "$CODEX_HOME/opsx"
+for skill_dir in "$REPO_ROOT/.claude/skills"/opsx-*/; do
+  [ -d "$skill_dir" ] || continue
+  skill_name="$(basename "$skill_dir")"
+  rm -rf "$AGENTS_SKILLS_HOME/$skill_name"
+  cp -r "${skill_dir%/}" "$AGENTS_SKILLS_HOME/"
+done
 
 echo ""
 echo "Global installation complete."
-echo "Claude home: $CLAUDE_HOME"
-echo "Codex home:  $CODEX_HOME"
+echo "Agents skills: $AGENTS_SKILLS_HOME"

@@ -13,7 +13,7 @@
 6. 验证与归档         请使用 `opsx-verify` -> `opsx-review` -> `opsx-archive`
 ```
 
-如果您希望安装到全局配置目录，可运行 `./scripts/install-global.sh`；它会同步到 `~/.claude`，并将 `~/.codex` 下的相关目录软链接到 `~/.claude`。
+如果您希望安装到全局配置目录，可运行 `./scripts/install-global.sh`；它会默认同步到 `~/.agents/skills`。
 
 ## 目录结构
 
@@ -21,7 +21,6 @@
 openspec/
 ├── changes/
 │   └── <change-name>/
-│       ├── index.md                  # 父 change 总览（group 场景）
 │       ├── .openspec.group.yaml      # active_subchange 等最小路由状态
 │       └── subchanges/
 │           └── <subchange-name>/
@@ -126,7 +125,7 @@ AI：正在处理任务...
 - `opsx-plan-review`、`opsx-task-analyze`、`opsx-verify` 是强制关卡。
 - 涉及全栈、多模块、多 capability 时，先使用 `opsx-slice` 再进入 `opsx-plan`。
 - `opsx-continue` 用于恢复中断的 change；如果你传入父 change，它会先看 `active_subchange`，否则再按 `suggested_focus` / `recommended_order` / 唯一 subchange 路由。
-- grouped change 执行 `opsx-archive` 时，默认归档的是当前 resolved subchange，目标应为顶层 `openspec/changes/archive/YYYY-MM-DD-<group>-<subchange>/`；不要在活动 group 下创建 `subchanges/archive/`。
+- grouped change 执行 `opsx-archive` 时，默认归档的是当前 resolved subchange，目标应为顶层 `openspec/changes/archive/YYYY-MM-DD-<group>-<subchange>/`；不要在活动 group 下创建 `subchanges/archive/`。归档后父 group 只保留 `.openspec.group.yaml` 与 `subchanges/`；如果最后一个 subchange 也已归档，则直接删除父 group。
 - 当前仓库不再维护 `.claude/commands/opsx/`。
 - 若其他旧文档仍出现 `/opsx:*`，请优先以 [支持的工具](supported-tools.md) 和 [工作流](workflows.md) 为准。
 

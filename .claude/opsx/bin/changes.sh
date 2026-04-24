@@ -38,7 +38,7 @@ usage() {
 说明:
   list/status         列出活动变更及其阶段和进度
   init                创建 openspec/changes/<name>/specs 和 .openspec.yaml
-  init-group          创建 openspec/changes/<group>/subchanges、index.md 和 .openspec.group.yaml
+  init-group          创建 openspec/changes/<group>/subchanges 和 .openspec.group.yaml
   init-subchange      创建 openspec/changes/<group>/subchanges/<name>/specs 和 .openspec.yaml
   set-active          写入父 change 的 active_subchange（运行态）
   set-suggested       写入父 change 的 suggested_focus（slice 推荐焦点）
@@ -368,26 +368,6 @@ init_group() {
       echo "active_subchange: "
       echo "recommended_order: "
     } > "$meta_file"
-  fi
-
-  if [ ! -f "$group_dir/index.md" ]; then
-    cat > "$group_dir/index.md" <<EOF
-# Change Group: $name
-
-## Goal
-
-## Subchanges
-
-## Execution Topology
-- execution_mode:
-- suggested_focus:
-- recommended_order:
-
-## Dependencies
-
-## Active
-- active_subchange:
-EOF
   fi
 
   echo "已初始化父 change: openspec/changes/$name"

@@ -32,14 +32,14 @@
 
    | 文件 | 写入者 | 消费者 | 说明 |
    |------|--------|--------|------|
-   | `.openspec.group.yaml` | slice / continue | slice / plan / continue | 父 change 的最小拓扑与路由状态；保存 `execution_mode`、`recommended_order`、`suggested_focus` 及可选 `active_subchange` |
+   | `.openspec.group.yaml` | slice / continue / archive | slice / plan / continue | 父 change 的最小拓扑与路由状态；保存 `execution_mode`、`recommended_order`、`suggested_focus` 及可选 `active_subchange` |
    | `.openspec.yaml` | slice / plan / plan-review / task-analyze / verify / review | continue / tasks / implement / verify / review / archive / report | subchange 的 common config；只保存 schema / gates 等最小状态 |
    | `test-report.md` | opsx-tdd（红/绿/重构追加） | opsx-verify（检查存在性与完整性） | TDD 任务的实时测试留档；无 TDD 任务时不产出 |
    | `audit-log.md` | opsx-plan-review、opsx-task-analyze、opsx-verify（追加） | opsx-report（渲染 HTML） | 各 gate stage 链路正确性校验留档；pass 和 fail 均追加写入 |
    | `review-report.md` | opsx-review（追加） | opsx-report（渲染 HTML） | 代码审查结论留档；与结构符合性审查分开存放 |
    | `run-report.html` | opsx-report | 人工阅读 | self-contained HTML 报告，按需生成 |
 
-   grouped change 场景下，父级 `index.md` + `.openspec.group.yaml` 负责切分与路由；subchange 下的 `proposal.md`、`specs/`、`design.md`、`tasks.md`、`test-report.md` 和代码本身仍是权威源。执行 `archive` 时，归档单元默认也是 resolved subchange root，目标落在顶层 `openspec/changes/archive/YYYY-MM-DD-<group>-<subchange>/`；不得在活动父 group 下创建 `subchanges/archive/`。
+   grouped change 场景下，父级只保留 `.openspec.group.yaml` 这个最小路由状态；subchange 下的 `proposal.md`、`specs/`、`design.md`、`tasks.md`、`test-report.md` 和代码本身仍是权威源。执行 `archive` 时，归档单元默认也是 resolved subchange root，目标落在顶层 `openspec/changes/archive/YYYY-MM-DD-<group>-<subchange>/`；不得在活动父 group 下创建 `subchanges/archive/`。若仍有剩余 subchange，父 group 会被清理为只剩 `.openspec.group.yaml` 与 `subchanges/`；若最后一个 subchange 也归档完成，则直接删除父 group 目录。
 
    **Gate Review Protocol**（详见 `docs/stage-packet-protocol.md`）：
 
