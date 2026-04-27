@@ -75,7 +75,7 @@ Design:
 
 - `runtime/bin/changes.sh`
 - `.claude/opsx/bin/changes.sh`
-- `.claude/skills/opsx-*/SKILL.md`
+- `skills/opsx-*/SKILL.md`
 
 验证方式：
 
@@ -113,7 +113,7 @@ Design:
 
 Design:
 
-- `opsx install-skills` copies package `.claude/skills/opsx-*` into the global agent skills directory.
+- `opsx install-skills` copies package `skills/opsx-*` into the global agent skills directory.
 - Existing target `opsx-*` directories not present in package source are pruned.
 - `opsx init-project` creates `openspec/config.yaml` only when missing and always ensures `openspec/changes` exists.
 - Legacy shell install scripts call or mirror the same behavior, but do not copy runtime scripts into target repositories.
@@ -141,7 +141,7 @@ Design:
 Design:
 
 - Docs describe npm installation as the primary path.
-- `.claude` remains a skill template source and optional project adapter only.
+- `skills/` is the skill template source. `.claude/skills` is only a generated project adapter for tools that cannot read global skills.
 - Runtime scripts and schemas are documented as package-owned resources.
 
 ## Decisions

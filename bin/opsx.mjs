@@ -102,7 +102,7 @@ export function installSkills(targetRoot = process.env.OPSX_AGENTS_SKILLS_HOME ?
     throw new Error("Cannot determine global agent skills directory");
   }
 
-  const sourceRoot = path.join(packageRoot(), ".claude", "skills");
+  const sourceRoot = path.join(packageRoot(), "skills");
   if (!fs.existsSync(sourceRoot)) {
     throw new Error(`skills source not found: ${sourceRoot}`);
   }

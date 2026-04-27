@@ -14,7 +14,7 @@
 7. 验证与归档         请使用 `opsx-verify` -> `opsx-review` -> `opsx-archive`
 ```
 
-从源码 checkout 调试时，可运行 `./scripts/install-global.sh` 安装当前工作区的 skills。仓库级 `scripts/install-repos.sh` 只同步 `.claude/skills/opsx-*` adapter，不复制 runtime 或模板。
+从源码 checkout 调试时，可运行 `./scripts/install-global.sh` 安装当前工作区 `skills/` 下的 canonical skills。仓库级 `scripts/install-repos.sh` 只把 `skills/opsx-*` 同步成目标仓库 `.claude/skills/opsx-*` adapter，不复制 runtime 或模板。
 
 ## 目录结构
 
@@ -33,6 +33,14 @@ openspec/
 │                   └── <domain>/
 │                       └── spec.md
 └── config.yaml
+```
+
+OPSX 包源码自身的目录边界是：
+
+```text
+bin/        npm launcher
+runtime/    通用 helper、schemas 和 templates
+skills/     opsx-* skill 源码真相源
 ```
 
 ## 关键制品

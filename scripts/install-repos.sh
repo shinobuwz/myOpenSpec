@@ -6,7 +6,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 if [ $# -eq 0 ]; then
   echo "Usage: $0 <repo-dir> [repo-dir ...]"
-  echo "  Installs OpenSpec into each repository root in the list"
+  echo "  Installs OPSX project adapters into each repository root in the list"
   echo ""
   echo "Example:"
   echo "  $0 ~/repo-a ~/repo-b"

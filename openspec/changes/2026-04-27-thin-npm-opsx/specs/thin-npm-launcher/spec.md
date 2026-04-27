@@ -40,5 +40,6 @@
 
 #### 场景:package files 范围可审计
 - **当** 维护者执行 npm pack 预检
-- **那么** 包内容必须包含 `bin/`、`runtime/`、`.claude/skills/`、`.claude/opsx/schemas/`
+- **那么** 包内容必须包含 `bin/`、`runtime/`、`skills/`
+- **那么** 包内容禁止包含 `.claude/` 源目录
 - **那么** 包内容不得依赖 `dist/` 目录

@@ -101,7 +101,7 @@
 **需求追踪**：[R3][R4][R12][R13] → [U4]
 **执行方式**：[direct]
 **涉及文件**：
-- `.claude/skills/opsx-*/SKILL.md` — helper 调用示例迁移到 `opsx changes`
+- `skills/opsx-*/SKILL.md` — helper 调用示例迁移到 `opsx changes`
 - `README.md` — npm/global 使用方式
 - `docs/getting-started.md` — 安装与初始化流程
 - `docs/supported-tools.md` — runtime/source-of-truth 边界
@@ -137,3 +137,23 @@
 - [ ] [manual] 在安装到全局 npm 前，需人工决定最终包名和发布权限
 
 **依赖**：Task 4.1
+
+- [x] 5.2 [R4][R9][R10][R13][U3][direct] 将 OPSX 包源码真相源从 `.claude` 迁移到通用目录
+
+**需求追踪**：[R4][R9][R10][R13] → [U3]
+**执行方式**：[direct]
+**涉及文件**：
+- `skills/opsx-*/SKILL.md` — canonical skill source
+- `runtime/schemas/spec-driven/**` — canonical schema/templates
+- `bin/opsx.mjs` — `install-skills` source path
+- `scripts/sync.sh` — project adapter sync source path
+- `package.json` — npm package file scope
+- `tests/opsx.test.mjs` — package file scope and sync coverage
+
+**验收标准**：
+- [ ] npm package 包含 `skills/` 和 `runtime/`，不包含 `.claude/` 源目录
+- [ ] `opsx install-skills` 从 `skills/` 安装全局 skills
+- [ ] `scripts/sync.sh <target>` 把 `skills/opsx-*` 同步为目标项目 `.claude/skills/opsx-*`
+- [ ] `.claude/opsx/bin/changes.sh` 仅作为源码 checkout 的兼容 wrapper 保留
+
+**依赖**：Task 5.1

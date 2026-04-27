@@ -141,7 +141,7 @@ vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 
 
-# Claude (只忽略敏感文件，保留 skills/ 源文件)
+# Claude (只忽略敏感文件；opsx skill 源文件位于仓库根目录 skills/)
 .claude/settings.local.json
 .claude/todos.json
 .claude/worktrees/

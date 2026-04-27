@@ -7,10 +7,10 @@ last_verified_by: opsx-codemap
 verification_basis: archive:2026-04-14-simplify-skill-artifacts
 applies_to:
   - docs/stage-packet-protocol.md
-  - .claude/skills/opsx-plan-review
-  - .claude/skills/opsx-verify
-  - .claude/skills/opsx-task-analyze
-  - .claude/skills/opsx-report
+  - skills/opsx-plan-review
+  - skills/opsx-verify
+  - skills/opsx-task-analyze
+  - skills/opsx-report
 superseded_by:
 ---
 
@@ -24,10 +24,10 @@ superseded_by:
 | 文件 | 角色 |
 |------|------|
 | `docs/stage-packet-protocol.md` | 协议规范正文，定义 StageResult schema（必填/可选字段、Finding 结构）和 audit-log.md 格式（条目格式、写入规则、写入者） |
-| `.claude/skills/opsx-plan-review/SKILL.md` | 消费侧：派遣 1 个 subagent 直接读取文件审查，获取 StageResult JSON，追加写 audit-log.md |
-| `.claude/skills/opsx-task-analyze/SKILL.md` | 消费侧：同上，负责 task-analyze stage 的审查留档 |
-| `.claude/skills/opsx-verify/SKILL.md` | 消费侧：派遣 1 个 subagent 直接读取文件顺序执行 4 维度审查，获取 StageResult JSON，追加写 audit-log.md |
-| `.claude/skills/opsx-report/SKILL.md` | 渲染侧：读取 audit-log.md（plan-review/verify 记录）、test-report.md（tdd 状态）、review-report.md（review 状态），生成 self-contained HTML RunReport |
+| `skills/opsx-plan-review/SKILL.md` | 消费侧：派遣 1 个 subagent 直接读取文件审查，获取 StageResult JSON，追加写 audit-log.md |
+| `skills/opsx-task-analyze/SKILL.md` | 消费侧：同上，负责 task-analyze stage 的审查留档 |
+| `skills/opsx-verify/SKILL.md` | 消费侧：派遣 1 个 subagent 直接读取文件顺序执行 4 维度审查，获取 StageResult JSON，追加写 audit-log.md |
+| `skills/opsx-report/SKILL.md` | 渲染侧：读取 audit-log.md（plan-review/verify 记录）、test-report.md（tdd 状态）、review-report.md（review 状态），生成 self-contained HTML RunReport |
 
 ## 隐式约束
 - StageResult 必填字段（version/run_id/change_id/stage/agent_role/summary/decision）缺失时消费者必须报错，不得静默降级

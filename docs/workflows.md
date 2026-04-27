@@ -181,4 +181,4 @@ AI：已归档，知识与 codemap 已更新
 
 - 当前仓库没有独立的 `opsx-sync`、`opsx-onboard`、`opsx-bulk-archive` skill。
 - `opsx-continue` 不再维护独立状态机；它只读取 group/subchange 的真实文件状态和 `gates.*` 来恢复流程。
-- 如需判断当前真相源，请优先看 `.claude/skills/opsx-*/SKILL.md`。
+- 如需判断当前真相源，请优先看 `skills/opsx-*/SKILL.md`。

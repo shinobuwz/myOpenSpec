@@ -53,6 +53,16 @@ openspec/
 
 Runtime scripts and skill templates are distributed by the npm package. They are not copied into every target repository.
 
+## Source Layout
+
+```text
+bin/        npm command entrypoint
+runtime/    shared helper scripts and OpenSpec schemas/templates
+skills/     canonical opsx-* skill source
+```
+
+`.claude/` is not a package source directory. The only expected project-level Claude adapter output is `.claude/skills/opsx-*` when `scripts/install-repos.sh` is used for tools that cannot read global skills.
+
 ## Development
 
 ```bash

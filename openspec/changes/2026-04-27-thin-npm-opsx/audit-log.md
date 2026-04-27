@@ -34,6 +34,37 @@
 }
 ```
 
+## verify-addendum | 2026-04-27T18:36:31+08:00 | pass
+方向：目录真相源迁移 + package scope + tests → completion
+修正：无发现
+
+### 验证事实
+- canonical skill source 已迁移为 `skills/opsx-*`。
+- canonical schema/templates 已迁移为 `runtime/schemas/spec-driven/**`。
+- `opsx install-skills` 与 `scripts/sync.sh` 均从 `skills/` 读取。
+- `npm test` 通过：13 tests, 0 failed。
+- `npm pack --dry-run --json` 通过，包内容包含 `bin/`、`runtime/`、`skills/`、README、LICENSE 和 package metadata。
+- pack 文件列表未包含 `.claude/`。
+- `npm run install:local` 通过，验证本地 tarball 可覆盖全局安装且 `opsx --version` 输出 `1.0.1`。
+- `opsx install-skills` 通过，安装 18 个 skills 到 `/Users/cc/.agents/skills`。
+- `.claude/opsx/bin/changes.sh` 兼容 wrapper 可用。
+- `opsx changes -p . init smoke-schema-check spec-driven` 可从 `runtime/schemas` 读取 schema；临时 smoke change 已删除。
+
+### Stage Result
+```json
+{
+  "version": 1,
+  "run_id": "20260427T183631-local",
+  "change_id": "2026-04-27-thin-npm-opsx",
+  "stage": "verify",
+  "agent_role": "verifier",
+  "summary": "Directory source-of-truth migration is implemented and package scope excludes .claude source directories.",
+  "decision": "pass",
+  "metrics": {"findings_total": 0, "critical": 0, "warning": 0, "suggestion": 0},
+  "findings": []
+}
+```
+
 ## verify | 2026-04-27T16:55:11+08:00 | pass
 方向：tasks.md + implementation + tests → completion
 修正：无发现

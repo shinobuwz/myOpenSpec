@@ -181,6 +181,24 @@ test("repo sync installs skills without copying claude runtime", async () => {
   }
 });
 
+test("npm package publishes canonical skills and runtime without claude source directories", () => {
+  const result = spawnSync("npm", ["pack", "--dry-run", "--json"], {
+    cwd: path.resolve("."),
+    encoding: "utf8",
+  });
+
+  assert.equal(result.status, 0, result.stderr);
+  const [pack] = JSON.parse(result.stdout);
+  const files = new Set(pack.files.map((file) => file.path));
+
+  assert.equal(files.has("bin/opsx.mjs"), true);
+  assert.equal(files.has("runtime/bin/changes.sh"), true);
+  assert.equal(files.has("runtime/schemas/spec-driven/schema.yaml"), true);
+  assert.equal(files.has("runtime/schemas/spec-driven/templates/proposal.md"), true);
+  assert.equal(files.has("skills/opsx-plan/SKILL.md"), true);
+  assert.equal([...files].some((file) => file.startsWith(".claude/")), false);
+});
+
 test("launcher changes command can initialize a target project change", async () => {
   const repo = await mkdtemp(path.join(tmpdir(), "opsx-e2e-"));
   try {

@@ -6,9 +6,9 @@ last_verified_at: 2026-04-14
 last_verified_by: opsx-codemap
 verification_basis: archive:2026-04-14-simplify-skill-artifacts
 applies_to:
-  - .claude/skills/opsx-plan-review
-  - .claude/skills/opsx-verify
-  - .claude/skills/opsx-report
+  - skills/opsx-plan-review
+  - skills/opsx-verify
+  - skills/opsx-report
   - docs/stage-packet-protocol.md
 superseded_by: "StagePacket/run-report-data.json 流已废弃；plan-review/verify 改为 subagent 直读文件 + audit-log.md 留档；report 改从 .md 文件聚合数据"
 ---
@@ -21,21 +21,21 @@ gate stage 执行时（plan-review 或 verify），主 agent 组装 StagePacket 
 
 ## 调用链
 
-1. **opsx-plan-review**（`.claude/skills/opsx-plan-review/SKILL.md`）
+1. **opsx-plan-review**（`skills/opsx-plan-review/SKILL.md`）
    - 主 agent 读取 specs/ + design.md，组装 **PlanReviewPacket**
    - 派遣 4 个 blind reviewer subagent（trace / granularity / uniqueness / design-integrity）
    - 每个 subagent 输出 StageResult JSON
    - 主 agent 汇总 → 写入 `context/run-report-data.json`（追加式合并，JSON 损坏则中止）
    - 通过时写 `gates.plan-review` 时间戳到 `.openspec.yaml`
 
-2. **opsx-verify**（`.claude/skills/opsx-verify/SKILL.md`）
+2. **opsx-verify**（`skills/opsx-verify/SKILL.md`）
    - 主 agent 读取 tasks.md + specs/ + design.md，组装 **VerifyPacket**（含 task_completion / task_traces / tdd_summary / test_report_present 扩展字段）
    - 派遣单一 subagent 顺序执行 4 个维度（completeness / correctness / consistency / test-report）
    - subagent 输出 4 个 StageResult JSON
    - 主 agent 检测冲突（可触发 arbiter subagent）→ 写入 `context/run-report-data.json`
    - 通过时写 `gates.verify` 时间戳
 
-3. **opsx-report**（`.claude/skills/opsx-report/SKILL.md`）
+3. **opsx-report**（`skills/opsx-report/SKILL.md`）
    - 读取 `context/run-report-data.json` 聚合 RunReport 数据模型
    - 读取 `.openspec.yaml` 获取 gate 时间戳（优先于 results decision 判断状态）
    - 渲染 self-contained HTML → `context/run-report.html`

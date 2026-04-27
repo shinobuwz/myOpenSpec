@@ -91,3 +91,20 @@
 - Added `npm run install:local` / `npm run test:local-install` to pack and globally install the local tarball for one-command manual testing.
 - `npm test` passed: 12 tests.
 - `npm run install:local` passed and `opsx --version` returned `1.0.1`.
+
+## Source layout migration | direct
+
+### Direct
+- Moved canonical skill sources from `.claude/skills/` to `skills/`.
+- Moved spec-driven schema/templates from `.claude/opsx/schemas/` to `runtime/schemas/`.
+- Updated `opsx install-skills` and `scripts/sync.sh` to read from `skills/`.
+- Updated package files so npm tarballs publish `skills/` and `runtime/`, not `.claude/`.
+
+### Verification
+- `npm test` passed: 13 tests.
+- `npm pack --dry-run --json` passed; package includes `bin/`, `runtime/`, `skills/`, README, LICENSE, and package metadata.
+- Pack verification confirmed no `.claude/` files are included.
+- `npm run install:local` passed and `opsx --version` returned `1.0.1`.
+- `opsx install-skills` passed and installed 18 skills to `/Users/cc/.agents/skills`.
+- `bash .claude/opsx/bin/changes.sh list` passed through the compatibility wrapper.
+- `node bin/opsx.mjs changes -p . init smoke-schema-check spec-driven` passed, then the temporary smoke change was removed.

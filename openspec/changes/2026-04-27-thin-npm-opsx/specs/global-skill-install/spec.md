@@ -6,7 +6,7 @@
 
 #### 场景:默认安装目录
 - **当** 用户运行 `opsx install-skills`
-- **那么** 系统必须把包内 `.claude/skills/opsx-*` 同步到 `~/.agents/skills`
+- **那么** 系统必须把包内 `skills/opsx-*` 同步到 `~/.agents/skills`
 
 #### 场景:自定义安装目录
 - **当** 用户设置 `OPSX_AGENTS_SKILLS_HOME=<target>`
@@ -49,7 +49,7 @@
 当文档或 skills 需要建议列出 active changes 时，必须优先使用 `opsx changes list` 或 `opsx changes -p <project> list`，而不是硬编码 `.claude/opsx/bin/changes.sh`。
 
 #### 场景:skill 文档不再硬编码 Claude helper
-- **当** 维护者检查 `.claude/skills/opsx-*/SKILL.md`
+- **当** 维护者检查 `skills/opsx-*/SKILL.md`
 - **那么** 通用 change helper 示例必须使用 `opsx changes`
 
 ### 需求:仓库同步不复制通用 runtime
@@ -58,5 +58,5 @@
 
 #### 场景:sync 目标项目不生成 .claude/opsx
 - **当** 用户运行 `scripts/sync.sh <target>`
-- **那么** 脚本必须同步 `.claude/skills/opsx-*`
+- **那么** 脚本必须把 `skills/opsx-*` 同步为 `.claude/skills/opsx-*`
 - **那么** 脚本禁止创建或刷新 `<target>/.claude/opsx`

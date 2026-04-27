@@ -30,7 +30,7 @@ Current OPSX helper scripts are invoked through repository-relative paths such a
 
 - Adds npm package metadata and a small Node.js launcher.
 - Refactors change-helper invocation so project state remains under `<project>/openspec/changes`.
-- Keeps `.claude/skills` as source templates in this repository, but global installation becomes the normal runtime path.
+- Keeps `skills/` as source templates in this repository, while global installation becomes the normal runtime path.
 - Updates scripts and documentation to avoid treating `.claude/opsx` as the canonical runtime location.
 - Does not reintroduce profile, delivery, workflow selection, or interactive CLI systems.
 
@@ -56,7 +56,7 @@ Single change: `2026-04-27-thin-npm-opsx`
 
 - 范围：thin npm launcher, `-p/--project` support, global skill installation, project initialization, docs.
 - 不包含：full CLI workflow engine, profile/delivery configuration, interactive setup, publishing automation beyond local npm/package verification.
-- 依赖：current `changes.sh`, `.claude/skills/opsx-*`, `openspec/config.yaml`.
+- 依赖：current `changes.sh`, `skills/opsx-*`, `openspec/config.yaml`.
 
 ### 执行拓扑
 

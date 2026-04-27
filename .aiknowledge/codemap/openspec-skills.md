@@ -6,9 +6,10 @@ last_verified_at: 2026-04-27
 last_verified_by: opsx-implement
 verification_basis: thin-npm-opsx
 applies_to:
-  - .claude/skills
+  - skills
   - bin/opsx.mjs
   - runtime/bin/changes.sh
+  - runtime/schemas
   - docs
 superseded_by:
 ---
@@ -16,7 +17,7 @@ superseded_by:
 # openspec-skills
 
 ## 职责
-OpenSpec 工作流的单一真相源。所有 skill 以 Markdown 文件存放于 `.claude/skills/<name>/SKILL.md`，由 `opsx install-skills` 分发到全局 `~/.agents/skills`，必要时由 `scripts/sync.sh` 分发为项目 adapter。
+OpenSpec 工作流的单一真相源。所有 skill 以 Markdown 文件存放于 `skills/<name>/SKILL.md`，由 `opsx install-skills` 分发到全局 `~/.agents/skills`，必要时由 `scripts/sync.sh` 分发为项目 adapter `.claude/skills/<name>/SKILL.md`。
 
 ## Skill 清单（18 个）
 
@@ -77,10 +78,10 @@ plan / ff ──────────────→ proposal → specs → d
 - `auto-drive`：编排层，自主驱动上述完整循环
 
 ## 隐式约束
-- Skills 被 git 追踪（`.gitignore` 精确忽略 `settings.local.json` 等敏感文件）
+- Skills 被 git 追踪在仓库根目录 `skills/`（`.gitignore` 精确忽略 `settings.local.json` 等敏感文件）
 - 关卡结果写入 `.openspec.yaml` 的 `gates.*` 字段，下游 skill 读取该字段做准入校验
 - 所有 skill 按需读取 `.aiknowledge/`（index-first 策略，禁止全量扫描）
 - Skill 文件变更后需运行 `opsx install-skills` 更新全局 skills；只有工具不支持全局 skills 时才运行 `scripts/sync.sh` 同步到目标仓库
-- 通用 runtime 归属于 npm 包入口 `bin/opsx.mjs` 与 `runtime/bin/changes.sh`，不再复制到目标项目 `.claude/opsx`
+- 通用 runtime 归属于 npm 包入口 `bin/opsx.mjs`、`runtime/bin/changes.sh` 与 `runtime/schemas`，不再复制到目标项目 `.claude/opsx`
 - `opsx-plan-review`、`opsx-task-analyze`、`opsx-verify` 遵循 Stage Packet Protocol v2：派遣 subagent 直接读取权威产物文件 → 输出 StageResult JSON → 主 agent 追加写 `audit-log.md`；无 context/ JSON 文件，无 StagePacket 组装步骤
 - `opsx-report` 从 `audit-log.md`（plan-review/verify）、`test-report.md`（tdd）、`review-report.md`（review）读取各 stage 决定，结合 `.openspec.yaml` gates 字段渲染 HTML；不读取 `run-report-data.json`

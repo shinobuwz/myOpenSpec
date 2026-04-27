@@ -14,12 +14,12 @@ superseded_by:
 # skill-sync
 
 ## 职责
-将 `.claude/skills/opsx-*` 同步到目标仓库作为工具 adapter。通用 runtime、schemas 和模板由全局 npm `opsx` launcher 分发，不再通过 `sync.sh` 复制到每个项目。
+将 `skills/opsx-*` 同步到目标仓库 `.claude/skills/opsx-*` 作为工具 adapter。通用 runtime、schemas 和模板由全局 npm `opsx` launcher 分发，不再通过 `sync.sh` 复制到每个项目。
 
 ## 关键文件
 | 文件 | 角色 |
 |------|------|
-| `scripts/sync.sh` | 单仓库同步：接受 `<target-dir>` 参数，只复制 `.claude/skills/opsx-*` |
+| `scripts/sync.sh` | 单仓库同步：接受 `<target-dir>` 参数，只把 `skills/opsx-*` 复制为 `.claude/skills/opsx-*` |
 | `bin/opsx.mjs` | 全局 launcher：负责 `install-skills`、`init-project` 和 `changes` 分发 |
 
 ## 隐式约束

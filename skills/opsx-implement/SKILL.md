@@ -59,7 +59,7 @@ Agent({
 ## 输入
 读取 openspec/changes/<name>/tasks.md 找到第一个 [ ] 任务作为起点，恢复实施进度。
 读取 openspec/changes/<name>/design.md 和 openspec/changes/<name>/specs/**/*.md 理解设计意图和需求。
-读取 .claude/skills/opsx-tdd/SKILL.md，掌握 TDD 红绿重构循环规则和 test-report.md 格式规范。这是 test-report.md 写入的唯一权威格式定义，必须严格遵守。
+读取 skills/opsx-tdd/SKILL.md（或已安装的全局 opsx-tdd skill），掌握 TDD 红绿重构循环规则和 test-report.md 格式规范。这是 test-report.md 写入的唯一权威格式定义，必须严格遵守。
 
 ## 实施规则
 按 tasks.md 顺序逐一实施，对每个任务：
