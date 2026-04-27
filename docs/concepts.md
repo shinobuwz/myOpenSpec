@@ -414,7 +414,7 @@ CSS Variables (应用于 :root)
 ### 模式如何工作
 
 ```yaml
-# .claude/opsx/schemas/spec-driven/schema.yaml
+# runtime/schemas/spec-driven/schema.yaml
 name: spec-driven
 artifacts:
   - id: proposal
@@ -475,16 +475,16 @@ slice（复杂需求时） → proposal → specs → design → plan-review →
 
 ```bash
 # 从零开始创建
-mkdir -p .claude/opsx/schemas/research-first/templates
+mkdir -p runtime/schemas/research-first/templates
 
 # 或从现有模式派生
-cp -r .claude/opsx/schemas/spec-driven .claude/opsx/schemas/research-first
+cp -r runtime/schemas/spec-driven runtime/schemas/research-first
 ```
 
 **示例自定义模式：**
 
 ```yaml
-# .claude/opsx/schemas/research-first/schema.yaml
+# runtime/schemas/research-first/schema.yaml
 name: research-first
 artifacts:
   - id: research

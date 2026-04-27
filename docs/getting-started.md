@@ -1,19 +1,20 @@
 # 快速上手
 
-本指南说明当前仓库的 skill-first 工作流如何使用。这里的入口不是 slash command，而是 `.claude/skills/` 下的 `opsx-*` skills。
+本指南说明当前仓库的 skill-first 工作流如何使用。全局 `opsx` 命令只负责 launcher、项目路径和 skills 安装；实际规划和实施仍由 `opsx-*` skills 驱动。
 
 ## 最短路径
 
 ```text
-1. 安装到仓库列表     ./scripts/install-repos.sh /path/to/repo-a /path/to/repo-b
-2. 复杂需求先切分     请使用 `opsx-slice` 判断是否需要多个 change
-3. 规划变更           请使用 `opsx-plan` 创建一个新变更
-4. 生成任务           请继续使用 `opsx-tasks`
-5. 实施代码           请使用 `opsx-implement`
-6. 验证与归档         请使用 `opsx-verify` -> `opsx-review` -> `opsx-archive`
+1. 安装全局入口       npm install -g @shinobuwz/opsx && opsx install-skills
+2. 初始化项目状态     opsx init-project -p /path/to/repo
+3. 复杂需求先切分     请使用 `opsx-slice` 判断是否需要多个 change
+4. 规划变更           请使用 `opsx-plan` 创建一个新变更
+5. 生成任务           请继续使用 `opsx-tasks`
+6. 实施代码           请使用 `opsx-implement`
+7. 验证与归档         请使用 `opsx-verify` -> `opsx-review` -> `opsx-archive`
 ```
 
-如果您希望安装到全局配置目录，可运行 `./scripts/install-global.sh`；它会默认同步到 `~/.agents/skills`。
+从源码 checkout 调试时，可运行 `./scripts/install-global.sh` 安装当前工作区的 skills。仓库级 `scripts/install-repos.sh` 只同步 `.claude/skills/opsx-*` adapter，不复制 runtime 或模板。
 
 ## 目录结构
 
@@ -127,6 +128,7 @@ AI：正在处理任务...
 - `opsx-continue` 用于恢复中断的 change；如果你传入父 change，它会先看 `active_subchange`，否则再按 `suggested_focus` / `recommended_order` / 唯一 subchange 路由。
 - grouped change 执行 `opsx-archive` 时，默认归档的是当前 resolved subchange，目标应为顶层 `openspec/changes/archive/YYYY-MM-DD-<group>-<subchange>/`；不要在活动 group 下创建 `subchanges/archive/`。归档后父 group 只保留 `.openspec.group.yaml` 与 `subchanges/`；如果最后一个 subchange 也已归档，则直接删除父 group。
 - 当前仓库不再维护 `.claude/commands/opsx/`。
+- 项目内只保留 `openspec/` 状态；通用 runtime 由全局 `opsx` npm 包提供。
 - 若其他旧文档仍出现 `/opsx:*`，请优先以 [支持的工具](supported-tools.md) 和 [工作流](workflows.md) 为准。
 
 ## 下一步

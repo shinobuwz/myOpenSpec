@@ -2,11 +2,12 @@
 status: active
 created_at: 2026-04-17
 created_from: opsx-bugfix
-last_verified_at: 2026-04-17
-last_verified_by: opsx-bugfix
-verification_basis: code-inspection
+last_verified_at: 2026-04-27
+last_verified_by: opsx-implement
+verification_basis: thin-npm-opsx
 applies_to:
-  - .claude/opsx/bin/changes.sh
+  - runtime/bin/changes.sh
+  - bin/opsx.mjs
 superseded_by:
 ---
 
@@ -30,25 +31,23 @@ superseded_by:
 路径归属必须分离：
 
 1. `CHANGES_DIR` 永远固定到项目目录：`$REPO_ROOT/openspec/changes`
-2. `SCHEMAS_DIR` 才允许项目优先、缺失时回退到 `$HOME/.claude/opsx/schemas`
+2. `SCHEMAS_DIR` 才允许使用包内 `runtime/schemas`，并按兼容需要回退到旧 schema 目录
 
 ## 修复 diff
 
 ```bash
-CHANGES_DIR="$REPO_ROOT/openspec/changes"
-PROJECT_SCHEMAS_DIR="$REPO_ROOT/.claude/opsx/schemas"
-GLOBAL_SCHEMAS_DIR="$HOME/.claude/opsx/schemas"
-SCHEMAS_DIR="$PROJECT_SCHEMAS_DIR"
-
-[ -d "$PROJECT_SCHEMAS_DIR" ] || SCHEMAS_DIR="$GLOBAL_SCHEMAS_DIR"
+PROJECT_ROOT="<resolved -p/--project>"
+CHANGES_DIR="$PROJECT_ROOT/openspec/changes"
+SCHEMAS_DIR="$RUNTIME_DIR/schemas"
 ```
 
 ## 要点
 
 - `changes` 永远属于项目，不能回退到全局
-- `schemas`/`skills` 可以作为全局共享能力存在
+- `schemas`/`skills` 可以作为全局共享能力存在，但 runtime 不应写入全局 changes
 - 设计 shell 路径策略时，先区分“项目状态”与“共享资源”，不要一刀切复用同一回退规则
+- 当 agent 在 A 目录操作 B 目录时，必须通过 `opsx changes -p B ...` 将 project root 显式传到底
 
 ## 来源
 
-2026-04-17 在修复 `.claude/opsx/bin/changes.sh` 归属策略时确认。
+2026-04-17 在修复 `.claude/opsx/bin/changes.sh` 归属策略时确认；2026-04-27 迁移到 thin npm launcher 后复核。

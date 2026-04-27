@@ -7,7 +7,7 @@ REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 
 if [ $# -eq 0 ]; then
   echo "Usage: $0 <target-dir>"
-  echo "  Syncs .claude/skills/opsx-* and .claude/opsx/ to <target-dir>"
+  echo "  Syncs .claude/skills/opsx-* to <target-dir>"
   exit 1
 fi
 
@@ -37,26 +37,5 @@ for skill_dir in "$REPO_ROOT/.claude/skills"/opsx-*/; do
   rm -rf "$TARGET/.claude/skills/$skill_name"
   cp -r "${skill_dir%/}" "$TARGET/.claude/skills/"
 done
-
-# Sync .claude/opsx shared assets (helper scripts + bundled schemas)
-if [ -d "$REPO_ROOT/.claude/opsx" ]; then
-  mkdir -p "$TARGET/.claude/opsx"
-
-  if [ -d "$REPO_ROOT/.claude/opsx/bin" ]; then
-    rm -rf "$TARGET/.claude/opsx/bin"
-    mkdir -p "$TARGET/.claude/opsx/bin"
-    cp "$REPO_ROOT/.claude/opsx/bin"/* "$TARGET/.claude/opsx/bin/" 2>/dev/null || true
-    chmod +x "$TARGET/.claude/opsx/bin"/* 2>/dev/null || true
-  fi
-
-  if [ -d "$REPO_ROOT/.claude/opsx/schemas" ]; then
-    rm -rf "$TARGET/.claude/opsx/schemas"
-    mkdir -p "$TARGET/.claude/opsx/schemas"
-    for schema_dir in "$REPO_ROOT/.claude/opsx/schemas"/*/; do
-      [ -d "$schema_dir" ] || continue
-      cp -r "${schema_dir%/}" "$TARGET/.claude/opsx/schemas/"
-    done
-  fi
-fi
 
 echo "✓ synced: $TARGET"

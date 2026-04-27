@@ -35,3 +35,4 @@ fi
 echo ""
 echo "Installation complete."
 echo "Tell your AI: use opsx-plan for <feature you want to build>"
+echo "Runtime helpers are provided by the global opsx npm package."

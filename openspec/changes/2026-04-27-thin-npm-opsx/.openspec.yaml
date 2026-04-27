@@ -1,0 +1,7 @@
+schema: spec-driven
+created: 2026-04-27
+gates:
+  plan-review: "2026-04-27T16:43:33+08:00"
+  task-analyze: "2026-04-27T16:44:49+08:00"
+  verify: "2026-04-27T16:55:11+08:00"
+  review: "2026-04-27T16:56:04+08:00"

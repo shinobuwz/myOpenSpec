@@ -8,7 +8,7 @@ description: 按 tasks.md 逐项实施，每项强制 TDD 循环。当 OpenSpec 
 ## Change Root 解析
 
 - `<name>` 可以是单个 change、父 change 或 `group/subchange` 简写。
-- 执行前先运行 `bash .claude/opsx/bin/changes.sh resolve <name>` 获取真实 change root。
+- 执行前先运行 `opsx changes resolve <name>` 获取真实 change root。
 - 后文所有 `proposal.md`、`design.md`、`specs/`、`tasks.md`、`test-report.md` 路径均指 resolved change root。
 
 ## 硬性门控

@@ -29,16 +29,16 @@ description: 创建 OpenSpec change 并生成规划产出物（proposal/design/s
   - 顶层单个 change：`2026-04-14-add-auth`
   - 父 change：`2026-04-14-lucky-guess`
   - subchange 简写：`2026-04-14-lucky-guess/01-auth`
-- 执行前必须先运行 `bash .claude/opsx/bin/changes.sh resolve <name>`，得到真实 change root。
+- 执行前必须先运行 `opsx changes resolve <name>`，得到真实 change root。
 - 如果 `<name>` 是父 change，则优先用 `active_subchange`；若为空，再退化到 `suggested_focus`、`recommended_order` 的首项或唯一 subchange。
 - 后文所有 `proposal.md`、`design.md`、`specs/`、`tasks.md` 路径，均指 **resolved change root** 下的文件。
 
 ## 启动序列
 
 1. 确认需求已经过脑暴或探索阶段的澄清
-2. 执行 `bash .claude/opsx/bin/changes.sh` 检查是否已有相关变更（含阶段和进度）
+2. 执行 `opsx changes` 检查是否已有相关变更（含阶段和进度）
 3. **【硬性门控 · 不可跳过】slice 前置检查**
-   - 执行 `bash .claude/opsx/bin/changes.sh resolve <name>` 解析 change root
+   - 执行 `opsx changes resolve <name>` 解析 change root
    - 检查 resolved change root 下是否存在 `proposal.md`
    - **如果不存在 `proposal.md`**：立即停止，输出以下提示并拒绝继续：
      ```
@@ -57,7 +57,7 @@ description: 创建 OpenSpec change 并生成规划产出物（proposal/design/s
 ## 流程
 
 ### 1. 创建变更
-- 如果是未切分的小 change：使用 `bash .claude/opsx/bin/changes.sh init YYYY-MM-DD-<name> spec-driven` 创建新变更目录结构
+- 如果是未切分的小 change：使用 `opsx changes init YYYY-MM-DD-<name> spec-driven` 创建新变更目录结构
 - 如果是 grouped change：不得重新创建 change；直接在 resolved subchange root 下继续
 - **变更名称必须带日期前缀**（如 `2026-04-03-add-auth`），便于按时间追溯
 - 名称部分简洁、描述性强，使用 kebab-case

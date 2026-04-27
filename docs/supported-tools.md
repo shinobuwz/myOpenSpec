@@ -1,36 +1,42 @@
 # 支持的工具
 
-OpenSpec 支持仓库内安装，以及全局 `~/.agents/skills` 安装。
+OpenSpec 支持全局 npm launcher 和全局 `~/.agents/skills` 安装。仓库内只保存 `openspec/` 状态。
 
 ## 工作原理
 
-当前仓库采用 skills-only 工作流模型。项目内只维护一套本地 skill 源：
+当前仓库采用 skills-first 工作流模型。全局 `opsx` 命令是薄 launcher：
 
-1. **技能** — 可重用的 `opsx-*` 指令目录，位于 `.claude/skills/`
-2. **辅助脚本** — 位于 `.claude/opsx/bin/`，供 OPSX skill 在本地仓库内调用
+1. **Launcher** — `opsx changes -p <repo> ...`、`opsx install-skills`、`opsx init-project -p <repo>`
+2. **技能模板** — 可重用的 `opsx-*` 指令目录，位于包内 `.claude/skills/`
+3. **项目状态** — 每个目标项目只保留 `openspec/config.yaml` 和 `openspec/changes/`
 
-不再维护单独的 `.claude/commands/opsx/` 斜杠命令绑定层。
+不再维护单独的 `.claude/commands/opsx/` 斜杠命令绑定层，也不把通用 runtime 复制到每个项目。
 
 ## 工具目录参考
 
-| 工具 | 项目内工作流入口 |
+| 工具 | 工作流入口 |
 |------|------------------|
-| Claude Code | `.claude/skills/opsx-*/SKILL.md` |
-| Codex | 复用同一仓库内的 OPSX 文档与 skill 源，不提供单独 prompt 产物 |
+| Claude Code | 全局 `~/.agents/skills/opsx-*` 或项目 adapter `.claude/skills/opsx-*` |
+| Codex | 复用同一 OPSX 文档与 skill 源，不提供单独 prompt 产物 |
 
 ## 安装方式
 
-将 skill 文件安装到指定仓库列表：
+推荐安装全局入口和 skills：
 
 ```bash
-# 安装到一个或多个仓库
-./scripts/install-repos.sh /path/to/repo-a /path/to/repo-b
-
-# 安装到全局 ~/.agents/skills
-./scripts/install-global.sh
+npm install -g @shinobuwz/opsx
+opsx install-skills
+opsx init-project -p /path/to/repo
 ```
 
-其中全局安装默认只同步 `opsx-*` skills 到 `~/.agents/skills`。
+源码 checkout 调试：
+
+```bash
+./scripts/install-global.sh
+./scripts/install-repos.sh /path/to/repo-a /path/to/repo-b
+```
+
+其中 `install-repos.sh` 只同步 `.claude/skills/opsx-*` adapter，不同步 runtime scripts 或 schemas。
 
 如果不需要安装，可跳过此步骤。
 

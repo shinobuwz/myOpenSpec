@@ -6,7 +6,7 @@ description: 使用 subagent 进行独立代码审查，输出质量指标和分
 ## Change Root 解析
 
 - `<name>` 可以是单个 change、父 change 或 `group/subchange` 简写。
-- 执行前先运行 `bash .claude/opsx/bin/changes.sh resolve <name>` 获取真实 change root。
+- 执行前先运行 `opsx changes resolve <name>` 获取真实 change root。
 - 后文所有 `proposal.md`、`review-report.md`、`.openspec.yaml` 路径均指 resolved change root。
 
 代码审查 Skill。使用 subagent 进行独立的代码审查，输出质量指标和分级问题列表。

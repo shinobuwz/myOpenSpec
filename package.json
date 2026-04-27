@@ -1,0 +1,30 @@
+{
+  "name": "@shinobuwz/opsx",
+  "version": "1.0.1",
+  "description": "Thin global launcher for OPSX workflows",
+  "type": "module",
+  "bin": {
+    "opsx": "bin/opsx.mjs"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "bin/",
+    "runtime/",
+    ".claude/skills/",
+    ".claude/opsx/schemas/",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "test": "node --test tests/*.test.mjs",
+    "test:local-install": "bash scripts/test-local-install.sh",
+    "install:local": "bash scripts/test-local-install.sh",
+    "pack:dry": "npm pack --dry-run"
+  },
+  "engines": {
+    "node": ">=20.19.0"
+  },
+  "license": "MIT"
+}
