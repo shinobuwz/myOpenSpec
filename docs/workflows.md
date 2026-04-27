@@ -93,7 +93,7 @@ opsx-slice
 - 需要先判断是一个 change 还是多个 change
 - 不希望把多个独立交付单元硬塞进同一个计划
 
-### 3. 直接推进
+### 3. 直接推进正式 change
 
 ```text
 opsx-plan
@@ -111,7 +111,27 @@ opsx-plan
 - 功能边界已经明确
 - 只需要快速进入规划和实现
 
-### 4. 明确缺陷修复
+### 4. 轻量小改动
+
+```text
+opsx-lite
+-> lite-run
+```
+
+适合：
+
+- 低风险文档、skill 文案、脚本或配置小修
+- 不需要 proposal / design / spec / tasks
+- 可以用明确命令快速验证
+
+如果发现多模块、新 capability、设计取舍、兼容性风险或测试策略不明确，应升级为：
+
+```text
+opsx-slice
+-> opsx-plan
+```
+
+### 5. 明确缺陷修复
 
 ```text
 opsx-bugfix
@@ -171,7 +191,7 @@ AI：已归档，知识与 codemap 已更新
 | 全栈 / 多模块需求，先判断怎么拆 | `opsx-slice` |
 | 创建新 change | `opsx-plan` |
 | 恢复中断的当前 change | `opsx-continue` |
-| 一次性推进完整规划 | `opsx-ff` |
+| 低风险小改动 | `opsx-lite` |
 | 开始主线实施 | `opsx-implement` |
 | 做最终一致性检查 | `opsx-verify` |
 | 归档 | `opsx-archive` |

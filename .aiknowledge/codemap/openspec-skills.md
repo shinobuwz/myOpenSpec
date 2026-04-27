@@ -2,9 +2,9 @@
 status: active
 created_at: 2026-04-13
 created_from: metadata-backfill
-last_verified_at: 2026-04-27
+last_verified_at: 2026-04-28
 last_verified_by: opsx-archive
-verification_basis: changes-status-detail + thin-npm-opsx archive + aiknowledge-lifecycle change
+verification_basis: changes-status-detail + thin-npm-opsx archive + aiknowledge-lifecycle change + opsx-lite-workflow archive
 applies_to:
   - skills
   - bin/opsx.mjs
@@ -14,6 +14,7 @@ applies_to:
   - .aiknowledge
 source_refs:
   - change:2026-04-27-aiknowledge-lifecycle
+  - change:2026-04-27-opsx-lite-workflow
 superseded_by:
 ---
 
@@ -30,7 +31,7 @@ OpenSpec 工作流的单一真相源。所有 skill 以 Markdown 文件存放于
 | `opsx-slice` | 创建父 change + subchanges，初始化每个 subchange 的 proposal，并定义执行拓扑（execution_mode / recommended_order / 可选 suggested_focus） | 无 |
 | `opsx-plan` | 为当前 resolved change root 生成/修订 specs + design，必要时小修 proposal | 无 |
 | `opsx-continue` | 恢复中断的当前 change；group 场景下先按 active_subchange，否则按 suggested_focus / recommended_order / 唯一 subchange 路由 | 无 |
-| `opsx-ff` | 快速生成全部产出物 + 三道关卡 + 实施 | 无 |
+| `opsx-lite` | 轻量小改动工作流，不创建正式 change，记录 lite-run 事实留档；范围扩大时升级到 slice→plan | 无 |
 | `opsx-plan-review` | spec↔plan 一致性审查（关卡1），硬性门控；派遣 1 个 subagent 直接读取 specs/+design.md，输出 StageResult JSON，写 audit-log.md | design 已生成 |
 | `opsx-tasks` | 将 design+specs 转化为带 TDD 标签的 tasks.md | `gates.plan-review` |
 | `opsx-task-analyze` | plan↔tasks 一致性审查（关卡2），硬性门控 | tasks 已生成 + plan-review 已通过 |
@@ -52,7 +53,7 @@ explore ─── 需求澄清 ───┐
                          ▼
 slice ──── 父 change / subchanges / active_subchange ───┤
                          ▼
-plan / ff ──────────────→ proposal → specs → design
+plan ───────────────────→ proposal → specs → design
                                           │
                    continue ──────────────┘  (恢复到当前合法节点)
                                           │

@@ -573,7 +573,7 @@ openspec/
 │           │                                                                  │
 │           ▼                                                                  │
 │   ┌────────────────┐                                                         │
-│   │  2. 创建        │  `opsx-plan` / `opsx-ff` / `opsx-continue`              │
+│   │  2. 创建        │  `opsx-plan` / `opsx-continue`                         │
 │   │    制品         │  proposal → specs → design                              │
 │   │                │  （continue 用于恢复到当前合法节点）                       │
 │   └───────┬────────┘                                                         │

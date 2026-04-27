@@ -52,7 +52,7 @@ opsx init-project -p /path/to/repo
 | `opsx-knowledge` | 独立沉淀可复用经验 |
 | `opsx-plan` | 创建变更并生成 proposal / specs / design |
 | `opsx-continue` | 恢复中断的当前 change，并路由到下一合法步骤 |
-| `opsx-ff` | 一次性推进完整规划链路 |
+| `opsx-lite` | 轻量小改动工作流，记录 lite-run 事实留档 |
 | `opsx-verify` | 验证实现与制品是否一致 |
 | `opsx-archive` | 归档已完成的变更 |
 | `opsx-bootstrap` | 会话启动时的工作流引导 |
