@@ -39,7 +39,7 @@
    | `review-report.md` | opsx-review（追加） | opsx-report（渲染 HTML） | 代码审查结论留档；与结构符合性审查分开存放 |
    | `run-report.html` | opsx-report | 人工阅读 | self-contained HTML 报告，按需生成 |
 
-   grouped change 场景下，父级只保留 `.openspec.group.yaml` 这个最小路由状态；subchange 下的 `proposal.md`、`specs/`、`design.md`、`tasks.md`、`test-report.md` 和代码本身仍是权威源。执行 `archive` 时，归档单元默认也是 resolved subchange root，目标落在顶层 `openspec/changes/archive/YYYY-MM-DD-<group>-<subchange>/`；不得在活动父 group 下创建 `subchanges/archive/`。若仍有剩余 subchange，父 group 会被清理为只剩 `.openspec.group.yaml` 与 `subchanges/`；若最后一个 subchange 也归档完成，则直接删除父 group 目录。
+   grouped change 场景下，父级只保留 `.openspec.group.yaml` 这个最小路由状态；subchange 下的 `proposal.md`、`specs/`、`design.md`、`tasks.md`、`test-report.md` 和代码本身仍是权威源。执行 `archive` 时，归档单元默认也是 resolved subchange root，目标落在顶层 `openspec/changes/archive/<archive-dir>/`；若 `<group>-<subchange>` 已带 `YYYY-MM-DD-` 前缀则不再重复加日期。不得在活动父 group 下创建 `subchanges/archive/`。若仍有剩余 subchange，父 group 会被清理为只剩 `.openspec.group.yaml` 与 `subchanges/`；若最后一个 subchange 也归档完成，则直接删除父 group 目录。
 
    **Gate Review Protocol**（详见 `docs/stage-packet-protocol.md`）：
 

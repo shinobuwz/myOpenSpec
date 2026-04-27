@@ -545,7 +545,7 @@ openspec/
 2. **移动到归档。** 变更文件夹移动到 `changes/archive/`，带有日期前缀以便按时间顺序排序。
 
    grouped change 场景下，默认移动的是当前 resolved subchange root，而不是父 group。也就是说：
-   `changes/<group>/subchanges/<subchange>/` 应归档到顶层 `changes/archive/YYYY-MM-DD-<group>-<subchange>/`，
+   `changes/<group>/subchanges/<subchange>/` 应归档到顶层 `changes/archive/<archive-dir>/`（若 `<group>-<subchange>` 已带 `YYYY-MM-DD-` 前缀则不再重复加日期），
    而不是在活动 group 内部创建 `subchanges/archive/`。
    如果 group 下仍有未归档的 subchange，父 group 会被清理为只剩 `.openspec.group.yaml` 与 `subchanges/`；
    如果最后一个 subchange 也已归档，则直接删除活动态父 group 目录。
