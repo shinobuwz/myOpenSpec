@@ -291,6 +291,103 @@ change_stage_summary() {
   printf "%s%s\n" "$stage" "$progress"
 }
 
+change_stage_name() {
+  local dir="$1"
+  if [ -f "$dir/tasks.md" ]; then
+    echo "tasks"
+  elif [ -f "$dir/design.md" ]; then
+    echo "design"
+  elif [ -f "$dir/proposal.md" ]; then
+    echo "proposal"
+  else
+    echo "empty"
+  fi
+}
+
+task_progress() {
+  local dir="$1"
+  if [ ! -f "$dir/tasks.md" ]; then
+    echo "-"
+    return 0
+  fi
+
+  local total done
+  total=$({ grep -E '^\s*- \[[ x]\] [0-9]+[.][0-9]+' "$dir/tasks.md" 2>/dev/null || true; } | wc -l | tr -d ' ')
+  done=$({ grep -E '^\s*- \[x\] [0-9]+[.][0-9]+' "$dir/tasks.md" 2>/dev/null || true; } | wc -l | tr -d ' ')
+  if [ "$total" -gt 0 ]; then
+    printf "%s/%s\n" "$done" "$total"
+  else
+    echo "-"
+  fi
+}
+
+gate_value() {
+  local dir="$1"
+  local key="$2"
+  local file="$dir/.openspec.yaml"
+  if [ ! -f "$file" ]; then
+    echo "missing"
+    return 0
+  fi
+
+  local value
+  value="$(awk -v key="$key" '
+    {
+      line = $0
+      sub(/^[[:space:]]*/, "", line)
+      split(line, parts, ":")
+      if (parts[1] == key) {
+        sub(/^[^:]+:[[:space:]]*/, "", line)
+        gsub(/^"/, "", line)
+        gsub(/"$/, "", line)
+        print line
+        exit
+      }
+    }
+  ' "$file")"
+
+  if [ -n "$value" ]; then
+    printf "%s\n" "$value"
+  else
+    echo "missing"
+  fi
+}
+
+has_specs() {
+  local dir="$1"
+  [ -d "$dir/specs" ] && find "$dir/specs" -type f -name "*.md" -print -quit | grep -q .
+}
+
+yes_no_file() {
+  local file="$1"
+  if [ -f "$file" ]; then
+    echo "yes"
+  else
+    echo "no"
+  fi
+}
+
+next_step() {
+  local dir="$1"
+  if [ ! -f "$dir/proposal.md" ]; then
+    echo "opsx-slice"
+  elif [ ! -f "$dir/design.md" ] || ! has_specs "$dir"; then
+    echo "opsx-plan"
+  elif [ "$(gate_value "$dir" "plan-review")" = "missing" ]; then
+    echo "opsx-plan-review"
+  elif [ ! -f "$dir/tasks.md" ]; then
+    echo "opsx-tasks"
+  elif [ "$(gate_value "$dir" "task-analyze")" = "missing" ]; then
+    echo "opsx-task-analyze"
+  elif [ "$(gate_value "$dir" "verify")" = "missing" ]; then
+    echo "opsx-verify"
+  elif [ "$(gate_value "$dir" "review")" = "missing" ]; then
+    echo "opsx-review"
+  else
+    echo "opsx-archive"
+  fi
+}
+
 print_change() {
   local dir="$1"
   local name
@@ -351,6 +448,84 @@ list_changes() {
       print_group "$d"
     else
       print_change "$d"
+    fi
+  done
+}
+
+print_status_change() {
+  local dir="$1"
+  local indent="${2:-}"
+  local name
+  name="$(basename "$dir")"
+
+  printf "%sChange: %s\n" "$indent" "$name"
+  printf "%s  Stage: %s\n" "$indent" "$(change_stage_name "$dir")"
+  printf "%s  Tasks: %s\n" "$indent" "$(task_progress "$dir")"
+  printf "%s  Gates:\n" "$indent"
+  printf "%s    plan-review:  %s\n" "$indent" "$(gate_value "$dir" "plan-review")"
+  printf "%s    task-analyze: %s\n" "$indent" "$(gate_value "$dir" "task-analyze")"
+  printf "%s    verify:       %s\n" "$indent" "$(gate_value "$dir" "verify")"
+  printf "%s    review:       %s\n" "$indent" "$(gate_value "$dir" "review")"
+  printf "%s  Reports:\n" "$indent"
+  printf "%s    audit-log.md:     %s\n" "$indent" "$(yes_no_file "$dir/audit-log.md")"
+  printf "%s    test-report.md:   %s\n" "$indent" "$(yes_no_file "$dir/test-report.md")"
+  printf "%s    review-report.md: %s\n" "$indent" "$(yes_no_file "$dir/review-report.md")"
+  printf "%s  Next: %s\n" "$indent" "$(next_step "$dir")"
+}
+
+print_status_group() {
+  local dir="$1"
+  local name
+  name="$(basename "$dir")"
+  local meta_file="$dir/.openspec.group.yaml"
+  local active_subchange suggested_focus execution_mode recommended_order
+  active_subchange="$(read_group_field "$meta_file" "active_subchange")"
+  suggested_focus="$(read_group_field "$meta_file" "suggested_focus")"
+  execution_mode="$(read_group_field "$meta_file" "execution_mode")"
+  recommended_order="$(read_group_field "$meta_file" "recommended_order")"
+
+  printf "Group: %s\n" "$name"
+  printf "  Mode: %s\n" "${execution_mode:--}"
+  printf "  Active: %s\n" "${active_subchange:--}"
+  printf "  Suggested: %s\n" "${suggested_focus:--}"
+  printf "  Order: %s\n" "${recommended_order:--}"
+
+  if [ -d "$dir/subchanges" ]; then
+    local subdir
+    while IFS= read -r -d '' subdir; do
+      print_status_change "$subdir" "  "
+    done < <(find "$dir/subchanges" -mindepth 1 -maxdepth 1 -type d -print0 | sort -z)
+  fi
+}
+
+status_changes() {
+  echo "Project: $PROJECT_ROOT"
+
+  if [ ! -d "$CHANGES_DIR" ]; then
+    echo
+    echo "Active changes: 0"
+    return 0
+  fi
+
+  local active=()
+  while IFS= read -r -d '' d; do
+    [[ "$(basename "$d")" == "archive" ]] && continue
+    active+=("$d")
+  done < <(find "$CHANGES_DIR" -mindepth 1 -maxdepth 1 -type d -not -name "archive" -print0 | sort -z)
+
+  echo
+  echo "Active changes: ${#active[@]}"
+  if [ ${#active[@]} -eq 0 ]; then
+    return 0
+  fi
+
+  local d
+  for d in "${active[@]}"; do
+    echo
+    if is_group_dir "$d"; then
+      print_status_group "$d"
+    else
+      print_status_change "$d"
     fi
   done
 }
@@ -512,8 +687,11 @@ set_recommended_order() {
 command="${1:-list}"
 
 case "$command" in
-  list|status)
+  list)
     list_changes
+    ;;
+  status)
+    status_changes
     ;;
   init)
     shift

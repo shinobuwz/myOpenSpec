@@ -11,4 +11,4 @@
 | [api](api/index.md) | 1 | 0 | 0 | 接口变更、兼容性、序列化、可选字段契约 |
 | [config](config/index.md) | 4 | 0 | 1 | 配置管理、config 数据同步、migration 模块设计、工作流门控 |
 | [data](data/index.md) | 1 | 0 | 0 | 数据一致性、脏数据、文件读写安全 |
-| [misc](misc/index.md) | 11 | 0 | 1 | 其他踩坑经验（AI 工具行为、工作流操作、schema 分类等） |
+| [misc](misc/index.md) | 12 | 0 | 1 | 其他踩坑经验（AI 工具行为、工作流操作、schema 分类等） |

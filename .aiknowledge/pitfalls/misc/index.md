@@ -18,3 +18,4 @@
 | changes-sh-project-changes-global-schemas | [changes.sh 中 changes 必须项目级，只有 schemas 可回退全局](changes-sh-project-changes-global-schemas.md) | active | 2026-04-17 | changes.sh, changes, schemas, project scope, global fallback |
 | subchange-archive-must-use-top-level-archive | [grouped change 的 subchange 归档必须落到顶层 archive](subchange-archive-must-use-top-level-archive.md) | active | 2026-04-20 | archive, grouped-change, subchange, path |
 | archive-date-prefix-idempotent | [archive 目录加日期必须幂等](archive-date-prefix-idempotent.md) | active | 2026-04-27 | archive, date-prefix, idempotency, workflow |
+| status-command-should-not-be-list-alias | [status 命令不应退化为 list 别名](status-command-should-not-be-list-alias.md) | active | 2026-04-27 | status, list, workflow, diagnostics, next-step |
