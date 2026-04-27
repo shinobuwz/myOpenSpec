@@ -10,7 +10,7 @@
 
 | 模块 | 状态 | 最近复核 | 职责 | 入口 |
 |------|------|----------|------|------|
-| [openspec-skills](openspec-skills.md) | active | 2026-04-27 | OpenSpec 工作流 skill 的单一真相源，被 git 追踪并通过 npm/global install 或 sync.sh 分发 | `skills/` |
+| [openspec-skills](openspec-skills.md) | active | 2026-04-27 | OpenSpec 工作流 skill 的单一真相源，并约束 `.aiknowledge` lifecycle 维护规则 | `skills/`, `.aiknowledge/` |
 | [skill-sync](skill-sync.md) | active | 2026-04-27 | 将 skill adapter 同步到目标仓库；通用 runtime 由全局 opsx launcher 提供 | `scripts/sync.sh`, `bin/opsx.mjs` |
 | [stage-packet-protocol](stage-packet-protocol.md) | active | 2026-04-14 | gate stage 审查结论的输出结构和留档格式：StageResult schema + audit-log.md 规范 | `docs/stage-packet-protocol.md` |
 

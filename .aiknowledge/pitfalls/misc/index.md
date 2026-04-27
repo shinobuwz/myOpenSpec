@@ -19,3 +19,4 @@
 | subchange-archive-must-use-top-level-archive | [grouped change 的 subchange 归档必须落到顶层 archive](subchange-archive-must-use-top-level-archive.md) | active | 2026-04-20 | archive, grouped-change, subchange, path |
 | archive-date-prefix-idempotent | [archive 目录加日期必须幂等](archive-date-prefix-idempotent.md) | active | 2026-04-27 | archive, date-prefix, idempotency, workflow |
 | status-command-should-not-be-list-alias | [status 命令不应退化为 list 别名](status-command-should-not-be-list-alias.md) | active | 2026-04-27 | status, list, workflow, diagnostics, next-step |
+| source-refs-prefer-change-over-raw-source | [source_refs 优先引用 change，避免制造 raw source 目录](source-refs-prefer-change-over-raw-source.md) | active | 2026-04-27 | aiknowledge, source_refs, lifecycle, log |

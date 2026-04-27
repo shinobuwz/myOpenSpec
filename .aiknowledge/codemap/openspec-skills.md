@@ -4,20 +4,23 @@ created_at: 2026-04-13
 created_from: metadata-backfill
 last_verified_at: 2026-04-27
 last_verified_by: opsx-archive
-verification_basis: changes-status-detail + thin-npm-opsx archive
+verification_basis: changes-status-detail + thin-npm-opsx archive + aiknowledge-lifecycle change
 applies_to:
   - skills
   - bin/opsx.mjs
   - runtime/bin/changes.sh
   - runtime/schemas
   - docs
+  - .aiknowledge
+source_refs:
+  - change:2026-04-27-aiknowledge-lifecycle
 superseded_by:
 ---
 
 # openspec-skills
 
 ## 职责
-OpenSpec 工作流的单一真相源。所有 skill 以 Markdown 文件存放于 `skills/<name>/SKILL.md`，由 `opsx install-skills` 分发到全局 `~/.agents/skills`，必要时由 `scripts/sync.sh` 分发为项目 adapter `.claude/skills/<name>/SKILL.md`。通用 change runtime 位于 `runtime/bin/changes.sh`，其中 `list` 是紧凑清单，`status` 是项目级诊断视图。
+OpenSpec 工作流的单一真相源。所有 skill 以 Markdown 文件存放于 `skills/<name>/SKILL.md`，由 `opsx install-skills` 分发到全局 `~/.agents/skills`，必要时由 `scripts/sync.sh` 分发为项目 adapter `.claude/skills/<name>/SKILL.md`。通用 change runtime 位于 `runtime/bin/changes.sh`，其中 `list` 是紧凑清单，`status` 是项目级诊断视图。长期知识维护规则位于 `.aiknowledge/README.md`，审计入口索引为 `.aiknowledge/log.md`，月度日志位于 `.aiknowledge/logs/YYYY-MM.md`，`opsx-knowledge` 与 `opsx-codemap` 必须共享同一套 lifecycle 语义。
 
 ## Skill 清单（18 个）
 
@@ -86,3 +89,6 @@ plan / ff ──────────────→ proposal → specs → d
 - `opsx changes list` 与 `opsx changes status` 语义必须分离：`list` 只列 active changes，`status` 读取 gates/reports/tasks 并给出 next-step 诊断
 - `opsx-plan-review`、`opsx-task-analyze`、`opsx-verify` 遵循 Stage Packet Protocol v2：派遣 subagent 直接读取权威产物文件 → 输出 StageResult JSON → 主 agent 追加写 `audit-log.md`；无 context/ JSON 文件，无 StagePacket 组装步骤
 - `opsx-report` 从 `audit-log.md`（plan-review/verify）、`test-report.md`（tdd）、`review-report.md`（review）读取各 stage 决定，结合 `.openspec.yaml` gates 字段渲染 HTML；不读取 `run-report-data.json`
+- `opsx-knowledge` 和 `opsx-codemap` 在写入 `.aiknowledge/` 前必须读取 `.aiknowledge/README.md`；新增、更新、合并、废弃或 lint 修复后必须追加当前月度日志 `.aiknowledge/logs/YYYY-MM.md`
+- OpenSpec change、commit、audit-log、test-report 和 review-report 是默认事实来源；`codemap/` 与 `pitfalls/` 是 LLM 维护层，可以演化但必须保留 `source_refs`
+- 合并或替代正式知识条目时，默认保留 `superseded` tombstone；只有未索引、未引用、从未正式消费的孤儿文件才允许删除
