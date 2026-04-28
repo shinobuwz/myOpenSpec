@@ -8,36 +8,36 @@ source_refs:
   - skill:opsx-explore
 ---
 
-# Codex-first subagent docs
+# Codex-first subagent 文档
 
-## Intent
+## 意图
 
-Clarify that OPSX can reuse the Superpowers-style subagent description as a platform-neutral workflow idea while making Codex the default execution mapping and Claude Code the compatibility mapping.
+明确 OPSX 可以复用 Superpowers 风格的 subagent 描述作为平台中立的 workflow 思路，同时把 Codex 作为默认执行映射，把 Claude Code 作为兼容映射。
 
-## Scope
+## 范围
 
 - `docs/supported-tools.md`
 - `skills/opsx-explore/SKILL.md`
 - `tests/workflow-discipline.test.mjs`
 
-## Changes
+## 变更
 
-- Added a Codex-first subagent mapping table covering `spawn_agent`, `wait_agent`, `close_agent`, `update_plan`, and Claude Code equivalents.
-- Removed the stale `opsx-bootstrap` skill entry from the supported tools list because no matching `skills/opsx-bootstrap/` directory exists.
-- Restored the missing `opsx-report` supported-tools entry because `skills/opsx-report/` exists.
-- Updated `opsx-explore` wording from Claude-style `subagent_type: "Explore"` only to Codex default plus Claude Code equivalent.
-- Added a regression test that the documented skill table matches actual `skills/opsx-*` directories and keeps Codex/Claude mapping text present.
+- 新增 Codex-first subagent 映射表，覆盖 `spawn_agent`、`wait_agent`、`close_agent`、`update_plan` 以及 Claude Code 等价能力。
+- 从 supported tools 列表移除过期的 `opsx-bootstrap` skill 条目，因为不存在对应的 `skills/opsx-bootstrap/` 目录。
+- 恢复缺失的 `opsx-report` supported-tools 条目，因为 `skills/opsx-report/` 存在。
+- 将 `opsx-explore` 从仅 Claude 风格的 `subagent_type: "Explore"` 文案更新为 Codex 默认映射 + Claude Code 等价映射。
+- 增加回归测试，确保文档中的 skill 表与实际 `skills/opsx-*` 目录一致，并保留 Codex/Claude 映射文案。
 
-## Verification
+## 验证
 
-- `npm test` passed: 24 tests, 24 pass, 0 fail.
-- `rg -n "opsx-bootstrap|opsx-report|spawn_agent|Codex \| 默认入口|Claude Code \| 兼容入口" docs/supported-tools.md tests/workflow-discipline.test.mjs skills/opsx-explore/SKILL.md .aiknowledge/lite-runs/2026-04/2026-04-28-codex-subagent-docs.md` confirmed the stale `opsx-bootstrap` entry is absent from supported docs, `opsx-report` is present, and the Codex/Claude mapping text exists.
-- `npm pack --dry-run --silent` passed and reported `shinobuwz-opsx-1.0.1.tgz`.
+- `npm test` 通过：24 个测试，24 个通过，0 个失败。
+- `rg -n "opsx-bootstrap|opsx-report|spawn_agent|Codex \| 默认入口|Claude Code \| 兼容入口" docs/supported-tools.md tests/workflow-discipline.test.mjs skills/opsx-explore/SKILL.md .aiknowledge/lite-runs/2026-04/2026-04-28-codex-subagent-docs.md` 确认 supported docs 中没有过期的 `opsx-bootstrap` 条目，`opsx-report` 存在，且 Codex/Claude 映射文案存在。
+- `npm pack --dry-run --silent` 通过，并报告 `shinobuwz-opsx-1.0.1.tgz`。
 
-## Risks
+## 风险
 
-Low. This is documentation and skill wording only. It does not change CLI behavior, skill installation, or OpenSpec change state.
+风险低。本次只改文档和 skill 文案，不改变 CLI 行为、skill 安装流程或 OpenSpec change 状态。
 
-## Knowledge
+## 知识沉淀
 
-Updated `.aiknowledge/codemap/openspec-skills.md` to record the Codex-first subagent dispatch mapping and appended the monthly knowledge log.
+已更新 `.aiknowledge/codemap/openspec-skills.md`，记录 Codex-first subagent 派发映射，并追加月度知识日志。

@@ -101,6 +101,50 @@ test("proposal generation contracts default to Chinese artifact prose", async ()
   assert.doesNotMatch(schema, /\*\*Impact\*\*/);
 });
 
+test("aiknowledge logs and lite-runs default to Chinese prose", async () => {
+  const lifecycle = await readFile(".aiknowledge/README.md", "utf8");
+  const liteReadme = await readFile(".aiknowledge/lite-runs/README.md", "utf8");
+  const lite = await skill("opsx-lite");
+  const log = await readFile(".aiknowledge/logs/2026-04.md", "utf8");
+  const liteRunFiles = (await readdir(".aiknowledge/lite-runs/2026-04"))
+    .filter((name) => name.endsWith(".md"));
+
+  for (const text of [lifecycle, liteReadme, lite]) {
+    assert.match(text, /默认使用中文/);
+    assert.match(text, /意图/);
+    assert.match(text, /范围/);
+    assert.match(text, /变更/);
+    assert.match(text, /验证/);
+    assert.match(text, /风险/);
+    assert.match(text, /知识沉淀/);
+    assert.doesNotMatch(text, /^- Intent$/m);
+    assert.doesNotMatch(text, /^- Scope$/m);
+    assert.doesNotMatch(text, /^- Changes$/m);
+    assert.doesNotMatch(text, /^- Verification$/m);
+    assert.doesNotMatch(text, /^- Risks$/m);
+    assert.doesNotMatch(text, /^- Knowledge$/m);
+    assert.doesNotMatch(text, /^## Intent$/m);
+    assert.doesNotMatch(text, /^## Scope$/m);
+    assert.doesNotMatch(text, /^## Changes$/m);
+    assert.doesNotMatch(text, /^## Verification$/m);
+    assert.doesNotMatch(text, /^## Risks$/m);
+    assert.doesNotMatch(text, /^## Knowledge$/m);
+  }
+
+  assert.doesNotMatch(log, /^- summary: [A-Za-z]/m);
+  assert.doesNotMatch(log, /^- reason: [A-Za-z]/m);
+
+  for (const file of liteRunFiles) {
+    const text = await readFile(`.aiknowledge/lite-runs/2026-04/${file}`, "utf8");
+    assert.doesNotMatch(text, /^## Intent$/m);
+    assert.doesNotMatch(text, /^## Scope$/m);
+    assert.doesNotMatch(text, /^## Changes$/m);
+    assert.doesNotMatch(text, /^## Verification$/m);
+    assert.doesNotMatch(text, /^## Risks$/m);
+    assert.doesNotMatch(text, /^## Knowledge$/m);
+  }
+});
+
 test("workflow skills preserve deterministic gate prerequisites", async () => {
   const tasks = await skill("opsx-tasks");
   const implement = await skill("opsx-implement");

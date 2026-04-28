@@ -8,31 +8,31 @@ source_refs:
   - test:tests/workflow-discipline.test.mjs
 ---
 
-# deterministic-workflow-tests
+# deterministic workflow 测试
 
-## Intent
+## 意图
 
-Add no-model deterministic tests for OPSX workflow contracts so routine test runs can catch state routing, artifact schema, and gate-prerequisite drift before any agent eval layer is introduced.
+为 OPSX workflow contracts 增加不依赖模型的 deterministic tests，让日常测试在引入 agent eval 层之前就能发现状态路由、artifact schema 和 gate prerequisite 漂移。
 
-## Scope
+## 范围
 
 - `tests/changes-helper.test.mjs`
 - `tests/workflow-discipline.test.mjs`
 
-## Changes
+## 变更
 
-- Added a real `opsx changes status` next-step matrix that walks a synthetic change from empty state through proposal, plan, review gates, verify, review, and archive.
-- Added artifact template contract checks for proposal, design, spec, and tasks templates.
-- Added workflow skill gate-prerequisite checks for `opsx-tasks`, `opsx-implement`, `opsx-archive`, and read-only explore routing constraints.
+- 增加真实的 `opsx changes status` next-step 矩阵，用合成 change 从空状态一路覆盖 proposal、plan、review gates、verify、review 和 archive。
+- 增加 proposal、design、spec 和 tasks 模板的 artifact contract 检查。
+- 增加 workflow skill gate prerequisite 检查，覆盖 `opsx-tasks`、`opsx-implement`、`opsx-archive` 和只读 explore 路由约束。
 
-## Verification
+## 验证
 
-- `npm test` passed: 30 tests, 30 pass, 0 fail.
+- `npm test` 通过：30 个测试，30 个通过，0 个失败。
 
-## Risks
+## 风险
 
-- These tests verify deterministic contracts and CLI routing only. They do not evaluate model-generated output quality or real agent trace quality.
+- 这些测试只验证 deterministic contracts 和 CLI routing，不评估模型生成输出质量或真实 agent trace 质量。
 
-## Knowledge
+## 知识沉淀
 
-No new long-term pitfall or codemap update was needed.
+未新增长期 pitfall 或 codemap 更新。

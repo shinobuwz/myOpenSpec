@@ -3,8 +3,8 @@ status: active
 created_at: 2026-04-28
 created_from: change:2026-04-27-opsx-lite-workflow
 last_verified_at: 2026-04-28
-last_verified_by: opsx-archive
-verification_basis: archive
+last_verified_by: opsx-bugfix
+verification_basis: bugfix + archive
 applies_to:
   - skills/opsx-lite/SKILL.md
   - .aiknowledge/lite-runs
@@ -39,7 +39,7 @@ deprecated_reason:
 
 ```diff
 + opsx-lite 不创建正式 OpenSpec change
-+ lite-run 只记录 Intent / Scope / Changes / Verification / Risks / Knowledge
++ lite-run 只记录意图 / 范围 / 变更 / 验证 / 风险 / 知识沉淀
 + 范围扩大时升级到 opsx-slice → opsx-plan
 + lite-run 可作为 source_refs，但不参与 opsx changes status
 ```

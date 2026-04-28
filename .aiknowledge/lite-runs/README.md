@@ -1,8 +1,12 @@
-# Lite Runs
+# Lite Runs（轻量运行记录）
 
-`lite-runs/` stores factual records for `opsx-lite` executions.
+`lite-runs/` 存放 `opsx-lite` 执行后的事实记录。
 
-A lite-run is a mini audit record for a small change. It is not a formal OpenSpec change and must not contain proposal/design/spec/tasks/gates.
+lite-run 是小改动的轻量审计记录，不是正式 OpenSpec change，不能包含 proposal/design/spec/tasks/gates。
+
+## 语言规则
+
+lite-run 正文默认使用中文，除非用户明确要求英文。路径、命令、配置键名、frontmatter key、状态枚举和稳定标识符保持原文。
 
 ## Layout
 
@@ -12,16 +16,16 @@ A lite-run is a mini audit record for a small change. It is not a formal OpenSpe
     └── YYYY-MM-DD-short-topic.md
 ```
 
-## Source Ref
+## 来源引用
 
-Knowledge entries may reference a lite-run as:
+知识条目可以这样引用 lite-run：
 
 ```yaml
 source_refs:
   - lite-run:YYYY-MM-DD-short-topic
 ```
 
-If a later commit exists, prefer adding both:
+如果后续已有 commit，优先同时保留两类来源：
 
 ```yaml
 source_refs:
@@ -42,34 +46,34 @@ source_refs:
 
 # <short-topic>
 
-## Intent
+## 意图
 
-Why this small change was made.
+为什么要做这个小改动。
 
-## Scope
+## 范围
 
-Files changed.
+改了哪些文件。
 
-## Changes
+## 变更
 
-What actually changed.
+实际改了什么。
 
-## Verification
+## 验证
 
-Commands run and results.
+运行了什么命令，结果如何。
 
-## Risks
+## 风险
 
-Residual risks or unverified items.
+剩余风险或未验证项。
 
-## Knowledge
+## 知识沉淀
 
-Whether anything was captured into `.aiknowledge/pitfalls` or `.aiknowledge/codemap`.
+是否沉淀到 `.aiknowledge/pitfalls` 或 `.aiknowledge/codemap`。
 ```
 
 ## Rules
 
-- Keep lite-runs factual and concise.
-- Do not duplicate full diffs unless needed for understanding.
-- Do not use lite-runs for new features, multi-module changes, or design-heavy work.
-- If a lite-run uncovers reusable knowledge, create or update the relevant pitfall/codemap entry and reference the lite-run.
+- lite-run 保持事实化、简洁。
+- 不复制完整 diff，除非理解问题确实需要。
+- 不用 lite-run 承接新功能、多模块变更或设计较重的工作。
+- 如果 lite-run 发现可复用知识，创建或更新对应 pitfall/codemap 条目，并引用该 lite-run。
