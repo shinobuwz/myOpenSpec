@@ -561,6 +561,10 @@ init_group() {
 
   local group_dir="$CHANGES_DIR/$name"
   local meta_file="$group_dir/.openspec.group.yaml"
+  if [ -e "$group_dir" ] && [ ! -f "$meta_file" ]; then
+    echo "错误: 父 change '$name' 已存在但不是 group" >&2
+    exit 1
+  fi
   mkdir -p "$group_dir/subchanges"
   if [ ! -f "$meta_file" ]; then
     {
@@ -588,8 +592,11 @@ init_subchange() {
   fi
 
   local group_dir="$CHANGES_DIR/$group_name"
+  if [ ! -e "$group_dir" ]; then
+    init_group "$group_name" >/dev/null
+  fi
   if ! is_group_dir "$group_dir"; then
-    echo "错误: 父 change '$group_name' 不存在或不是 group" >&2
+    echo "错误: 父 change '$group_name' 已存在但不是 group" >&2
     exit 1
   fi
 

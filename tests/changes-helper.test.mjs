@@ -154,3 +154,32 @@ test("change helper resolve prints absolute path and rejects traversal names", a
     await rm(repo, { recursive: true, force: true });
   }
 });
+
+test("init-subchange creates a missing parent group", async () => {
+  const repo = await createRepo("opsx-helper-subchange-");
+  try {
+    const result = run(["-p", repo, "init-subchange", "parent", "child", "spec-driven"]);
+    assert.equal(result.status, 0, result.stderr);
+    assert.equal(existsSync(path.join(repo, "openspec", "changes", "parent", ".openspec.group.yaml")), true);
+    assert.equal(
+      existsSync(path.join(repo, "openspec", "changes", "parent", "subchanges", "child", ".openspec.yaml")),
+      true,
+    );
+  } finally {
+    await rm(repo, { recursive: true, force: true });
+  }
+});
+
+test("init-subchange rejects an existing non-group parent change", async () => {
+  const repo = await createRepo("opsx-helper-subchange-conflict-");
+  try {
+    assert.equal(run(["-p", repo, "init", "parent", "spec-driven"]).status, 0);
+
+    const result = run(["-p", repo, "init-subchange", "parent", "child", "spec-driven"]);
+    assert.notEqual(result.status, 0);
+    assert.match(result.stderr, /父 change 'parent' 已存在但不是 group/);
+    assert.equal(existsSync(path.join(repo, "openspec", "changes", "parent", "subchanges", "child")), false);
+  } finally {
+    await rm(repo, { recursive: true, force: true });
+  }
+});
