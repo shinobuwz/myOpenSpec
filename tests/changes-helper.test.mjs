@@ -125,6 +125,64 @@ test("change helper status shows gates reports and next step", async () => {
   }
 });
 
+test("change helper status follows deterministic artifact and gate next-step matrix", async () => {
+  const repo = await createRepo("opsx-helper-next-step-");
+  const changeDir = path.join(repo, "openspec", "changes", "matrix");
+
+  async function expectNext(step) {
+    const status = run(["-p", repo, "status"]);
+    assert.equal(status.status, 0, status.stderr);
+    assert.match(status.stdout, new RegExp(`Next: ${step}`));
+  }
+
+  async function writeGates(keys) {
+    const lines = [
+      "schema: spec-driven",
+      "created: 2026-04-28",
+    ];
+    if (keys.length > 0) {
+      lines.push("gates:");
+      for (const key of keys) {
+        lines.push(`  ${key}: "2026-04-28T10:00:00+08:00"`);
+      }
+    }
+    lines.push("");
+    await writeFile(path.join(changeDir, ".openspec.yaml"), lines.join("\n"));
+  }
+
+  try {
+    assert.equal(run(["-p", repo, "init", "matrix", "spec-driven"]).status, 0);
+    await expectNext("opsx-slice");
+
+    await writeFile(path.join(changeDir, "proposal.md"), "# Proposal\n");
+    await expectNext("opsx-plan");
+
+    await writeFile(path.join(changeDir, "design.md"), "# Design\n");
+    await expectNext("opsx-plan");
+
+    await mkdir(path.join(changeDir, "specs", "demo"), { recursive: true });
+    await writeFile(path.join(changeDir, "specs", "demo", "spec.md"), "## 新增需求\n");
+    await expectNext("opsx-plan-review");
+
+    await writeGates(["plan-review"]);
+    await expectNext("opsx-tasks");
+
+    await writeFile(path.join(changeDir, "tasks.md"), "- [ ] 1.1 [test-first] Add coverage\n");
+    await expectNext("opsx-task-analyze");
+
+    await writeGates(["plan-review", "task-analyze"]);
+    await expectNext("opsx-verify");
+
+    await writeGates(["plan-review", "task-analyze", "verify"]);
+    await expectNext("opsx-review");
+
+    await writeGates(["plan-review", "task-analyze", "verify", "review"]);
+    await expectNext("opsx-archive");
+  } finally {
+    await rm(repo, { recursive: true, force: true });
+  }
+});
+
 test("change helper operates on target project instead of cwd project", async () => {
   const repoA = await createRepo("opsx-helper-a-");
   const repoB = await createRepo("opsx-helper-b-");

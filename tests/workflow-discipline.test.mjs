@@ -42,6 +42,59 @@ test("tasks template keeps trace mapping in detail fields only", async () => {
   assert.doesNotMatch(text, /^- \[ \] \d+\.\d+ \[R\d+\]\[U\d+\]/m);
 });
 
+test("spec-driven templates preserve deterministic artifact contracts", async () => {
+  const proposal = await readFile("runtime/schemas/spec-driven/templates/proposal.md", "utf8");
+  const design = await readFile("runtime/schemas/spec-driven/templates/design.md", "utf8");
+  const spec = await readFile("runtime/schemas/spec-driven/templates/spec.md", "utf8");
+  const tasks = await readFile("runtime/schemas/spec-driven/templates/tasks.md", "utf8");
+
+  assert.match(proposal, /## 为什么/);
+  assert.match(proposal, /## 变更内容/);
+  assert.match(proposal, /## 功能 \(Capabilities\)/);
+  assert.match(proposal, /## 影响/);
+
+  assert.match(design, /## 需求追踪/);
+  assert.match(design, /\[R1\] -> \[U1\]/);
+  assert.match(design, /## 实施单元/);
+  assert.match(design, /验证方式/);
+
+  assert.match(spec, /\*\*Trace\*\*: R/);
+  assert.match(spec, /\*\*Slice\*\*:/);
+  assert.match(spec, /#### 场景:/);
+  assert.match(spec, /- \*\*当\*\*/);
+  assert.match(spec, /- \*\*那么\*\*/);
+
+  assert.match(tasks, /\[test-first\]/);
+  assert.match(tasks, /\[characterization-first\]/);
+  assert.match(tasks, /\[direct\]/);
+  assert.match(tasks, /\*\*需求追踪\*\*/);
+  assert.match(tasks, /\*\*涉及文件\*\*/);
+  assert.match(tasks, /\*\*验收标准\*\*/);
+  assert.match(tasks, /\*\*验证命令 \/ 方法\*\*/);
+  assert.match(tasks, /\*\*依赖\*\*/);
+});
+
+test("workflow skills preserve deterministic gate prerequisites", async () => {
+  const tasks = await skill("opsx-tasks");
+  const implement = await skill("opsx-implement");
+  const archive = await skill("opsx-archive");
+  const explore = await skill("opsx-explore");
+
+  assert.match(tasks, /校验 `gates\.plan-review` 字段存在/);
+  assert.match(tasks, /请先完成 opsx-plan-review/);
+
+  assert.match(implement, /校验 `gates\.plan-review` 和 `gates\.task-analyze` 字段均存在/);
+  assert.match(implement, /任一缺失则拒绝执行/);
+
+  assert.match(archive, /校验 `gates\.verify` 和 `gates\.review` 字段均存在/);
+  assert.match(archive, /不可被用户确认绕过/);
+
+  assert.match(explore, /explore 默认只读/);
+  assert.match(explore, /绝不编写代码/);
+  assert.match(explore, /下一步必须是 `opsx-slice`/);
+  assert.match(explore, /禁止.*直接跳转到 `opsx-plan`/);
+});
+
 test("verify owns spec compliance and review owns release risk", async () => {
   const verify = await skill("opsx-verify");
   const review = await skill("opsx-review");
