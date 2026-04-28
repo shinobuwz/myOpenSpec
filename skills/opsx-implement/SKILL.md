@@ -3,131 +3,76 @@ name: opsx-implement
 description: 按 tasks.md 逐项实施，每项强制 TDD 循环。当 OpenSpec change 的 artifact 全部就绪、准备开始编码时使用。
 ---
 
-实施 Skill。按照 tasks.md 逐项实施，每项任务强制执行 TDD 循环。
+# 实施
 
-## Change Root 解析
+按 `tasks.md` 顺序实施，每个 `[test-first]` / `[characterization-first]` task 调用 `opsx-tdd`。worker prompt 和执行细则见 `references/worker-contract.md` 与 `references/execution-rules.md`。
+
+## Change Root
 
 - `<name>` 可以是单个 change、父 change 或 `group/subchange` 简写。
 - 执行前先运行 `opsx changes resolve <name>` 获取真实 change root。
-- 后文所有 `proposal.md`、`design.md`、`specs/`、`tasks.md`、`test-report.md` 路径均指 resolved change root。
+- 下文 `proposal.md`、`design.md`、`specs/`、`tasks.md`、`test-report.md` 均指 resolved change root。
 
 ## 硬性门控
 
-**进入实施前必须确认以下关卡已通过：**
-1. opsx-plan-review（spec↔plan 一致性）已通过
-2. opsx-task-analyze（plan↔tasks 一致性）已通过
-
-如果任一关卡未通过，**拒绝开始实施**，提示用户先完成对应审查。
+进入实施前必须读取 `.openspec.yaml` 并校验 `gates.plan-review` 和 `gates.task-analyze` 字段均存在；任一缺失则拒绝执行，提示先完成对应审查。
 
 ## 输入 / 输出边界
 
-**读取：**
-- `openspec/changes/<name>/.openspec.yaml`（校验 gates）
-- `openspec/changes/<name>/tasks.md`（进度恢复和任务内容）
-- `openspec/changes/<name>/design.md`（理解设计意图）
-- `openspec/changes/<name>/specs/**/*.md`（理解需求）
+读取：
+- `.openspec.yaml`
+- `tasks.md`
+- `design.md`
+- `specs/**/*.md`
 - `.aiknowledge/codemap/` 和 `.aiknowledge/pitfalls/`（按需）
-- tasks.md 中"涉及文件"字段列出的代码文件
+- tasks 中列出的实现、测试、skill、docs 文件
 
-**产出：**
-- tasks.md 顶层任务 `[ ]` → `[x]`（逐项标记完成）
-- tasks.md 中该任务内部已满足的验收标准 `[ ]` → `[x]`（包括已完成的 `[manual]` 项）
-- 业务代码和测试代码
-- `openspec/changes/<name>/test-report.md`（TDD 留档）
+写入：
+- `tasks.md` 顶层任务 `[ ]` → `[x]`
+- `tasks.md` 验收标准 `[ ]` → `[x]`
+- 实现和测试文件
+- `test-report.md`
+
+禁止：
+- 不写 gates
+- 不写 `audit-log.md` 或 `review-report.md`
+- 不要求 git commit，除非用户明确要求
 
 ## 启动序列
 
-1. 读取 `openspec/changes/<name>/.openspec.yaml`，**校验 `gates.plan-review` 和 `gates.task-analyze` 字段均存在**；任一缺失则拒绝执行并提示缺失的关卡名称
-2. 读取当前变更的 `tasks.md`，找到第一个 `[ ]` 任务作为起点，恢复进度
-3. 确认所有产出物（proposal/design/specs）已就绪
-4. 按需读取 `.aiknowledge/`（index-first，禁止全量扫描）：
-   - 先读 `.aiknowledge/codemap/index.md`，识别本次变更涉及的模块
-   - 仅读取命中模块的 `<module>.md`（及必要的 `chains/*.md`），定位代码位置和模块边界
-   - 先读 `.aiknowledge/pitfalls/index.md`，识别相关领域
-   - 仅读取命中领域的 `<domain>/index.md`；如命中具体条目，继续读取 L3 条目文件（`<domain>/<slug>.md`）获取详细修复模式，实施时主动规避已知陷阱
-5. 确认测试框架已配置并可运行
+1. 校验 `gates.plan-review` 和 `gates.task-analyze`。
+2. 读取 `tasks.md`，从第一个未完成 task 恢复。
+3. 确认 proposal/design/specs/tasks 已就绪。
+4. 按 index-first 策略读取 `.aiknowledge/`。
+5. 确认测试框架可运行。
 
-## subagent 实施
+## Worker 策略
 
-按 `opsx-subagent` 的 implementation worker contract 派发 implementation worker。Codex 默认、Claude Code 兼容映射、controller boundary、写入边界、status 处理和 fallback 均以 `opsx-subagent` 为准；本 skill 只定义 implement stage 的输入、TDD 规则和完成条件。
+按 `opsx-subagent` implementation worker contract 执行。Codex 默认、Claude Code 兼容映射、controller boundary、status 和 fallback 均以 `opsx-subagent` 为准；主 agent 保留 controller 权限。
 
-### Worker 派发策略
+`opsx-implement` 默认串行（serial-by-default）。只有任务簇独立、写入集合不重叠（disjoint write sets）、明确 file ownership、依赖顺序清楚，且不并发修改 public interface、migration、schema、config、package/build scripts 时，才允许多个 workers。
 
-`opsx-implement` 采用 **serial-by-default / 默认串行** 策略。默认路径是派发 **1 个** worker 实施全部任务，或在 subagent 不可用时由主 agent inline fallback 串行执行。
+依赖顺序不清、任务边界不清、共享接口或共享 artifact 场景必须串行。共享 artifact 包括 `tasks.md`、`test-report.md`、`.openspec.yaml`、`audit-log.md`、`review-report.md`、`.aiknowledge/logs/YYYY-MM.md`，始终由主 agent 串行写入。
 
-只有主 agent 能证明以下条件全部成立时，才允许派发多个 implementation workers：
+主 agent 使用多个 workers 时必须明确读取范围、写入范围和禁止越界文件，逐个检查 worker diff，处理 `DONE_WITH_CONCERNS`、`NEEDS_CONTEXT`、`BLOCKED`，并串行整合状态。
 
-- 任务簇独立，不共享前置依赖或隐含状态。
-- 写入集合不重叠（disjoint write sets）。
-- 每个 worker 都有明确 file ownership / 文件归属。
-- 不并发修改共享 public interface、migration、schema、config、package/build scripts。
-- 依赖顺序清楚，任一任务簇延期不会破坏其他任务簇的验证。
+## 执行规则
 
-任一条件无法证明时必须保持串行。共享 artifact 必须串行写入，以下场景始终串行：
-
-- 共享 artifact 写入：`tasks.md`、`test-report.md`、`.openspec.yaml`、`audit-log.md`、`review-report.md`、`.aiknowledge/logs/YYYY-MM.md`。
-- 共享核心文件、共享 public interface、migration、schema、config、package/build scripts。
-- 依赖顺序不清、任务边界不清或需要统一设计判断。
-
-### 主 agent 整合职责
-
-主 agent 仍负责 gates 校验、worker 派发决策、worker 结果汇总、`tasks.md` / `test-report.md` 状态整合、diff 检查和最终完成声明。
-
-使用多个 workers 时，主 agent 必须：
-
-- 为每个 worker 明确读取范围、写入范围和禁止越界文件。
-- 禁止 worker 写共享 artifact 或 `.openspec.yaml` gates。
-- 逐个检查 worker diff，按顺序整合结果。
-- 串行更新 `tasks.md` 和 `test-report.md`。
-- 处理 `DONE_WITH_CONCERNS`、`NEEDS_CONTEXT` 和 `BLOCKED`，必要时暂停或回到 plan/tasks。
-- 运行最终验证命令，并继续进入 `opsx-verify`；worker 的局部 `DONE` 不能替代 verify/review/archive gates。
-
-派发给 worker 的任务结构：
-
-```
-你是 implement worker。
-
-## 输入
-读取 openspec/changes/<name>/tasks.md 找到被分配的任务或第一个 [ ] 任务作为起点，恢复实施进度。
-读取 openspec/changes/<name>/design.md 和 openspec/changes/<name>/specs/**/*.md 理解设计意图和需求。
-读取 skills/opsx-tdd/SKILL.md（或已安装的全局 opsx-tdd skill），掌握 TDD 红绿重构循环规则和 test-report.md 格式规范。这是 test-report.md 写入的唯一权威格式定义，必须严格遵守。
-如果主 agent 明确分配了并行任务簇，只能修改 prompt 中声明的文件 ownership 范围；禁止修改共享 artifact。
-
-## 实施规则
-按 tasks.md 顺序逐一实施，对每个任务：
-1. 读取 design.md 和 specs/ 中对应部分理解设计意图
-2. 先校验依赖（blockedBy 中列出的前置任务均已 [x]）；如未完成则暂停并报告 task 依赖异常
-3. 按执行方式标签执行（详细规则见 opsx-tdd/SKILL.md）：
-   - test-first：严格执行红→绿→重构循环，每个阶段完成后立即追加写入 test-report.md
-   - characterization-first：先固化旧行为测试，再修改代码，同样按红→绿→重构追加写入
-   - direct：纯配置/脚手架场景直接执行，无需写入 test-report.md
-4. 确保每条非 [manual] 验收标准有对应测试或显式"不需要测试"理由
-5. [manual] 验收标准不阻塞 task 完成，但必须在 test-report.md 中记录到「⏳ 待人工验证」清单；已人工验证的 `[manual]` 项必须同步在 tasks.md 中标记为 `[x]`，未验证的 `[manual]` 项保持 `[ ]`
-6. 每完成一个任务，立即在 tasks.md 中将该任务的顶层 [ ] 改为 [x]，并将该任务内部所有已有测试、验证命令或人工验证证据支撑的验收标准从 [ ] 改为 [x]；没有证据的验收标准不得勾选
-7. 不要求在 implement 阶段执行 git commit；只有用户明确要求时才提交
-8. 禁止事后汇总：test-report.md 必须在每个 TDD 阶段完成时实时追加，禁止在所有任务完成后一次性生成
-
-## 完成后报告
-使用 `opsx-subagent` 的 implementation status 之一报告：`DONE`、`DONE_WITH_CONCERNS`、`NEEDS_CONTEXT`、`BLOCKED`。
-每个任务：修改了哪些文件、测试结果（通过/失败数）、是否产生 commit；并输出最终任务完成情况摘要。
-```
-
-## 暂停条件
-
-在以下情况下暂停实施并通知用户：
-- 发现任务描述不清晰，需要澄清
-- 发现设计遗漏，需要补充
-- 发现任务之间有未记录的依赖
-- 遇到超出预期的技术困难
+- 按 `tasks.md` 顺序逐项实施。
+- `[test-first]` 严格红→绿→重构。
+- `[characterization-first]` 先固化旧行为，再迁移到目标行为。
+- `[direct]` 仅用于纯配置/脚手架，无需 TDD 留档。
+- 每条非 `[manual]` 验收标准必须有测试、验证命令或明确无需测试理由。
+- 没有证据的验收标准不得勾选。
+- 未验证的 `[manual]` 项保持 `[ ]`，并写入 `test-report.md` 待人工验证清单。
+- 每完成一项，立即更新 `tasks.md` 和 `test-report.md`，禁止事后汇总。
 
 ## 完成条件
 
-- tasks.md 中所有顶层任务标记为已完成（全部 `[x]`）
-- 每个已完成任务内部的非 `[manual]` 验收标准均已标记为 `[x]`，且 test-report.md 或验证命令能提供对应证据；未验证的 `[manual]` 项可保持 `[ ]`，但必须在退出摘要中列明
-- 所有测试通过
+- 所有顶层任务已 `[x]`。
+- 每个已完成 task 的非 `[manual]` 验收标准均已 `[x]` 且有证据。
+- 所有测试通过。
 
 ## 退出契约
 
-- 输出实施摘要，包含完成的任务数、测试数和关键实现决策
-- 如存在 `[manual]` 验收标准，输出待人工验证清单并标注风险：「以下验收标准未经自动化测试覆盖，需人工验证后方可确认完整性」
-- **必须**转入 **opsx-verify** 进行三维验证检查。这不是建议，是强制要求。禁止跳过验证直接归档或上线。
+输出实施摘要、测试结果和待人工验证清单。完成后必须转入 **opsx-verify**，禁止跳过验证直接归档。

@@ -3,156 +3,58 @@ name: opsx-task-analyze
 description: 任务分析：检查 tasks 是否完整覆盖 design/specs 需求、是否与 design 一致。在 tasks 生成后、implement 之前使用。
 ---
 
-# 任务分析：plan↔tasks 一致性检查
+# 任务分析
 
-## 硬性门控
+检查 `design.md` / `specs/**/*.md` 到 `tasks.md` 的 plan↔tasks 一致性。详细 reviewer prompt 见 `references/reviewer-prompt.md`，audit/gate 写入规则见 `references/audit-gate.md`。
 
-**这是强制关卡。** 在本 skill 输出"可实施"结论之前，禁止进入 opsx-implement 或任何编码活动。
-
-## Change Root 解析
+## Change Root
 
 - `<name>` 可以是单个 change、父 change 或 `group/subchange` 简写。
 - 执行前先运行 `opsx changes resolve <name>` 获取真实 change root。
-- 后文所有 `specs/**/*.md`、`design.md`、`tasks.md`、`audit-log.md`、`.openspec.yaml` 路径均指 resolved change root。
+- 下文 `specs/**/*.md`、`design.md`、`tasks.md`、`audit-log.md`、`.openspec.yaml` 均指 resolved change root。
+
+## 硬性门控
+
+这是强制关卡。task-analyze 输出"可实施"前，禁止进入 `opsx-implement` 或任何编码活动。
 
 ## 输入 / 输出边界
 
-**读取：**
-- `openspec/changes/<name>/.openspec.yaml`
-- `openspec/changes/<name>/specs/**/*.md`
-- `openspec/changes/<name>/design.md`
-- `openspec/changes/<name>/tasks.md`
+读取：
+- `.openspec.yaml`
+- `specs/**/*.md`
+- `design.md`
+- `tasks.md`
 
-**产出：**
-- `openspec/changes/<name>/audit-log.md`（追加）
-- `openspec/changes/<name>/.openspec.yaml` 的 `gates.task-analyze`（仅通过时）
+写入：
+- `audit-log.md`（追加）
+- `.openspec.yaml` 的 `gates.task-analyze`（仅通过时）
+
+禁止：
+- 不改业务代码
+- 不改 specs/design（除非处理 QUALITY warning 且能明确说明）
+- 不复制 StageResult schema；格式以 `docs/stage-packet-protocol.md` 为准
 
 ## 启动序列
 
-1. 确认 git 工作区干净
-2. 读取 `openspec/changes/<name>/.openspec.yaml` 获取 schema 定义，然后检查各产出物文件是否已存在，确认 tasks artifact 已生成
-3. 确认 opsx-plan-review 已通过（spec↔plan 一致性已验证）
-4. 渐进加载制品（最小只读范围，禁止全量读取）：
-
-   **从 specs/ 加载：**
-   - 每条需求的 `**Trace**: R?` 声明
-   - 需求描述（一行摘要）
-   - 不读 Given/When/Then 展开内容
-
-   **从 design.md 加载：**
-   - `## 需求追踪` 章节（R→U 映射）
-   - 实施单元 [U?] 列表及简述
-   - 架构/技术选型决策（仅关键约束，不读详细说明）
-   - 不读序列图、数据模型、接口定义等实施细节
-
-   **从 tasks.md 加载：**
-   - Task ID 及描述
-   - `[R?][U?][执行模式]` 标签
-   - 涉及的文件路径
-   - 验证方式
-   - 依赖关系（blockedBy）
-
-   **不加载 proposal.md**（plan-review 阶段已验证，此处无需重读）
+1. 确认 git 工作区状态，避免把未理解的改动混入 gate 修正。
+2. 校验 `gates.plan-review` 已存在；缺失时拒绝执行并回到 `opsx-plan-review`。
+3. 确认 `tasks.md`、`design.md`、`specs/` 已存在。
+4. 渐进读取：specs 只取 Trace 和需求摘要；design 只取 R->U、U 列表和关键决策；tasks 只取任务 ID、标签、文件、验证方式和依赖。
 
 ## 审查方式
 
-按 `opsx-subagent` 的 reviewer worker contract 派发 1 个只读 reviewer subagent 进行独立审查。Codex 默认、Claude Code 兼容映射、controller boundary、只读写入边界和 fallback 均以 `opsx-subagent` 为准；本 skill 只定义 task-analyze 的审查维度、StageResult 输出和 gate 写入规则。
+按 `opsx-subagent` reviewer worker contract 派发 1 个只读 reviewer。Codex 默认、Claude Code 兼容映射、controller boundary、只读写入边界和 fallback 均以 `opsx-subagent` 为准。
 
-subagent 只读取产出物文件，不做任何修改。审查结果由 subagent 汇报，主 agent 汇总输出；主 agent 仍负责追加 `audit-log.md` 和写入 `.openspec.yaml` gates。
-
-## 审查维度
-
-### 需求覆盖（design/specs → tasks）
-- 每个实施单元 [U1] 都必须落到至少一个 task
-- 每条需求必须有至少一个带 [R1] 标签的 task 对应
-- 每条 Given/When/Then 场景必须有对应的验证方式
-- 标记未覆盖的需求为 **GAP**（severity: **critical**）
-
-### 设计一致性（design → tasks）
-- design.md 中的架构决策是否在 tasks 中体现
-- 技术选型是否与 task 实施方式匹配
-- 模块划分是否与 task 粒度对齐
-- task 是否使用 `[R?][U?][test-first|characterization-first|direct]` 标签
-- 标记不一致为 **MISMATCH**（severity: **critical**）
-
-### tasks 质量检查
-- 每个 task 是否有精确文件路径
-- 每个 task 是否有明确的验证方式
-- task 之间是否有隐含依赖未标注
-- task 粒度是否合理（过大需拆分，过小可合并）
-- 标记问题为 **QUALITY**（severity: **warning**，可当轮修正）
-
-### change 规模兜底检查
-- 检查 tasks 是否已经自然分成多个弱依赖的任务簇
-- 检查这些任务簇是否可以独立实现、独立验证、独立上线
-- 检查是否存在"其中一个任务簇延期，不应阻塞其他任务簇"的情况
-- 检查当前 change 是否已经大到难以在一次 implement → verify 周期内稳定收敛
-- 命中上述情况时，标记为 **OVERSIZED_CHANGE**
-- **OVERSIZED_CHANGE 的处理原则**：
-  - 如果只是 task 粒度粗糙但仍属于同一个交付单元，回到 `opsx-tasks` 重写 tasks
-  - 如果已经暴露出多个独立交付单元，回到 `opsx-plan` 拆分 change，而不是继续进入 implement
-
-## 输出格式
-
-```
-## 任务分析报告
-
-### 覆盖矩阵
-| 需求 | 实施单元 | 对应 Task | 状态 |
-|------|----------|----------|------|
-| R1 | U1 | Task N | ✓/GAP |
-
-### 问题列表
-[GAP] 需求 X / 单元 UY 无对应 task
-[MISMATCH] design 决策 Y 与 task Z 实施方式冲突
-[QUALITY] Task W 缺少 trace / 执行方式 / 验证方式
-[OVERSIZED_CHANGE] 当前 tasks 已分裂为多个可独立交付的任务簇，应回到 plan 拆分 change
-
-### 结论
-可实施 / 需补充后实施
-```
+reviewer 只读产物并输出 StageResult JSON，schema 见 `docs/stage-packet-protocol.md`。主 agent 负责汇总覆盖矩阵、追加 `audit-log.md`、写入 `.openspec.yaml` gates；reviewer 不得直接写 gates 或宣称整个 change 可实施。
 
 ## 完成条件
 
-- 分析报告已输出
-- 覆盖矩阵已完成
-- 所有 GAP 和 MISMATCH 已列出
+- 每个 U 和每条 R 都有 task 覆盖。
+- design 关键决策已体现在 task 文件边界、执行方式和验证方法中。
+- GAP、MISMATCH、QUALITY、OVERSIZED_CHANGE 已全部列出并按 severity 处理。
 
 ## 退出契约
 
-- **如"可实施"**（无 findings 或仅 suggestion）：
-  1. 追加 `openspec/changes/<name>/audit-log.md`，格式：
-     ```
-     ## task-analyze | <ISO8601 时间戳> | pass
-     方向：specs/**/*.md + design.md → tasks.md
-     修正：无发现
-     ```
-     若写入 audit-log.md 时文件损坏（已存在但无法追加），中止并报错，禁止继续。
-  2. 写入门控状态：`yq -i '.gates.task-analyze = "'$(date -u +%Y-%m-%dT%H:%M:%SZ)'"' openspec/changes/<name>/.openspec.yaml`
-  3. 必须转入 **opsx-implement**。这不是建议，是强制要求。
-- **如"可实施（含修正）"**（有 QUALITY warning 但无 critical，主 agent 已修正全部 warning）：
-  1. 先修正 tasks.md 中的 QUALITY warning 项
-  2. 追加 `openspec/changes/<name>/audit-log.md`，格式：
-     ```
-     ## task-analyze | <ISO8601 时间戳> | pass
-     方向：specs/**/*.md + design.md → tasks.md
-     修正：
-     - F1(warning) <修正描述>
-     - F2(warning) <修正描述>
-     ```
-     若写入 audit-log.md 时文件损坏，中止并报错，禁止继续。
-  3. 写入门控状态：`yq -i '.gates.task-analyze = "'$(date -u +%Y-%m-%dT%H:%M:%SZ)'"' openspec/changes/<name>/.openspec.yaml`
-  4. 必须转入 **opsx-implement**。这不是建议，是强制要求。
-- **如"需补充"**（存在 critical findings）：
-  1. 追加 `openspec/changes/<name>/audit-log.md`，格式：
-     ```
-     ## task-analyze | <ISO8601 时间戳> | fail
-     方向：specs/**/*.md + design.md → tasks.md
-     问题：<问题列表，每行一条>
-     需修正：<需修正内容，每行一条>
-     ```
-     若写入时文件损坏，中止并报错。
-  2. 不写入 gates
-  - 普通 GAP / MISMATCH / QUALITY：必须回到 **opsx-tasks** 修正 tasks.md。禁止绕过直接进入实施。
-  - 命中 **OVERSIZED_CHANGE**：必须回到 **opsx-plan** 缩小范围或拆分多个 change；禁止继续在当前 change 上追加更多 task。
-- 所有发现已记录在分析报告中
+- 可实施：按 `references/audit-gate.md` 追加 `task-analyze` pass 记录，写入 `gates.task-analyze`，必须转入 **opsx-implement**。
+- 可实施且含 QUALITY 修正：先修正 tasks，再追加 pass 记录和修正列表，写入 `gates.task-analyze`，必须转入 **opsx-implement**。
+- 需补充：追加 fail 记录，不写 gates；普通 GAP/MISMATCH/QUALITY 回到 **opsx-tasks**，`OVERSIZED_CHANGE` 回到 **opsx-plan**。
