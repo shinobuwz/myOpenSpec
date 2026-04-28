@@ -4,7 +4,7 @@ created_at: 2026-04-13
 created_from: metadata-backfill
 last_verified_at: 2026-04-28
 last_verified_by: opsx-archive
-verification_basis: changes-status-detail + thin-npm-opsx archive + aiknowledge-lifecycle change + opsx-lite-workflow archive + superpowers-discipline archive + subagent-workflow-adapter archive + subagent-smoke-eval archive + workflow-skill-adoption archive
+verification_basis: changes-status-detail + thin-npm-opsx archive + aiknowledge-lifecycle change + opsx-lite-workflow archive + superpowers-discipline archive + subagent-workflow-adapter archive + subagent-smoke-eval archive + workflow-skill-adoption archive + parallel-worker-policy archive
 applies_to:
   - skills
   - bin/opsx.mjs
@@ -23,8 +23,10 @@ source_refs:
   - lite-run:2026-04-28-codex-subagent-docs
   - change:2026-04-28-subagent-workflow-adapter/01-subagent-contract
   - change:2026-04-28-subagent-workflow-adapter/02-workflow-skill-adoption
+  - change:2026-04-28-subagent-workflow-adapter/03-parallel-worker-policy
   - change:2026-04-28-subagent-workflow-adapter/04-subagent-smoke-eval
   - review-report:openspec/changes/archive/2026-04-28-subagent-workflow-adapter-02-workflow-skill-adoption/review-report.md
+  - review-report:openspec/changes/archive/2026-04-28-subagent-workflow-adapter-03-parallel-worker-policy/review-report.md
 superseded_by:
 ---
 
@@ -47,7 +49,7 @@ OpenSpec 工作流的单一真相源。所有 skill 以 Markdown 文件存放于
 | `opsx-tasks` | 将 design+specs 转化为带 TDD 标签、bite-sized、可执行验证方法的 tasks.md | `gates.plan-review` |
 | `opsx-task-analyze` | plan↔tasks 一致性审查（关卡2），硬性门控；通过 `opsx-subagent` reviewer contract 执行只读审查 | tasks 已生成 + plan-review 已通过 |
 | `opsx-tdd` | 红绿重构循环，按 task 标签执行（test-first/characterization-first/direct） | 无（被 implement 调用） |
-| `opsx-implement` | 按 tasks.md 逐项实施，每项强制 TDD 循环；通过 `opsx-subagent` implementation worker contract 派发单 worker，主 agent 负责状态整合 | `gates.plan-review` + `gates.task-analyze` |
+| `opsx-implement` | 按 tasks.md 逐项实施，每项强制 TDD 循环；通过 `opsx-subagent` implementation worker contract 默认串行，只有 explicit disjoint parallel eligibility 成立时才允许多 worker，主 agent 串行整合 | `gates.plan-review` + `gates.task-analyze` |
 | `opsx-verify` | Spec compliance + 四维验证（完整性/正确性/一致性/测试留档），要求 fresh evidence 支撑完成声明，通过 `opsx-subagent` reviewer contract 派遣 1 个只读 reviewer 输出 StageResult JSON | 实施完成 |
 | `opsx-review` | 独立代码审查，聚焦 code quality / release risk；通过 `opsx-subagent` reviewer contract 审查，发现 compliance drift 时路由回 verify | `gates.verify` 已通过 |
 | `opsx-report` | 读取 `audit-log.md`、`test-report.md`、`review-report.md` 及产出物文件，渲染 self-contained HTML RunReport | 无（按需触发） |
@@ -102,6 +104,7 @@ plan ───────────────────→ proposal → s
 - `opsx-plan-review`、`opsx-task-analyze`、`opsx-verify` 遵循 Stage Packet Protocol v2：派遣 subagent 直接读取权威产物文件 → 输出 StageResult JSON → 主 agent 追加写 `audit-log.md`；无 context/ JSON 文件，无 StagePacket 组装步骤
 - subagent 文案以 `opsx-subagent` 为 canonical contract：Codex 默认使用 `spawn_agent`，Claude Code 兼容映射为 `Task` tool；主 agent 保留 controller 权限，subagent 不写 gates 或最终完成声明。
 - 会派发 subagent 的 workflow skills（implement、plan-review、task-analyze、verify、review、explore、archive follow-up）必须显式引用 `opsx-subagent`，只保留自身 stage 的输入、输出、gate 和产物规则；禁止在各 skill 中维护另一套 Claude-only 或平台分叉的派发说明。
+- `opsx-implement` 的 implementation workers 是 serial-by-default / 默认串行；只有任务簇独立、disjoint write sets、明确 file ownership 且不并发修改 public interface、migration、schema、config、package/build scripts 时，主 agent 才能派发多个 workers。共享 artifact（`tasks.md`、`test-report.md`、`.openspec.yaml`、`audit-log.md`、`review-report.md`）始终由主 agent 串行写入。
 - `opsx-verify` 拥有 Spec Compliance Review；`opsx-review` 不重复完整 compliance，只审查 code quality / release risk，发现明显需求遗漏或范围外实现时输出 `VERIFY_DRIFT` 并路由回 verify。
 - `opsx-bugfix` 在修复前必须说明 root cause 与证据；同一问题连续 3 次修复失败时停止叠加补丁并重新审视假设或架构。
 - `opsx-verify` 与 `opsx-lite` 的完成声明必须基于当前轮 fresh verification evidence；未验证只能说明待验证，不能宣称通过。

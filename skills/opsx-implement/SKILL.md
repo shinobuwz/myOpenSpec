@@ -49,9 +49,38 @@ description: 按 tasks.md 逐项实施，每项强制 TDD 循环。当 OpenSpec 
 
 ## subagent 实施
 
-按 `opsx-subagent` 的 implementation worker contract 派发 **1 个** worker 实施全部任务。Codex 默认、Claude Code 兼容映射、controller boundary、写入边界、status 处理和 fallback 均以 `opsx-subagent` 为准；本 skill 只定义 implement stage 的输入、TDD 规则和完成条件。
+按 `opsx-subagent` 的 implementation worker contract 派发 implementation worker。Codex 默认、Claude Code 兼容映射、controller boundary、写入边界、status 处理和 fallback 均以 `opsx-subagent` 为准；本 skill 只定义 implement stage 的输入、TDD 规则和完成条件。
 
-本 subchange 不引入多 worker 并行策略。主 agent 仍负责 gates 校验、worker 结果汇总、`tasks.md` / `test-report.md` 状态整合、diff 检查和最终完成声明。
+### Worker 派发策略
+
+`opsx-implement` 采用 **serial-by-default / 默认串行** 策略。默认路径是派发 **1 个** worker 实施全部任务，或在 subagent 不可用时由主 agent inline fallback 串行执行。
+
+只有主 agent 能证明以下条件全部成立时，才允许派发多个 implementation workers：
+
+- 任务簇独立，不共享前置依赖或隐含状态。
+- 写入集合不重叠（disjoint write sets）。
+- 每个 worker 都有明确 file ownership / 文件归属。
+- 不并发修改共享 public interface、migration、schema、config、package/build scripts。
+- 依赖顺序清楚，任一任务簇延期不会破坏其他任务簇的验证。
+
+任一条件无法证明时必须保持串行。共享 artifact 必须串行写入，以下场景始终串行：
+
+- 共享 artifact 写入：`tasks.md`、`test-report.md`、`.openspec.yaml`、`audit-log.md`、`review-report.md`、`.aiknowledge/logs/YYYY-MM.md`。
+- 共享核心文件、共享 public interface、migration、schema、config、package/build scripts。
+- 依赖顺序不清、任务边界不清或需要统一设计判断。
+
+### 主 agent 整合职责
+
+主 agent 仍负责 gates 校验、worker 派发决策、worker 结果汇总、`tasks.md` / `test-report.md` 状态整合、diff 检查和最终完成声明。
+
+使用多个 workers 时，主 agent 必须：
+
+- 为每个 worker 明确读取范围、写入范围和禁止越界文件。
+- 禁止 worker 写共享 artifact 或 `.openspec.yaml` gates。
+- 逐个检查 worker diff，按顺序整合结果。
+- 串行更新 `tasks.md` 和 `test-report.md`。
+- 处理 `DONE_WITH_CONCERNS`、`NEEDS_CONTEXT` 和 `BLOCKED`，必要时暂停或回到 plan/tasks。
+- 运行最终验证命令，并继续进入 `opsx-verify`；worker 的局部 `DONE` 不能替代 verify/review/archive gates。
 
 派发给 worker 的任务结构：
 
@@ -59,9 +88,10 @@ description: 按 tasks.md 逐项实施，每项强制 TDD 循环。当 OpenSpec 
 你是 implement worker。
 
 ## 输入
-读取 openspec/changes/<name>/tasks.md 找到第一个 [ ] 任务作为起点，恢复实施进度。
+读取 openspec/changes/<name>/tasks.md 找到被分配的任务或第一个 [ ] 任务作为起点，恢复实施进度。
 读取 openspec/changes/<name>/design.md 和 openspec/changes/<name>/specs/**/*.md 理解设计意图和需求。
 读取 skills/opsx-tdd/SKILL.md（或已安装的全局 opsx-tdd skill），掌握 TDD 红绿重构循环规则和 test-report.md 格式规范。这是 test-report.md 写入的唯一权威格式定义，必须严格遵守。
+如果主 agent 明确分配了并行任务簇，只能修改 prompt 中声明的文件 ownership 范围；禁止修改共享 artifact。
 
 ## 实施规则
 按 tasks.md 顺序逐一实施，对每个任务：

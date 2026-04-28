@@ -9,15 +9,17 @@ artifacts:
     instruction: |
       创建提案文档，阐明为什么需要这项变更。
 
-      章节：
-      - **Why**: 用 1-2 句话说明问题或机会。这解决了什么问题？为什么是现在？
-      - **What Changes**: 变更的列表。明确说明新功能、修改或移除。使用 **BREAKING** 标记破坏性变更。
-      - **Capabilities**: 确定将创建或修改哪些规范：
-        - **New Capabilities**: 列出引入的新功能。每个功能都将对应一个新的 `specs/<name>/spec.md`。使用 kebab-case 命名（例如：`user-auth`, `data-export`）。
-        - **修改功能**: 列出需求发生变化的现有功能。仅当规范层面的行为发生变化时（不只是实现细节）才包含在内。每个功能都需要一个 `specs/<name>/spec.md` 文件。功能名以当前 change 内使用的 capability 名称为准。如果没有需求变化，请保持为空。
-      - **Impact**: 受影响的代码、API、依赖或系统。
+      OpenSpec 正式产物默认使用中文，除非用户明确要求英文。代码标识、capability 名称、文件路径、命令和配置键名保持原文。
 
-      重要提示：Capabilities 章节至关重要。它建立了提案阶段与规范阶段之间的契约。此处列出的每个功能都需要一个对应的 `specs/<capability>/spec.md` 文件。
+      章节：
+      - **为什么**: 用 1-2 句话说明问题或机会。这解决了什么问题？为什么是现在？
+      - **变更内容**: 变更的列表。明确说明新功能、修改或移除。使用 **BREAKING** 标记破坏性变更。
+      - **功能 (Capabilities)**: 确定将创建或修改哪些规范：
+        - **新增功能**: 列出引入的新功能。每个功能都将对应一个新的 `specs/<name>/spec.md`。使用 kebab-case 命名（例如：`user-auth`, `data-export`）。
+        - **修改功能**: 列出需求发生变化的现有功能。仅当规范层面的行为发生变化时（不只是实现细节）才包含在内。每个功能都需要一个 `specs/<name>/spec.md` 文件。功能名以当前 change 内使用的 capability 名称为准。如果没有需求变化，请保持为空。
+      - **影响**: 受影响的代码、API、依赖或系统。
+
+      重要提示：功能 (Capabilities) 章节至关重要。它建立了提案阶段与规范阶段之间的契约。此处列出的每个功能都需要一个对应的 `specs/<capability>/spec.md` 文件。
 
       保持简明扼要（1-2 页）。关注“为什么”而不是“怎么做” —— 实现细节属于 design.md。
 
@@ -31,7 +33,7 @@ artifacts:
     instruction: |
       创建定义系统"应该做什么"的规范文件。
 
-      为提案 Capabilities 章节中列出的每个功能创建一个规范文件：
+      为提案的功能 (Capabilities) 章节中列出的每个功能创建一个规范文件：
       - 新增功能：使用提案中的精确 kebab-case 名称（specs/<capability>/spec.md）。
       - 修改功能：沿用该 change 中约定的 capability 名称（在 specs/<capability>/spec.md 中创建），确保命名在当前 change 内一致。
 

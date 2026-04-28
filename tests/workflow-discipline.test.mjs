@@ -74,6 +74,33 @@ test("spec-driven templates preserve deterministic artifact contracts", async ()
   assert.match(tasks, /\*\*依赖\*\*/);
 });
 
+test("proposal generation contracts default to Chinese artifact prose", async () => {
+  const slice = await skill("opsx-slice");
+  const schema = await readFile("runtime/schemas/spec-driven/schema.yaml", "utf8");
+
+  assert.match(slice, /正式 `proposal\.md` 默认使用中文/);
+  assert.match(slice, /目标/);
+  assert.match(slice, /范围内/);
+  assert.match(slice, /范围外/);
+  assert.match(slice, /依赖/);
+  assert.match(slice, /完成标准/);
+  assert.doesNotMatch(slice, /^- Goal$/m);
+  assert.doesNotMatch(slice, /^- In Scope$/m);
+  assert.doesNotMatch(slice, /^- Out of Scope$/m);
+  assert.doesNotMatch(slice, /^- Depends On$/m);
+  assert.doesNotMatch(slice, /^- Done Means$/m);
+
+  assert.match(schema, /正式产物默认使用中文/);
+  assert.match(schema, /\*\*为什么\*\*/);
+  assert.match(schema, /\*\*变更内容\*\*/);
+  assert.match(schema, /\*\*功能 \(Capabilities\)\*\*/);
+  assert.match(schema, /\*\*影响\*\*/);
+  assert.doesNotMatch(schema, /\*\*Why\*\*/);
+  assert.doesNotMatch(schema, /\*\*What Changes\*\*/);
+  assert.doesNotMatch(schema, /\*\*New Capabilities\*\*/);
+  assert.doesNotMatch(schema, /\*\*Impact\*\*/);
+});
+
 test("workflow skills preserve deterministic gate prerequisites", async () => {
   const tasks = await skill("opsx-tasks");
   const implement = await skill("opsx-implement");
@@ -194,6 +221,38 @@ test("workflow subagent wording avoids claude-only dispatch semantics", async ()
       assert.match(text, /opsx-subagent/, `${name} must pair platform dispatch wording with central contract`);
     }
   }
+});
+
+test("implement keeps parallel workers serial by default and explicitly bounded", async () => {
+  const text = await skill("opsx-implement");
+
+  assert.match(text, /默认串行|serial-by-default/i);
+  assert.match(text, /任务簇独立/);
+  assert.match(text, /写入集合不重叠|disjoint write sets/i);
+  assert.match(text, /明确.*file ownership|明确.*文件 ownership|明确.*文件归属/i);
+  assert.match(text, /public interface/i);
+  assert.match(text, /migration/i);
+  assert.match(text, /schema/i);
+  assert.match(text, /config/i);
+  assert.match(text, /package\/build scripts/i);
+  assert.match(text, /依赖顺序不清/);
+  assert.doesNotMatch(text, /默认.*多个 implementation workers|无条件.*多个 implementation workers|自动.*多个 implementation workers/);
+});
+
+test("implement keeps shared artifacts and gates under main-agent integration", async () => {
+  const text = await skill("opsx-implement");
+
+  assert.match(text, /tasks\.md/);
+  assert.match(text, /test-report\.md/);
+  assert.match(text, /\.openspec\.yaml/);
+  assert.match(text, /audit-log\.md/);
+  assert.match(text, /review-report\.md/);
+  assert.match(text, /共享 artifact.*串行写入|串行.*共享 artifact/);
+  assert.match(text, /逐个检查.*diff|diff.*逐个检查/);
+  assert.match(text, /DONE_WITH_CONCERNS/);
+  assert.match(text, /NEEDS_CONTEXT/);
+  assert.match(text, /BLOCKED/);
+  assert.match(text, /opsx-verify/);
 });
 
 test("supported tools documents codex-first subagent mapping and real skills", async () => {

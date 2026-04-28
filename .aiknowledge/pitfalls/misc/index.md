@@ -25,3 +25,5 @@
 | subagent-platform-mapping-central-contract | [Subagent 平台映射应集中在 contract skill](subagent-platform-mapping-central-contract.md) | active | 2026-04-28 | opsx-subagent, codex, claude, workflow |
 | interactive-question-tool-is-optional | [交互式问询工具是可选增强能力](interactive-question-tool-is-optional.md) | active | 2026-04-28 | opsx-explore, codex, request_user_input, Default mode |
 | subagent-smoke-evals-must-use-trace-evidence | [Subagent smoke eval 必须使用 trace evidence](subagent-smoke-evals-must-use-trace-evidence.md) | active | 2026-04-28 | opsx, subagent, eval, codex, trace |
+| parallel-workers-need-disjoint-write-sets | [Parallel workers need disjoint write sets](parallel-workers-need-disjoint-write-sets.md) | active | 2026-04-28 | opsx, subagent, parallelism, write-set |
+| proposal-contract-default-language | [Proposal contracts must declare the default language](proposal-contract-default-language.md) | active | 2026-04-28 | opsx, proposal, skill, schema, language |
