@@ -4,7 +4,7 @@ created_at: 2026-04-13
 created_from: metadata-backfill
 last_verified_at: 2026-04-28
 last_verified_by: opsx-archive
-verification_basis: changes-status-detail + thin-npm-opsx archive + aiknowledge-lifecycle change + opsx-lite-workflow archive + superpowers-discipline archive
+verification_basis: changes-status-detail + thin-npm-opsx archive + aiknowledge-lifecycle change + opsx-lite-workflow archive + superpowers-discipline archive + subagent-workflow-adapter archive
 applies_to:
   - skills
   - bin/opsx.mjs
@@ -16,6 +16,8 @@ source_refs:
   - change:2026-04-27-aiknowledge-lifecycle
   - change:2026-04-27-opsx-lite-workflow
   - change:2026-04-28-superpowers-discipline
+  - lite-run:2026-04-28-codex-subagent-docs
+  - change:2026-04-28-subagent-workflow-adapter/01-subagent-contract
 superseded_by:
 ---
 
@@ -24,7 +26,7 @@ superseded_by:
 ## 职责
 OpenSpec 工作流的单一真相源。所有 skill 以 Markdown 文件存放于 `skills/<name>/SKILL.md`，由 `opsx install-skills` 分发到全局 `~/.agents/skills`，必要时由 `scripts/sync.sh` 分发为项目 adapter `.claude/skills/<name>/SKILL.md`。通用 change runtime 位于 `runtime/bin/changes.sh`，其中 `list` 是紧凑清单，`status` 是项目级诊断视图。长期知识维护规则位于 `.aiknowledge/README.md`，审计入口索引为 `.aiknowledge/log.md`，月度日志位于 `.aiknowledge/logs/YYYY-MM.md`，`opsx-knowledge` 与 `opsx-codemap` 必须共享同一套 lifecycle 语义。
 
-## Skill 清单（18 个）
+## Skill 清单（19 个）
 
 | Skill | 角色 | 前置关卡 |
 |-------|------|----------|
@@ -33,6 +35,7 @@ OpenSpec 工作流的单一真相源。所有 skill 以 Markdown 文件存放于
 | `opsx-plan` | 为当前 resolved change root 生成/修订 specs + design，必要时小修 proposal | 无 |
 | `opsx-continue` | 恢复中断的当前 change；group 场景下先按 active_subchange，否则按 suggested_focus / recommended_order / 唯一 subchange 路由 | 无 |
 | `opsx-lite` | 轻量小改动工作流，不创建正式 change，记录 lite-run 事实留档；范围扩大时升级到 slice→plan | 无 |
+| `opsx-subagent` | Codex 默认、Claude 兼容的 subagent 派发契约；统一 worker/reviewer/explorer 的角色边界、写入边界、status 和 fallback 规则 | 无 |
 | `opsx-plan-review` | spec↔plan 一致性审查（关卡1），硬性门控；派遣 1 个 subagent 直接读取 specs/+design.md，输出 StageResult JSON，写 audit-log.md | design 已生成 |
 | `opsx-tasks` | 将 design+specs 转化为带 TDD 标签、bite-sized、可执行验证方法的 tasks.md | `gates.plan-review` |
 | `opsx-task-analyze` | plan↔tasks 一致性审查（关卡2），硬性门控 | tasks 已生成 + plan-review 已通过 |
@@ -90,6 +93,7 @@ plan ───────────────────→ proposal → s
 - 通用 runtime 归属于 npm 包入口 `bin/opsx.mjs`、`runtime/bin/changes.sh` 与 `runtime/schemas`，不再复制到目标项目 `.claude/opsx`
 - `opsx changes list` 与 `opsx changes status` 语义必须分离：`list` 只列 active changes，`status` 读取 gates/reports/tasks 并给出 next-step 诊断
 - `opsx-plan-review`、`opsx-task-analyze`、`opsx-verify` 遵循 Stage Packet Protocol v2：派遣 subagent 直接读取权威产物文件 → 输出 StageResult JSON → 主 agent 追加写 `audit-log.md`；无 context/ JSON 文件，无 StagePacket 组装步骤
+- subagent 文案以 `opsx-subagent` 为 canonical contract：Codex 默认使用 `spawn_agent`，Claude Code 兼容映射为 `Task` tool；主 agent 保留 controller 权限，subagent 不写 gates 或最终完成声明。
 - `opsx-verify` 拥有 Spec Compliance Review；`opsx-review` 不重复完整 compliance，只审查 code quality / release risk，发现明显需求遗漏或范围外实现时输出 `VERIFY_DRIFT` 并路由回 verify。
 - `opsx-bugfix` 在修复前必须说明 root cause 与证据；同一问题连续 3 次修复失败时停止叠加补丁并重新审视假设或架构。
 - `opsx-verify` 与 `opsx-lite` 的完成声明必须基于当前轮 fresh verification evidence；未验证只能说明待验证，不能宣称通过。

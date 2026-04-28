@@ -22,3 +22,4 @@
 | source-refs-prefer-change-over-raw-source | [source_refs 优先引用 change，避免制造 raw source 目录](source-refs-prefer-change-over-raw-source.md) | active | 2026-04-27 | aiknowledge, source_refs, lifecycle, log |
 | lite-workflow-fact-log-not-mini-change | [轻量 workflow 应记录事实，不应退化成 mini change](lite-workflow-fact-log-not-mini-change.md) | active | 2026-04-28 | opsx-lite, workflow, lite-run, aiknowledge |
 | verify-owns-compliance-review-owns-risk | [Verify 管合规，Review 管发布风险](verify-owns-compliance-review-owns-risk.md) | active | 2026-04-28 | opsx-verify, opsx-review, compliance, release-risk |
+| subagent-platform-mapping-central-contract | [Subagent 平台映射应集中在 contract skill](subagent-platform-mapping-central-contract.md) | active | 2026-04-28 | opsx-subagent, codex, claude, workflow |

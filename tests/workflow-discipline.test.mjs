@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
+import { readdir, readFile } from "node:fs/promises";
 
 async function skill(name) {
   return readFile(`skills/${name}/SKILL.md`, "utf8");
@@ -62,6 +62,7 @@ test("touched skill descriptions avoid workflow step summaries", async () => {
     "opsx-tasks",
     "opsx-review",
     "opsx-explore",
+    "opsx-subagent",
   ];
 
   for (const name of touched) {
@@ -72,4 +73,36 @@ test("touched skill descriptions avoid workflow step summaries", async () => {
     assert.doesNotMatch(description, /先.*再/);
     assert.ok(description.length <= 220, `${name} description is too long`);
   }
+});
+
+test("subagent contract is codex-first with claude compatibility", async () => {
+  const text = await skill("opsx-subagent");
+
+  assert.match(text, /spawn_agent\(agent_type="worker"/);
+  assert.match(text, /spawn_agent\(agent_type="explorer"/);
+  assert.match(text, /Claude Code/);
+  assert.match(text, /Task tool/);
+  assert.match(text, /main agent.*controller/);
+  assert.match(text, /共享 artifact/);
+  assert.match(text, /DONE_WITH_CONCERNS/);
+  assert.match(text, /NEEDS_CONTEXT/);
+  assert.match(text, /BLOCKED/);
+  assert.match(text, /StageResult/);
+  assert.match(text, /fallback/);
+});
+
+test("supported tools documents codex-first subagent mapping and real skills", async () => {
+  const doc = await readFile("docs/supported-tools.md", "utf8");
+  const skillDirs = (await readdir("skills", { withFileTypes: true }))
+    .filter((entry) => entry.isDirectory() && entry.name.startsWith("opsx-"))
+    .map((entry) => entry.name)
+    .sort();
+  const documented = [...doc.matchAll(/^\| `(opsx-[^`]+)` \|/gm)]
+    .map((match) => match[1])
+    .sort();
+
+  assert.match(doc, /Codex \| 默认入口/);
+  assert.match(doc, /spawn_agent/);
+  assert.match(doc, /Claude Code \| 兼容入口/);
+  assert.deepEqual(documented, skillDirs);
 });
