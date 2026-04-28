@@ -1,2 +1,9 @@
 schema: spec-driven
 created: 2026-04-28
+capabilities:
+  - gate-skill-slimming
+  - execution-support-slimming
+  - skill-slimming-validation
+gates:
+  plan-review: "2026-04-28T09:32:59Z"
+  task-analyze: "2026-04-28T09:35:38Z"
