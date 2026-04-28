@@ -1,0 +1,4 @@
+{"type":"thread.started","thread_id":"parent"}
+{"type":"item.completed","item":{"id":"item_1","type":"collab_tool_call","tool":"spawn_agent","receiver_thread_ids":["child-1"],"agents_states":{"child-1":{"status":"pending_init","message":null}},"status":"completed"}}
+{"type":"item.completed","item":{"id":"item_2","type":"agent_message","text":"{\"status\":\"pass\",\"subagent_required\":true,\"subagent_result_seen\":true,\"files_checked\":[],\"notes\":\"Spawned but did not wait.\"}"}}
+{"type":"turn.completed"}

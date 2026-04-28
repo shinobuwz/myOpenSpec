@@ -1,0 +1,31 @@
+{
+  "type": "object",
+  "required": [
+    "status",
+    "subagent_required",
+    "subagent_result_seen",
+    "files_checked",
+    "notes"
+  ],
+  "properties": {
+    "status": {
+      "enum": ["pass", "fail", "inconclusive"]
+    },
+    "subagent_required": {
+      "type": "boolean"
+    },
+    "subagent_result_seen": {
+      "type": "boolean"
+    },
+    "files_checked": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "additionalProperties": false
+}
