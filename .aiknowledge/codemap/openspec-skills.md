@@ -4,7 +4,7 @@ created_at: 2026-04-13
 created_from: metadata-backfill
 last_verified_at: 2026-04-28
 last_verified_by: opsx-archive
-verification_basis: changes-status-detail + thin-npm-opsx archive + aiknowledge-lifecycle change + opsx-lite-workflow archive
+verification_basis: changes-status-detail + thin-npm-opsx archive + aiknowledge-lifecycle change + opsx-lite-workflow archive + superpowers-discipline archive
 applies_to:
   - skills
   - bin/opsx.mjs
@@ -15,6 +15,7 @@ applies_to:
 source_refs:
   - change:2026-04-27-aiknowledge-lifecycle
   - change:2026-04-27-opsx-lite-workflow
+  - change:2026-04-28-superpowers-discipline
 superseded_by:
 ---
 
@@ -27,21 +28,21 @@ OpenSpec 工作流的单一真相源。所有 skill 以 Markdown 文件存放于
 
 | Skill | 角色 | 前置关卡 |
 |-------|------|----------|
-| `opsx-explore` | 思考伙伴，探索想法/调查问题/澄清需求，禁止写代码 | 无 |
+| `opsx-explore` | 思考伙伴，探索想法/调查问题/澄清需求，收敛阶段一次一问、方案对比、逐段确认，禁止写代码 | 无 |
 | `opsx-slice` | 创建父 change + subchanges，初始化每个 subchange 的 proposal，并定义执行拓扑（execution_mode / recommended_order / 可选 suggested_focus） | 无 |
 | `opsx-plan` | 为当前 resolved change root 生成/修订 specs + design，必要时小修 proposal | 无 |
 | `opsx-continue` | 恢复中断的当前 change；group 场景下先按 active_subchange，否则按 suggested_focus / recommended_order / 唯一 subchange 路由 | 无 |
 | `opsx-lite` | 轻量小改动工作流，不创建正式 change，记录 lite-run 事实留档；范围扩大时升级到 slice→plan | 无 |
 | `opsx-plan-review` | spec↔plan 一致性审查（关卡1），硬性门控；派遣 1 个 subagent 直接读取 specs/+design.md，输出 StageResult JSON，写 audit-log.md | design 已生成 |
-| `opsx-tasks` | 将 design+specs 转化为带 TDD 标签的 tasks.md | `gates.plan-review` |
+| `opsx-tasks` | 将 design+specs 转化为带 TDD 标签、bite-sized、可执行验证方法的 tasks.md | `gates.plan-review` |
 | `opsx-task-analyze` | plan↔tasks 一致性审查（关卡2），硬性门控 | tasks 已生成 + plan-review 已通过 |
 | `opsx-tdd` | 红绿重构循环，按 task 标签执行（test-first/characterization-first/direct） | 无（被 implement 调用） |
 | `opsx-implement` | 按 tasks.md 逐项实施，每项强制 TDD 循环 | `gates.plan-review` + `gates.task-analyze` |
-| `opsx-verify` | 四维验证（完整性/正确性/一致性/测试留档），派遣 1 个 subagent 直接读取文件顺序执行，输出 StageResult JSON，写 audit-log.md | 实施完成 |
-| `opsx-review` | 独立代码审查，发版风险拦截，分级问题列表 | `gates.verify` 已通过 |
+| `opsx-verify` | Spec compliance + 四维验证（完整性/正确性/一致性/测试留档），要求 fresh evidence 支撑完成声明，派遣 1 个 subagent 输出 StageResult JSON | 实施完成 |
+| `opsx-review` | 独立代码审查，聚焦 code quality / release risk；发现 compliance drift 时路由回 verify | `gates.verify` 已通过 |
 | `opsx-report` | 读取 `audit-log.md`、`test-report.md`、`review-report.md` 及产出物文件，渲染 self-contained HTML RunReport | 无（按需触发） |
 | `opsx-archive` | 归档变更 + knowledge + codemap + git | `gates.verify` + `gates.review` |
-| `opsx-bugfix` | 精简 bugfix 流程：定位→测试策略→修复→验证→经验沉淀 | 无 |
+| `opsx-bugfix` | 精简 bugfix 流程：定位→根因调查→单一假设→测试策略→修复→验证→经验沉淀 | 无 |
 | `opsx-codemap` | 维护 `.aiknowledge/codemap/` 架构认知地图 | 无（独立工具） |
 | `opsx-knowledge` | 经验沉淀到 `.aiknowledge/pitfalls/` | 无（独立工具） |
 | `opsx-auto-drive` | 自动驱动引擎，AI 自主执行完整工作流循环 | 无（编排层） |
@@ -89,6 +90,9 @@ plan ───────────────────→ proposal → s
 - 通用 runtime 归属于 npm 包入口 `bin/opsx.mjs`、`runtime/bin/changes.sh` 与 `runtime/schemas`，不再复制到目标项目 `.claude/opsx`
 - `opsx changes list` 与 `opsx changes status` 语义必须分离：`list` 只列 active changes，`status` 读取 gates/reports/tasks 并给出 next-step 诊断
 - `opsx-plan-review`、`opsx-task-analyze`、`opsx-verify` 遵循 Stage Packet Protocol v2：派遣 subagent 直接读取权威产物文件 → 输出 StageResult JSON → 主 agent 追加写 `audit-log.md`；无 context/ JSON 文件，无 StagePacket 组装步骤
+- `opsx-verify` 拥有 Spec Compliance Review；`opsx-review` 不重复完整 compliance，只审查 code quality / release risk，发现明显需求遗漏或范围外实现时输出 `VERIFY_DRIFT` 并路由回 verify。
+- `opsx-bugfix` 在修复前必须说明 root cause 与证据；同一问题连续 3 次修复失败时停止叠加补丁并重新审视假设或架构。
+- `opsx-verify` 与 `opsx-lite` 的完成声明必须基于当前轮 fresh verification evidence；未验证只能说明待验证，不能宣称通过。
 - `opsx-report` 从 `audit-log.md`（plan-review/verify）、`test-report.md`（tdd）、`review-report.md`（review）读取各 stage 决定，结合 `.openspec.yaml` gates 字段渲染 HTML；不读取 `run-report-data.json`
 - `opsx-knowledge` 和 `opsx-codemap` 在写入 `.aiknowledge/` 前必须读取 `.aiknowledge/README.md`；新增、更新、合并、废弃或 lint 修复后必须追加当前月度日志 `.aiknowledge/logs/YYYY-MM.md`
 - OpenSpec change、commit、audit-log、test-report 和 review-report 是默认事实来源；`codemap/` 与 `pitfalls/` 是 LLM 维护层，可以演化但必须保留 `source_refs`

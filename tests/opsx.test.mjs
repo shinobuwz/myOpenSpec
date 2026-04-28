@@ -223,3 +223,33 @@ test("launcher changes command can initialize a target project change", async ()
     await rm(repo, { recursive: true, force: true });
   }
 });
+
+test("launcher changes command operates on project option instead of cwd", async () => {
+  const repoA = await mkdtemp(path.join(tmpdir(), "opsx-launcher-a-"));
+  const repoB = await mkdtemp(path.join(tmpdir(), "opsx-launcher-b-"));
+
+  try {
+    assert.equal(await main(["init-project", "-p", repoA], createIo().io), 0);
+    assert.equal(await main(["init-project", "-p", repoB], createIo().io), 0);
+
+    const result = spawnSync("node", [
+      path.resolve("bin/opsx.mjs"),
+      "changes",
+      "-p",
+      repoB,
+      "init",
+      "target",
+      "spec-driven",
+    ], {
+      cwd: repoA,
+      encoding: "utf8",
+    });
+
+    assert.equal(result.status, 0, result.stderr);
+    assert.equal(existsSync(path.join(repoB, "openspec", "changes", "target", ".openspec.yaml")), true);
+    assert.equal(existsSync(path.join(repoA, "openspec", "changes", "target", ".openspec.yaml")), false);
+  } finally {
+    await rm(repoA, { recursive: true, force: true });
+    await rm(repoB, { recursive: true, force: true });
+  }
+});

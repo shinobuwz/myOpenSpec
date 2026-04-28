@@ -1,6 +1,6 @@
 ---
 name: opsx-review
-description: 使用 subagent 进行独立代码审查，输出质量指标和分级问题。当验证通过后需要更深入的代码质量评估时使用。
+description: opsx-verify 通过后使用，用于在归档前审查已实现 change 的发布风险和代码质量。
 ---
 
 ## Change Root 解析
@@ -9,7 +9,7 @@ description: 使用 subagent 进行独立代码审查，输出质量指标和分
 - 执行前先运行 `opsx changes resolve <name>` 获取真实 change root。
 - 后文所有 `proposal.md`、`review-report.md`、`.openspec.yaml` 路径均指 resolved change root。
 
-代码审查 Skill。使用 subagent 进行独立的代码审查，输出质量指标和分级问题列表。
+代码审查 Skill。使用 subagent 进行独立的代码质量 / 发布风险审查，输出质量指标和分级问题列表。
 
 ## 输入 / 输出边界
 
@@ -40,9 +40,9 @@ description: 使用 subagent 进行独立代码审查，输出质量指标和分
 1. 确认 opsx-verify 验证已通过
 2. 收集本次变更的所有代码差异（`git diff`）
 3. 读取当前 change 目录下的需求文档作为业务审查上下文：
-   - `proposal.md` — 变更动机和目标
-   - `design.md` — 设计方案
-   - `specs/` — 详细规格说明
+   - `proposal.md` — 变更动机和目标（仅作为风险上下文）
+   - `design.md` — 设计方案（仅作为风险上下文）
+   - `specs/` — 详细规格说明（仅作为风险上下文）
 4. 按需读取 `.aiknowledge/`：
    - 先读 `.aiknowledge/codemap/index.md`（如存在），识别本次变更涉及的模块
    - 仅读取命中模块的 `<module>.md`，获取模块边界和调用链，避免重新探索
@@ -71,12 +71,24 @@ description: 使用 subagent 进行独立代码审查，输出质量指标和分
 
 subagent 只读取代码和文档，不做任何修改。审查结果由 subagent 汇报，主 agent 汇总输出。
 
+### Verify / Review 边界
+
+`opsx-verify` 已经负责 Spec Compliance Review：实现是否满足 proposal/design/specs/tasks、是否有需求遗漏、是否存在范围外实现。
+
+`opsx-review` 不重复完整 spec compliance。它只做 code quality / release risk review：
+- 崩溃、数据损坏、安全、兼容性、资源泄漏、竞态、错误处理
+- 删除代码副作用、状态闭环、异步安全、平台差异
+- diff 中新增或修改代码的真实发布风险
+
+如果 review 过程中发现明显需求遗漏或范围外实现，不要在 review 内重做完整 compliance；输出 `VERIFY_DRIFT` critical finding，并要求回退 `opsx-verify` 重新验证。
+
 ## 审查范围
 
 **只检查以下内容**：
 
 | 类别 | 具体关注点 |
 |------|-----------|
+| verify drift | 明显需求遗漏、范围外实现、任务状态与代码证据不一致；发现后路由回 `opsx-verify` |
 | 逻辑错误 | 空指针、越界、死循环、条件反转、off-by-one |
 | 资源泄漏 | 内存、文件句柄、网络连接、锁、订阅（检查获取-释放配对，含异常路径） |
 | 并发问题 | 数据竞争、死锁、竞态条件（须追踪读写线程并确认无同步机制） |
@@ -149,7 +161,8 @@ subagent 只读取代码和文档，不做任何修改。审查结果由 subagen
 
 ## 完成条件
 
-- 审查范围内所有类别完成检查
+- 审查范围内所有 code quality / release risk 类别完成检查
+- 未重复执行完整 spec compliance；发现 compliance 漂移时输出 `VERIFY_DRIFT` 并路由回 `opsx-verify`
 - 所有问题已按 CRITICAL/WARNING/SUGGESTION 分级并记录
 - 每个 CRITICAL 问题包含：行号、执行路径、具体后果、修复建议
 - 审查报告已生成
