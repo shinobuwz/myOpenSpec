@@ -11,7 +11,9 @@ applies_to:
   - skills/opsx-*.md
 source_refs:
   - change:2026-04-28-subagent-workflow-adapter/01-subagent-contract
+  - change:2026-04-28-subagent-workflow-adapter/02-workflow-skill-adoption
   - review-report:openspec/changes/archive/2026-04-28-subagent-workflow-adapter-01-subagent-contract/review-report.md
+  - review-report:openspec/changes/archive/2026-04-28-subagent-workflow-adapter-02-workflow-skill-adoption/review-report.md
 superseded_by:
 merged_from:
 deprecated_reason:
@@ -60,3 +62,4 @@ Subagent 派发是横切契约，不是某个单独 workflow stage 的业务规�
 ## 来源
 
 change: 2026-04-28-subagent-workflow-adapter/01-subagent-contract
+change: 2026-04-28-subagent-workflow-adapter/02-workflow-skill-adoption

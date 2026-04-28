@@ -49,13 +49,14 @@ description: 按 tasks.md 逐项实施，每项强制 TDD 循环。当 OpenSpec 
 
 ## subagent 实施
 
-使用 Agent tool 启动 **1 个** subagent，实施全部任务：
+按 `opsx-subagent` 的 implementation worker contract 派发 **1 个** worker 实施全部任务。Codex 默认、Claude Code 兼容映射、controller boundary、写入边界、status 处理和 fallback 均以 `opsx-subagent` 为准；本 skill 只定义 implement stage 的输入、TDD 规则和完成条件。
+
+本 subchange 不引入多 worker 并行策略。主 agent 仍负责 gates 校验、worker 结果汇总、`tasks.md` / `test-report.md` 状态整合、diff 检查和最终完成声明。
+
+派发给 worker 的任务结构：
 
 ```
-Agent({
-  description: "实施 <name> 全部任务",
-  subagent_type: "general-purpose",
-  prompt: `你是 implement agent。
+你是 implement worker。
 
 ## 输入
 读取 openspec/changes/<name>/tasks.md 找到第一个 [ ] 任务作为起点，恢复实施进度。
@@ -77,8 +78,8 @@ Agent({
 8. 禁止事后汇总：test-report.md 必须在每个 TDD 阶段完成时实时追加，禁止在所有任务完成后一次性生成
 
 ## 完成后报告
-每个任务：修改了哪些文件、测试结果（通过/失败数）、是否产生 commit；并输出最终任务完成情况摘要`
-})
+使用 `opsx-subagent` 的 implementation status 之一报告：`DONE`、`DONE_WITH_CONCERNS`、`NEEDS_CONTEXT`、`BLOCKED`。
+每个任务：修改了哪些文件、测试结果（通过/失败数）、是否产生 commit；并输出最终任务完成情况摘要。
 ```
 
 ## 暂停条件

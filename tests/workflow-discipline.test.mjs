@@ -156,6 +156,46 @@ test("subagent contract is codex-first with claude compatibility", async () => {
   assert.match(text, /fallback/);
 });
 
+test("workflow subagent users reference the central contract", async () => {
+  const contractUsers = [
+    "opsx-implement",
+    "opsx-plan-review",
+    "opsx-task-analyze",
+    "opsx-verify",
+    "opsx-review",
+    "opsx-explore",
+    "opsx-archive",
+  ];
+
+  for (const name of contractUsers) {
+    const text = await skill(name);
+
+    assert.match(text, /opsx-subagent/, `${name} should reference opsx-subagent`);
+    assert.match(text, /主 agent|main agent/, `${name} should preserve controller ownership`);
+  }
+});
+
+test("workflow subagent wording avoids claude-only dispatch semantics", async () => {
+  const contractUsers = [
+    "opsx-implement",
+    "opsx-plan-review",
+    "opsx-task-analyze",
+    "opsx-verify",
+    "opsx-review",
+    "opsx-explore",
+    "opsx-archive",
+  ];
+
+  for (const name of contractUsers) {
+    const text = await skill(name);
+    const usesClaudeDispatch = /subagent_type|Task tool|Agent tool/.test(text);
+
+    if (usesClaudeDispatch) {
+      assert.match(text, /opsx-subagent/, `${name} must pair platform dispatch wording with central contract`);
+    }
+  }
+});
+
 test("supported tools documents codex-first subagent mapping and real skills", async () => {
   const doc = await readFile("docs/supported-tools.md", "utf8");
   const skillDirs = (await readdir("skills", { withFileTypes: true }))

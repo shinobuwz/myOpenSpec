@@ -9,7 +9,9 @@ description: opsx-verify 通过后使用，用于在归档前审查已实现 cha
 - 执行前先运行 `opsx changes resolve <name>` 获取真实 change root。
 - 后文所有 `proposal.md`、`review-report.md`、`.openspec.yaml` 路径均指 resolved change root。
 
-代码审查 Skill。使用 subagent 进行独立的代码质量 / 发布风险审查，输出质量指标和分级问题列表。
+代码审查 Skill。按 `opsx-subagent` 的 reviewer worker contract 派发只读 reviewer subagent，进行独立的代码质量 / 发布风险审查，输出质量指标和分级问题列表。
+
+Codex 默认、Claude Code 兼容映射、controller boundary、只读写入边界和 fallback 均以 `opsx-subagent` 为准；本 skill 只定义 review stage 的风险审查范围、分级和 `review-report.md` / review gate 规则。主 agent 负责汇总 reviewer 结果、写入 `review-report.md` 和 `.openspec.yaml` gates。
 
 ## 输入 / 输出边界
 
@@ -64,7 +66,7 @@ description: opsx-verify 通过后使用，用于在归档前审查已实现 cha
 
 ## 审查方式
 
-使用 Agent tool 启动 subagent 进行独立审查。subagent 接收以下上下文：
+按 `opsx-subagent` reviewer contract 启动 subagent 进行独立审查。subagent 接收以下上下文：
 - 本次变更的 diff
 - 需求文档摘要（proposal/design/specs）
 - codemap/pitfalls 摘要

@@ -35,7 +35,9 @@ description: 规划审查：检查 specs 需求是否完整进入 design。在 p
 
 ## 审查方式
 
-使用 Agent tool 启动 1 个 subagent 进行独立审查：
+按 `opsx-subagent` 的 reviewer worker contract 派发 1 个只读 reviewer subagent 进行独立审查。Codex 默认、Claude Code 兼容映射、controller boundary、只读写入边界和 fallback 均以 `opsx-subagent` 为准；本 skill 只定义 plan-review 的审查维度、StageResult 输出和 gate 写入规则。
+
+主 agent 负责收集 reviewer 输出、生成追踪矩阵、追加 `audit-log.md` 和写入 `.openspec.yaml` gates；reviewer 不得直接写 gates 或宣称整个 change 可进入下一阶段。
 
 subagent 直接读取 `openspec/changes/<name>/specs/**/*.md` 和 `openspec/changes/<name>/design.md`，在同一轮覆盖 trace、granularity、uniqueness、design-integrity 四类检查，并输出 1 个符合 **StageResult schema** 的 JSON（见 `docs/stage-packet-protocol.md` 第 1 节）。
 

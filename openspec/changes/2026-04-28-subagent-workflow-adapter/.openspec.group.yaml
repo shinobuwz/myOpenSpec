@@ -1,6 +1,6 @@
 kind: group
 created: 2026-04-28
-execution_mode: serial
-suggested_focus: 02-workflow-skill-adoption
-active_subchange: 02-workflow-skill-adoption
-recommended_order: 02-workflow-skill-adoption,03-parallel-worker-policy
+execution_mode: mixed
+suggested_focus: 03-parallel-worker-policy
+active_subchange: 03-parallel-worker-policy
+recommended_order: 03-parallel-worker-policy
