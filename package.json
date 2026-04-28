@@ -18,6 +18,7 @@
   ],
   "scripts": {
     "test": "node --test tests/*.test.mjs",
+    "check:skill-slimming": "node scripts/check-skill-slimming.mjs",
     "eval:subagent": "node scripts/eval-subagent-smoke.mjs",
     "test:local-install": "bash scripts/test-local-install.sh",
     "install:local": "bash scripts/test-local-install.sh",

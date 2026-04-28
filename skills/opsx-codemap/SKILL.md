@@ -3,243 +3,49 @@ name: opsx-codemap
 description: 独立维护 .aiknowledge/codemap/ 架构认知地图。初始化缺失模块的 codemap，或在变更后更新受影响模块。
 ---
 
-执行 codemap 维护工作流。目标是把项目的架构认知固化为可复用的地图文档，写入 `.aiknowledge/codemap/`。
+执行 codemap 维护工作流。目标是把项目架构认知固化为可复用地图，写入 `.aiknowledge/codemap/`。
 
-## `.aiknowledge` 生命周期契约
+## 硬边界
 
-进入本 skill 后，必须先读取 `.aiknowledge/README.md`（如存在），并遵守其中的 source references、LLM-maintained wiki、月度 append-only log、状态机、merge tombstone、deprecate 和 lint 规则。
-
-核心约束：
-- OpenSpec change、commit、audit-log、test-report 和 review-report 是默认事实来源，优先写入 `source_refs`，不要重复复制 raw source。
-- `codemap/` 是 LLM 维护层，可以刷新、替代和废弃，但必须保留来源引用。
-- 每次新增、刷新、替代、废弃或 lint 修复 codemap 后，必须向当前月度日志追加审计记录，例如 `.aiknowledge/logs/YYYY-MM.md`；`.aiknowledge/log.md` 仅作为日志索引。
-- 替代正式索引过的模块或链路时，保留旧条目作为 `superseded` tombstone；禁止静默删除历史文件。
+- 写入前必须先读取 `.aiknowledge/README.md`，以它作为 lifecycle canonical source。
+- codemap-only：本 skill 只写 `.aiknowledge/codemap/` 和日志，不修改产品代码、测试代码或 OpenSpec gates。
+- 采用 index-first：先读 `.aiknowledge/codemap/index.md`，再按需读模块文档或 chains。
+- 只更新受影响模块；不做无关全量重写。
+- 每次新增、刷新、替代、废弃或 lint 修复后，必须追加当前月度日志 `.aiknowledge/logs/YYYY-MM.md`。
+- 替代正式索引过的模块或链路时保留 `superseded` tombstone，禁止静默删除历史文件。
 
 ## 输入 / 输出边界
 
 **读取：**
-- `.aiknowledge/README.md`（生命周期契约，如存在）
-- `.aiknowledge/codemap/index.md`、现有模块文档、现有链路文档（如存在）
+- `.aiknowledge/README.md`
+- `.aiknowledge/codemap/index.md`、现有模块文档、现有链路文档
 - 与目标模块相关的代码文件
-- 相关 change 上下文（如由 archive 或 explore 传入）
+- 相关 change、archive 或 explore 上下文
 
 **写入：**
 - `.aiknowledge/codemap/index.md`
 - `.aiknowledge/codemap/<module>.md`
 - `.aiknowledge/codemap/chains/<chain-name>.md`
-- `.aiknowledge/log.md`（仅更新 shard 链接）
+- `.aiknowledge/log.md`（仅维护 shard 链接）
 - `.aiknowledge/logs/YYYY-MM.md`
 
-**边界约束：**
-- codemap 只维护架构认知文档，不修改产品代码、测试代码或 OpenSpec gates
-- codemap 只更新受影响模块，不做无关全量重写
+## 快速流程
 
-## Freshness 原则
+1. 读取 `.aiknowledge/README.md` 和 codemap index。
+2. 判断触发场景：入口初始化或归档后出口更新。
+3. 只读取目标模块关键文件，记录文件级职责和隐式约束。
+4. 需要跨 3 个以上文件才能理解的调用链，写入 `chains/<chain-name>.md`。
+5. 同步 index 状态和条目 frontmatter。
+6. 追加当前月度日志。
 
-codemap 采用事件驱动维护，而不是定时刷新。
+## Reference 导航
 
-- `active`：当前可直接用于定位代码和判断模块边界
-- `stale`：文档可能漂移，只能作为线索，使用前必须刷新
-- `superseded`：条目已被新条目或新链路替代，默认不再直接消费
-
-发现漂移时，**先标记 stale，再刷新内容**。不要在不确定时直接覆盖旧结论。
-
-## 两种触发场景
-
-**场景 A：入口初始化**（explore 开始时，codemap 缺失或模块未覆盖）
-- 根据用户描述的需求范围，识别涉及的模块
-- 检查这些模块是否已有 codemap 条目
-- 对缺失的模块：读代码 → 生成模块文档
-
-**场景 B：出口更新**（archive 归档后，变更涉及的模块有代码改动）
-- 根据本次变更涉及的模块，更新对应的模块文档
-- 如有新的跨模块链路，更新或新建 chains/
-
-## 目录结构
-
-```
-.aiknowledge/codemap/
-├── index.md              # L1：模块列表 + 链路索引
-├── <module>.md           # L2：单模块文档（扁平，不建子目录）
-└── chains/
-    └── <chain-name>.md   # 跨模块调用链（按需创建）
-```
-
-## index.md 格式
-
-```md
-# Codemap
-
-## 模块
-
-| 模块 | 状态 | 最近复核 | 职责 | 入口 |
-|------|------|----------|------|------|
-| [audio-connection](audio-connection.md) | active | 2026-04-13 | WebSocket 音频连接管理 | src/audio/connection.ts |
-| [session](session.md) | stale | 2026-04-12 | 会话生命周期 | src/session/manager.ts |
-
-## 链路
-
-| 链路 | 状态 | 最近复核 | 涉及模块 | 说明 |
-|------|------|----------|----------|------|
-| [音频建连](chains/audio-session-setup.md) | active | 2026-04-13 | session, audio-connection, codec | 从发起到首帧的完整路径 |
-```
-
-## 模块文档格式（`<module>.md`）
-
-```md
----
-status: active
-created_at: 2026-04-13
-created_from: change:add-audio-reconnect
-last_verified_at: 2026-04-13
-last_verified_by: opsx-archive
-verification_basis: archive
-applies_to:
-  - src/audio
-source_refs:
-  - change:add-audio-reconnect
-superseded_by:
-merged_from:
-deprecated_reason:
----
-
-# <模块名>
-
-## 职责
-一段话说明这个模块做什么、边界在哪。
-
-## 关键文件
-| 文件 | 角色 |
-|------|------|
-| src/audio/connection.ts | 入口，对外暴露 connect/disconnect |
-| src/audio/reconnect.ts | 重连策略与退避逻辑 |
-
-## 隐式约束
-- 调用 connect() 前必须先完成 auth，否则返回 null session
-- reconnect() 跳过 auth，直接重用已有 token
-```
-
-精确到**文件级 + 一句话角色**，不记录类和函数。
-
-## 链路文档格式（`chains/<chain-name>.md`）
-
-```md
----
-status: active
-created_at: 2026-04-13
-created_from: change:add-audio-reconnect
-last_verified_at: 2026-04-13
-last_verified_by: opsx-codemap
-verification_basis: codemap-refresh
-applies_to:
-  - src/session
-  - src/audio
-source_refs:
-  - change:add-audio-reconnect
-superseded_by:
-merged_from:
-deprecated_reason:
----
-
-# <链路名称>
-
-## 触发点
-`Module.method()` → src/xxx/yyy.ts:42
-
-## 调用链
-1. AppEntry.startAudio()
-   → SessionManager.create(config)   # src/session/manager.ts:88
-2. SessionManager.create()
-   → AudioConnection.connect(token)  # src/audio/connection.ts:33
-3. AudioConnection.connect()
-   → Codec.init()                    # src/audio/codec.ts:12 ⚠ 必须在 ws.onopen 之后
-
-## 隐式约束
-- Codec.init() 必须在 WebSocket 连接建立后才能调用，否则 crash
-- getToken() 失败时 SessionManager 不会抛异常，而是返回 null
-
-## 关键分支
-- 重连路径：SessionManager.reconnect() 跳过步骤 1，直接走步骤 2-3
-```
-
-链路文档的价值在于固化"跨 N 个文件才能追踪到的约束"，避免每次重新追踪。
-
-## 步骤
-
-### 场景 A：入口初始化
-
-1. **识别涉及模块**
-   - 先读取 `.aiknowledge/README.md`（如存在），确认 lifecycle 规则
-   - 根据用户描述的需求范围（功能、问题、模块名）推断涉及哪些模块
-   - 不要过度扩展——只覆盖本次需要理解的模块
-
-2. **读取 L1 index**
-   - 先读 `.aiknowledge/codemap/index.md`（不存在则准备从头创建）
-   - 对比已有模块列表，确定哪些模块缺失
-   - 如果目标模块在 index 中已标记为 `stale`，视为“存在但不可直接复用”，仍需进入刷新流程
-
-3. **对每个缺失模块：读代码 → 生成文档**
-   - 读该模块的关键文件（入口 + 核心实现）
-   - 生成模块文档：职责 + 关键文件角色 + 隐式约束
-   - **不记录**类/函数级细节，那些 AI 读文件就能快速获取
-
-4. **判断是否需要 chain**
-   - 如果发现跨模块的复杂调用链（追踪 3 个以上文件才能串通），记录为 chain
-   - 在 index.md 的链路表中添加引用
-
-5. **更新 index.md**
-   - 追加新模块行
-   - 确认链路表准确
-   - 向当前月度日志追加 `create` 或 `refresh` 记录，包含目标文件和 `source_refs`
-
-### 场景 B：出口更新
-
-1. **确认变更涉及的模块**（由 archive 传入上下文）
-   - 先读取 `.aiknowledge/README.md`（如存在），确认 lifecycle 规则
-   - 优先形成 `source_refs`：`change:<name>`、`commit:<sha>`、`audit-log:<path>`、`test-report:<path>`、`review-report:<path>`；不要为已有 change/commit/report 重复创建 raw source 文件
-
-2. **读当前 codemap**
-   - 读受影响模块的 .md 文件
-   - 判断哪些信息已过时（文件改动、接口变更、新增约束）
-   - 若发现文档与代码不一致：先把该条目标记为 `stale`
-
-3. **更新模块文档**
-   - 只更新变更涉及的部分
-   - 更新 frontmatter 中的 `last_verified_at`、`last_verified_by`、`verification_basis`
-   - 更新或补充 `source_refs`
-   - 内容刷新完成后，将状态恢复为 `active`
-   - 如果约束或调用链有变化，同步更新对应 chain 文件
-
-4. **更新 index.md**（如有新模块或新链路）
-5. **追加审计日志**
-   - 向当前月度日志追加本次 `refresh` / `supersede` / `deprecate` / `lint-fix` 记录
-   - 如果旧模块或旧链路被新条目替代，旧条目必须保留为 `superseded` tombstone 并填写 `superseded_by`
-
-## stale 判定信号
-
-以下任一命中，即可将 codemap 条目标记为 `stale`：
-
-- 关键文件已删除、重命名或移动
-- 模块边界变化，原职责描述不再准确
-- 链路中的关键调用顺序与代码不一致
-- 文档记录的隐式约束被当前实现推翻
-
-若只是新增文件但不影响既有边界，可直接刷新 `last_verified_at`，无需先标 stale。
-
-## 写入规则
-
-- **只更新涉及的模块**，不全量重写
-- **状态附着在条目本身**，index 只是状态摘要视图
-- **写入前向用户展示变更摘要**，确认后再写
-- 发现文档与代码不一致时，先标 `stale` 再刷新正文；正式索引过的条目不得因过时而静默删除
-- 替代正式条目时保留 tombstone，除非确认它只是未索引、未引用、从未消费的孤儿文件
-- 每次 codemap 写入后必须追加当前月度日志 `.aiknowledge/logs/YYYY-MM.md`，但日常使用不需要读取历史日志
-- 写入后检查 `superseded_by` 指向真实条目，并确认 index 状态与条目 frontmatter 一致
+- `references/lifecycle-workflow.md`：入口初始化、出口更新、freshness/stale 处理和写入规则。
+- `references/templates.md`：codemap 目录结构、index/module/chain 模板和文件级粒度要求。
 
 ## 护栏
 
-- 地图而非百科：记录"在哪里"和"怎么连"，不记录实现细节
-- 稳定接口优先：记录公开接口和模块边界，不记录内部实现
-- 文件级粒度：关键文件列表精确到文件，不到类/函数
-- 链路按需创建：只有跨 3 个以上文件的调用链才值得记录
-- source refs 必须引用稳定来源；不能把无来源推断写成确定事实
+- 地图而非百科：记录“在哪里”和“怎么连”，不记录实现细节。
+- 文件级粒度：关键文件精确到文件 + 一句话角色，不到类/函数。
+- source_refs 必须引用稳定来源；不能把无来源推断写成确定事实。
+- 发现文档漂移时先标记 stale，再刷新内容。

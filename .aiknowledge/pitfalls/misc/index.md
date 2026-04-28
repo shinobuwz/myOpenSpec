@@ -27,4 +27,5 @@
 | subagent-smoke-evals-must-use-trace-evidence | [Subagent smoke eval 必须使用 trace evidence](subagent-smoke-evals-must-use-trace-evidence.md) | active | 2026-04-28 | opsx, subagent, eval, codex, trace |
 | parallel-workers-need-disjoint-write-sets | [Parallel workers need disjoint write sets](parallel-workers-need-disjoint-write-sets.md) | active | 2026-04-28 | opsx, subagent, parallelism, write-set |
 | proposal-contract-default-language | [Proposal contracts must declare the default language](proposal-contract-default-language.md) | active | 2026-04-28 | opsx, proposal, skill, schema, language |
+| skill-entry-files-should-stay-thin | [Skill 入口文件应保持薄入口](skill-entry-files-should-stay-thin.md) | active | 2026-04-28 | opsx, skill-design, progressive-disclosure, references |
 | aiknowledge-records-default-language | [`.aiknowledge` 事实记录必须声明默认中文](aiknowledge-records-default-language.md) | active | 2026-04-28 | aiknowledge, lite-run, audit-log, skill, language |

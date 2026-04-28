@@ -1,6 +1,6 @@
 kind: group
 created: 2026-04-28
 execution_mode: mixed
-suggested_focus: 01-slimming-structure
-active_subchange:
-recommended_order: 01-slimming-structure,02-migrate-guidance-skills,03-migrate-gate-skills
+suggested_focus: 03-migrate-gate-skills
+active_subchange: 03-migrate-gate-skills
+recommended_order: 03-migrate-gate-skills

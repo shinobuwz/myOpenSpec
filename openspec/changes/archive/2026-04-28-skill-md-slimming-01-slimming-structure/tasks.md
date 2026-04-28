@@ -41,7 +41,7 @@
 
 ## 2. Slimming Validation
 
-- [ ] 2.1 [test-first] Add the skill slimming checker and regression tests
+- [x] 2.1 [test-first] Add the skill slimming checker and regression tests
 
   **需求追踪**：[R7][R8][R9] → [U3]
   **执行方式**：[test-first]
@@ -51,11 +51,11 @@
   - `package.json` — npm script entry for the checker
 
   **验收标准**：
-  - [ ] Checker can report oversized `skills/opsx-*/SKILL.md` entries using a configurable threshold.
-  - [ ] Checker can report duplicated canonical-contract text outside canonical sources.
-  - [ ] Checker only uses Node.js standard library and repository files.
-  - [ ] Test coverage proves the checker reports current oversized entries without failing the baseline migration.
-  - [ ] Test coverage proves the checker can fail on synthetic duplicated StageResult/platform mapping text.
+  - [x] Checker can report oversized `skills/opsx-*/SKILL.md` entries using a configurable threshold.
+  - [x] Checker can report duplicated canonical-contract text outside canonical sources.
+  - [x] Checker only uses Node.js standard library and repository files.
+  - [x] Test coverage proves the checker reports current oversized entries without failing the baseline migration.
+  - [x] Test coverage proves the checker can fail on synthetic duplicated StageResult/platform mapping text.
 
   **验证命令 / 方法**：
   - `npm test`，预期：全部 tests 通过。
