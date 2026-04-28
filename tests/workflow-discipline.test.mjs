@@ -98,6 +98,15 @@ test("workflow skills preserve deterministic gate prerequisites", async () => {
   assert.match(explore, /降级为普通文本中的单个关键问题/);
 });
 
+test("implement marks task acceptance criteria consistently", async () => {
+  const implement = await skill("opsx-implement");
+
+  assert.match(implement, /顶层任务 `?\[ \]`? → `?\[x\]`?/);
+  assert.match(implement, /验收标准 `?\[ \]`? → `?\[x\]`?/);
+  assert.match(implement, /没有证据的验收标准不得勾选/);
+  assert.match(implement, /未验证的 `?\[manual\]`? 项保持 `?\[ \]`?/);
+});
+
 test("verify owns spec compliance and review owns release risk", async () => {
   const verify = await skill("opsx-verify");
   const review = await skill("opsx-review");

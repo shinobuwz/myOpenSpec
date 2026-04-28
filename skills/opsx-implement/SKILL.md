@@ -30,7 +30,8 @@ description: 按 tasks.md 逐项实施，每项强制 TDD 循环。当 OpenSpec 
 - tasks.md 中"涉及文件"字段列出的代码文件
 
 **产出：**
-- tasks.md `[ ]` → `[x]`（逐项标记完成）
+- tasks.md 顶层任务 `[ ]` → `[x]`（逐项标记完成）
+- tasks.md 中该任务内部已满足的验收标准 `[ ]` → `[x]`（包括已完成的 `[manual]` 项）
 - 业务代码和测试代码
 - `openspec/changes/<name>/test-report.md`（TDD 留档）
 
@@ -70,8 +71,8 @@ Agent({
    - characterization-first：先固化旧行为测试，再修改代码，同样按红→绿→重构追加写入
    - direct：纯配置/脚手架场景直接执行，无需写入 test-report.md
 4. 确保每条非 [manual] 验收标准有对应测试或显式"不需要测试"理由
-5. [manual] 验收标准不阻塞 task 完成，但必须在 test-report.md 中记录到「⏳ 待人工验证」清单
-6. 每完成一个任务，立即在 tasks.md 中将该任务的 [ ] 改为 [x]
+5. [manual] 验收标准不阻塞 task 完成，但必须在 test-report.md 中记录到「⏳ 待人工验证」清单；已人工验证的 `[manual]` 项必须同步在 tasks.md 中标记为 `[x]`，未验证的 `[manual]` 项保持 `[ ]`
+6. 每完成一个任务，立即在 tasks.md 中将该任务的顶层 [ ] 改为 [x]，并将该任务内部所有已有测试、验证命令或人工验证证据支撑的验收标准从 [ ] 改为 [x]；没有证据的验收标准不得勾选
 7. 不要求在 implement 阶段执行 git commit；只有用户明确要求时才提交
 8. 禁止事后汇总：test-report.md 必须在每个 TDD 阶段完成时实时追加，禁止在所有任务完成后一次性生成
 
@@ -90,7 +91,8 @@ Agent({
 
 ## 完成条件
 
-- tasks.md 中所有任务标记为已完成（全部 `[x]`）
+- tasks.md 中所有顶层任务标记为已完成（全部 `[x]`）
+- 每个已完成任务内部的非 `[manual]` 验收标准均已标记为 `[x]`，且 test-report.md 或验证命令能提供对应证据；未验证的 `[manual]` 项可保持 `[ ]`，但必须在退出摘要中列明
 - 所有测试通过
 
 ## 退出契约
