@@ -93,6 +93,9 @@ test("workflow skills preserve deterministic gate prerequisites", async () => {
   assert.match(explore, /绝不编写代码/);
   assert.match(explore, /下一步必须是 `opsx-slice`/);
   assert.match(explore, /禁止.*直接跳转到 `opsx-plan`/);
+  assert.match(explore, /request_user_input/);
+  assert.match(explore, /Default mode/);
+  assert.match(explore, /降级为普通文本中的单个关键问题/);
 });
 
 test("verify owns spec compliance and review owns release risk", async () => {
