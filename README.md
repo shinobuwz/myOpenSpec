@@ -2,7 +2,7 @@
 
 Thin global launcher for my local OpenSpec/OPSX workflow.
 
-This package intentionally stays small. It provides a global `opsx` command, installs OPSX skills into the agent skills directory, and keeps project state inside each target repository's `openspec/` directory.
+This package intentionally stays small. It provides a global `opsx` command, installs OPSX skills into the agent skills directory, installs common contracts into `~/.opsx/common`, and keeps project state inside each target repository's `openspec/` directory.
 
 It does not recreate the old full OpenSpec CLI, profile system, workflow selector, or interactive setup.
 
@@ -60,7 +60,7 @@ Runtime scripts and skill templates are distributed by the npm package. They are
 ```text
 bin/        npm command entrypoint
 runtime/    shared helper scripts and OpenSpec schemas/templates
-skills/     canonical opsx-* skill source
+skills/     canonical opsx-* skill source and common contracts
 ```
 
 `.claude/` is not a package source directory. The only expected project-level Claude adapter output is `.claude/skills/opsx-*` when `scripts/install-repos.sh` is used for tools that cannot read global skills.

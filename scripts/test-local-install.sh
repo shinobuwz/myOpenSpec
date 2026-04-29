@@ -5,6 +5,7 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 TARBALL=""
 NPM_PREFIX=""
 SKILLS_HOME=""
+COMMON_HOME=""
 
 cleanup() {
   if [[ -n "$TARBALL" ]]; then
@@ -16,6 +17,9 @@ cleanup() {
   if [[ -n "$SKILLS_HOME" ]]; then
     rm -rf "$SKILLS_HOME"
   fi
+  if [[ -n "$COMMON_HOME" ]]; then
+    rm -rf "$COMMON_HOME"
+  fi
 }
 trap cleanup EXIT
 
@@ -23,9 +27,11 @@ cd "$ROOT_DIR"
 
 NPM_PREFIX="$(mktemp -d)"
 SKILLS_HOME="$(mktemp -d)"
+COMMON_HOME="$(mktemp -d)"
 mkdir -p "$SKILLS_HOME/opsx-old" "$SKILLS_HOME/custom-skill"
 printf "old\n" > "$SKILLS_HOME/opsx-old/SKILL.md"
 printf "custom\n" > "$SKILLS_HOME/custom-skill/SKILL.md"
+printf "stale\n" > "$COMMON_HOME/stale.md"
 
 TARBALL="$(npm pack --silent)"
 npm install -g --prefix "$NPM_PREFIX" "$ROOT_DIR/$TARBALL" >/dev/null
@@ -34,11 +40,13 @@ OPSX="$NPM_PREFIX/bin/opsx"
 "$OPSX" --version
 "$OPSX" --help >/dev/null
 "$OPSX" changes --help >/dev/null
-OPSX_AGENTS_SKILLS_HOME="$SKILLS_HOME" "$OPSX" install-skills >/dev/null
+OPSX_AGENTS_SKILLS_HOME="$SKILLS_HOME" OPSX_COMMON_HOME="$COMMON_HOME" "$OPSX" install-skills >/dev/null
 
 test -f "$SKILLS_HOME/opsx-plan/SKILL.md"
-test -f "$SKILLS_HOME/opsx-lite/SKILL.md"
+test -f "$SKILLS_HOME/opsx-fast/SKILL.md"
 test ! -e "$SKILLS_HOME/opsx-old"
 test -f "$SKILLS_HOME/custom-skill/SKILL.md"
+test -f "$COMMON_HOME/git-lifecycle.md"
+test ! -e "$COMMON_HOME/stale.md"
 
 echo "Global local tarball install OK: $TARBALL"

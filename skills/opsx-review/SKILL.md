@@ -23,6 +23,7 @@ description: opsx-verify 通过后使用，用于在归档前审查已实现 cha
 - fast target 的 `item.md`、`evidence.md`、`root-cause.md`（如存在）
 - 命中的 `.aiknowledge/codemap/` 和 `.aiknowledge/pitfalls/`
 - 既有 `review-report.md`（追加时）
+- Git 状态按 `~/.opsx/common/git-lifecycle.md` 检查，用于声明 review diff scope
 
 写入：
 - `review-report.md`（新建或追加）
@@ -45,7 +46,7 @@ description: opsx-verify 通过后使用，用于在归档前审查已实现 cha
 
 ## 审查边界
 
-只审查 diff 中实际变更的代码。新增行是核心审查对象；删除行只用于判断是否移除了状态重置、资源清理或事件触发等副作用；上下文行只用于理解，不单独产生 issue。
+只审查 diff 中实际变更的代码，并按 `~/.opsx/common/git-lifecycle.md` 覆盖 `HEAD`、staged diff、unstaged diff。新增行是核心审查对象；删除行只用于判断是否移除了状态重置、资源清理或事件触发等副作用；上下文行只用于理解，不单独产生 issue。
 
 如果发现明显需求遗漏、范围外实现或任务状态与证据不一致，不在 review 内重跑 compliance；输出 `VERIFY_DRIFT` critical finding，并路由回 `opsx-verify`。
 

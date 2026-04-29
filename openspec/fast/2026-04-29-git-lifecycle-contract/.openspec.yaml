@@ -1,0 +1,34 @@
+schema: fast
+kind: fast
+id: 2026-04-29-git-lifecycle-contract
+source_type: lite
+created: 2026-04-29
+status: in_progress
+attempts:
+  count: 0
+  max_fast_attempts: 3
+test_strategy:
+  mode: direct
+  reason: "公共 workflow contract 文档和引用更新，没有可先写失败测试的业务行为；用静态契约测试防止引用缺失和 skill 漂移。"
+  alternative_verification: "运行 workflow discipline 与 skill slimming 测试检查公共 contract 关键规则和引用关系。"
+gates:
+  classify:
+    status: pass
+    at: "2026-04-29T18:05:00+08:00"
+  preflight:
+    status: pass
+    at: "2026-04-29T18:05:00+08:00"
+  tdd-strategy:
+    status: pass
+    at: "2026-04-29T18:05:00+08:00"
+  verify:
+    status:
+    at:
+  review:
+    status:
+    at:
+fallback:
+  trigger:
+  status:
+  route:
+  reason:

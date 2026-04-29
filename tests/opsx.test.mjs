@@ -58,7 +58,7 @@ test("cli entrypoint runs when invoked through an npm-style symlink", async () =
     });
 
     assert.equal(result.status, 0, result.stderr);
-    assert.equal(result.stdout, "1.0.1\n");
+    assert.equal(result.stdout, "1.0.2\n");
   } finally {
     await rm(root, { recursive: true, force: true });
   }
@@ -138,16 +138,20 @@ test("init-project creates only project-local openspec state", async () => {
   }
 });
 
-test("install-skills syncs opsx skills globally and prunes stale opsx skills", async () => {
+test("install-skills syncs opsx skills and common contracts globally", async () => {
   const target = await mkdtemp(path.join(tmpdir(), "opsx-skills-"));
+  const common = await mkdtemp(path.join(tmpdir(), "opsx-common-"));
   const oldEnv = process.env.OPSX_AGENTS_SKILLS_HOME;
+  const oldCommonEnv = process.env.OPSX_COMMON_HOME;
   process.env.OPSX_AGENTS_SKILLS_HOME = target;
+  process.env.OPSX_COMMON_HOME = common;
 
   try {
     await mkdir(path.join(target, "opsx-old"), { recursive: true });
     await writeFile(path.join(target, "opsx-old", "SKILL.md"), "old\n");
     await mkdir(path.join(target, "custom-skill"), { recursive: true });
     await writeFile(path.join(target, "custom-skill", "SKILL.md"), "custom\n");
+    await writeFile(path.join(common, "stale.md"), "stale\n");
 
     const capture = createIo();
     assert.equal(await main(["install-skills"], capture.io), 0);
@@ -155,13 +159,22 @@ test("install-skills syncs opsx skills globally and prunes stale opsx skills", a
     assert.equal(existsSync(path.join(target, "opsx-plan", "SKILL.md")), true);
     assert.equal(existsSync(path.join(target, "opsx-old")), false);
     assert.equal(existsSync(path.join(target, "custom-skill", "SKILL.md")), true);
+    assert.equal(existsSync(path.join(common, "git-lifecycle.md")), true);
+    assert.equal(existsSync(path.join(common, "stale.md")), false);
+    assert.match(capture.stdout, /OPSX common contracts/);
   } finally {
     if (oldEnv === undefined) {
       delete process.env.OPSX_AGENTS_SKILLS_HOME;
     } else {
       process.env.OPSX_AGENTS_SKILLS_HOME = oldEnv;
     }
+    if (oldCommonEnv === undefined) {
+      delete process.env.OPSX_COMMON_HOME;
+    } else {
+      process.env.OPSX_COMMON_HOME = oldCommonEnv;
+    }
     await rm(target, { recursive: true, force: true });
+    await rm(common, { recursive: true, force: true });
   }
 });
 
@@ -196,6 +209,7 @@ test("npm package publishes canonical skills and runtime without claude source d
   assert.equal(files.has("runtime/schemas/spec-driven/schema.yaml"), true);
   assert.equal(files.has("runtime/schemas/spec-driven/templates/proposal.md"), true);
   assert.equal(files.has("skills/opsx-plan/SKILL.md"), true);
+  assert.equal(files.has("skills/common/git-lifecycle.md"), true);
   assert.equal([...files].some((file) => file.startsWith(".claude/")), false);
 });
 

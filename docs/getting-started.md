@@ -40,7 +40,7 @@ OPSX 包源码自身的目录边界是：
 ```text
 bin/        npm launcher
 runtime/    通用 helper、schemas 和 templates
-skills/     opsx-* skill 源码真相源
+skills/     opsx-* skill 源码真相源，common/ 打包安装到 ~/.opsx/common
 ```
 
 ## 关键制品
@@ -132,6 +132,7 @@ AI：正在处理任务...
 ## 注意事项
 
 - `opsx-plan-review`、`opsx-task-analyze`、`opsx-verify` 是强制关卡。
+- Git 生命周期规则安装在 `~/.opsx/common/git-lifecycle.md`；默认开 change 使用分支，关键 checkpoint 建议提交，归档前必须确认 merge 状态或记录 pending reason。
 - 涉及全栈、多模块、多 capability 时，先使用 `opsx-slice` 再进入 `opsx-plan`。
 - 恢复中断的 change 时，先运行 `opsx changes -p /path/to/repo status` 查看当前 `Next:`，再点名对应的 `opsx-*` skill；父 change 的默认 subchange 仍由 `opsx changes resolve` 按 `active_subchange` / `suggested_focus` / `recommended_order` / 唯一 subchange 解析。
 - grouped change 执行 `opsx-archive` 时，默认归档的是当前 resolved subchange，目标应为顶层 `openspec/changes/archive/<archive-dir>/`；`<archive-dir>` 由 `<group>-<subchange>` 计算，若已带 `YYYY-MM-DD-` 前缀则不再重复加日期。不要在活动 group 下创建 `subchanges/archive/`。归档后父 group 只保留 `.openspec.group.yaml` 与 `subchanges/`；如果最后一个 subchange 也已归档，则直接删除父 group。

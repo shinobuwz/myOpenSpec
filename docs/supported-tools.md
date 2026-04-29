@@ -1,14 +1,15 @@
 # 支持的工具
 
-OpenSpec 支持全局 npm launcher 和全局 `~/.agents/skills` 安装。仓库内只保存 `openspec/` 状态。
+OpenSpec 支持全局 npm launcher、全局 `~/.agents/skills` skill 安装和全局 `~/.opsx/common` 公共契约安装。仓库内只保存 `openspec/` 状态。
 
 ## 工作原理
 
 当前仓库采用 skills-first 工作流模型。全局 `opsx` 命令是薄 launcher：
 
 1. **Launcher** — `opsx changes -p <repo> ...`、`opsx install-skills`、`opsx init-project -p <repo>`
-2. **技能模板** — 可重用的 `opsx-*` 指令目录，位于包内 `skills/`
-3. **项目状态** — 每个目标项目只保留 `openspec/config.yaml`、`openspec/changes/` 和 `openspec/fast/`
+2. **技能模板** — 可重用的 `opsx-*` 指令目录，安装到 `~/.agents/skills`
+3. **公共契约** — 不直接触发的 workflow contract，安装到 `~/.opsx/common`
+4. **项目状态** — 每个目标项目只保留 `openspec/config.yaml`、`openspec/changes/` 和 `openspec/fast/`
 
 不再维护单独的 `.claude/commands/opsx/` 斜杠命令绑定层，也不把通用 runtime 复制到每个项目。
 

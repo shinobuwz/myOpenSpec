@@ -12,6 +12,7 @@
 - 多模块、全栈、多 capability 需求，优先使用 `opsx-slice` 做切分，再进入 `opsx-plan`。
 - 是否拆成多个 change，优先在 `opsx-slice` 和 `opsx-plan` 的 proposal/specs 初稿后判断；`opsx-task-analyze` 只做超大 change 的兜底拦截。
 - 共享状态保持最小化：可从权威产物稳定重建的内容，不应再缓存成中间知识。
+- Git 生命周期规则集中安装在 `~/.opsx/common/git-lifecycle.md`；各节点强制检查 Git 状态，但只在命中 checkpoint 条件时建议提交。
 
 ## 公用知识如何共享
 
@@ -20,13 +21,17 @@
 1. **项目级上下文**
    - `openspec/config.yaml` 的 `context:` 和 `rules:` 会为规划类产出物提供统一约束。
 
-2. **长期共享知识**
+2. **公共 workflow contract**
+   - `~/.opsx/common/git-lifecycle.md` 保存 change branch、checkpoint、gate 失败修正、archive merge 和分支清理规则。
+   - 这类文件不是可触发 skill，由 `opsx install-skills` 从包内 `skills/common/` 安装，只由 `opsx-*` skills 引用，避免多个节点复制同一套 Git 判断逻辑。
+
+3. **长期共享知识**
    - `.aiknowledge/codemap/` 保存模块地图、关键文件和跨模块链路，供 `explore`、`slice`、`plan`、`implement`、`fast` 复用。
    - `.aiknowledge/pitfalls/` 保存可复用经验，供 `slice`、`plan`、`tdd`、`fast` 复用。
    - `archive` 结束时会强制回写 `knowledge` 和 `codemap`，让后续 workflow 继续复用这些知识。
    - 这两类知识都采用**事件驱动 freshness 管理**：命中时复核、漂移时标记 `stale`、被推翻时标记 `superseded`，而不是按时间自动过期。
 
-3. **change / fast 级运行状态与留档**
+4. **change / fast 级运行状态与留档**
 
    change 运行期间产生的共享文件：
 

@@ -36,7 +36,7 @@ description: 按 tasks.md 逐项实施，每项强制 TDD 循环。当 OpenSpec 
 禁止：
 - 不写 gates
 - 不写 `audit-log.md` 或 `review-report.md`
-- 不要求 git commit，除非用户明确要求
+- Git 检查和 checkpoint 判断按 `~/.opsx/common/git-lifecycle.md`
 
 ## 启动序列
 
@@ -44,7 +44,8 @@ description: 按 tasks.md 逐项实施，每项强制 TDD 循环。当 OpenSpec 
 2. 读取 `tasks.md`，从第一个未完成 task 恢复。
 3. 确认 proposal/design/specs/tasks 已就绪。
 4. 按 index-first 策略读取 `.aiknowledge/`。
-5. 确认测试框架可运行。
+5. 按 `~/.opsx/common/git-lifecycle.md` 检查当前分支和 dirty tree。
+6. 确认测试框架可运行。
 
 ## Worker 策略
 
@@ -66,6 +67,7 @@ description: 按 tasks.md 逐项实施，每项强制 TDD 循环。当 OpenSpec 
 - 没有证据的验收标准不得勾选。
 - 未验证的 `[manual]` 项保持 `[ ]`，并写入 `test-report.md` 待人工验证清单。
 - 每完成一项，立即更新 `tasks.md` 和 `test-report.md`，禁止事后汇总。
+- 每完成一个顶层 task，按 `~/.opsx/common/git-lifecycle.md` 判断是否建议 checkpoint。
 
 ## 完成条件
 

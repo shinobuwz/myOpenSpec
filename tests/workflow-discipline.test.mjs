@@ -6,6 +6,10 @@ async function skill(name) {
   return readFile(`skills/${name}/SKILL.md`, "utf8");
 }
 
+async function common(name) {
+  return readFile(`skills/common/${name}`, "utf8");
+}
+
 test("fast bugfix source requires root cause before fixes", async () => {
   const text = await skill("opsx-fast");
 
@@ -183,6 +187,28 @@ test("workflow skills preserve deterministic gate prerequisites", async () => {
   assert.match(explore, /request_user_input/);
   assert.match(explore, /Default mode/);
   assert.match(explore, /降级为普通文本中的单个关键问题/);
+});
+
+test("workflow git lifecycle contract is centralized and referenced", async () => {
+  const contract = await common("git-lifecycle.md");
+  const slice = await skill("opsx-slice");
+  const plan = await skill("opsx-plan");
+  const implement = await skill("opsx-implement");
+  const verify = await skill("opsx-verify");
+  const review = await skill("opsx-review");
+  const archive = await skill("opsx-archive");
+  const workflows = await readFile("docs/workflows.md", "utf8");
+
+  assert.match(contract, /Git 检查是强制的，Git 提交是有条件的/);
+  assert.match(contract, /任一 gate 从 fail 或 blocking 进入 pass/);
+  assert.match(contract, /pending_merge_reason/);
+  assert.match(contract, /git branch -d opsx\/<change-id>/);
+  assert.match(contract, /git worktree remove <path>/);
+  assert.match(contract, /不得默认使用 `git branch -D`/);
+
+  for (const text of [slice, plan, implement, verify, review, archive, workflows]) {
+    assert.match(text, /~\/\.opsx\/common\/git-lifecycle\.md/);
+  }
 });
 
 test("implement marks task acceptance criteria consistently", async () => {

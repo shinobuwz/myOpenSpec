@@ -14,7 +14,7 @@ export function usage() {
 
 Commands:
   changes         Run OpenSpec change helper operations
-  install-skills  Install OPSX skills to the global agent skills directory
+  install-skills  Install OPSX skills and common contracts globally
   init-project    Initialize project-local openspec state
 `;
 }
@@ -97,9 +97,15 @@ export function initProject(projectRoot) {
   }
 }
 
-export function installSkills(targetRoot = process.env.OPSX_AGENTS_SKILLS_HOME ?? path.join(homedir(), ".agents", "skills")) {
+export function installSkills({
+  targetRoot = process.env.OPSX_AGENTS_SKILLS_HOME ?? path.join(homedir(), ".agents", "skills"),
+  commonRoot = process.env.OPSX_COMMON_HOME ?? path.join(homedir(), ".opsx", "common"),
+} = {}) {
   if (!targetRoot) {
     throw new Error("Cannot determine global agent skills directory");
+  }
+  if (!commonRoot) {
+    throw new Error("Cannot determine OPSX common directory");
   }
 
   const sourceRoot = path.join(packageRoot(), "skills");
@@ -128,7 +134,18 @@ export function installSkills(targetRoot = process.env.OPSX_AGENTS_SKILLS_HOME ?
     fs.cpSync(source, target, { recursive: true });
   }
 
-  return { targetRoot, count: sourceSkillNames.size };
+  const commonSource = path.join(sourceRoot, "common");
+  let commonCount = 0;
+  if (fs.existsSync(commonSource)) {
+    fs.rmSync(commonRoot, { recursive: true, force: true });
+    fs.mkdirSync(path.dirname(commonRoot), { recursive: true });
+    fs.cpSync(commonSource, commonRoot, { recursive: true });
+    commonCount = fs.readdirSync(commonSource, { withFileTypes: true })
+      .filter((entry) => entry.isFile())
+      .length;
+  }
+
+  return { targetRoot, commonRoot, count: sourceSkillNames.size, commonCount };
 }
 
 function runChanges(args, projectRoot, io) {
@@ -160,7 +177,7 @@ export async function main(argv = process.argv.slice(2), io = {}) {
   }
 
   if (command === "--version" || command === "-v") {
-    stdout.write("1.0.1\n");
+    stdout.write("1.0.2\n");
     return 0;
   }
 
@@ -190,6 +207,7 @@ export async function main(argv = process.argv.slice(2), io = {}) {
     }
     const result = installSkills();
     stdout.write(`Installed ${result.count} OPSX skills: ${result.targetRoot}\n`);
+    stdout.write(`Installed ${result.commonCount} OPSX common contracts: ${result.commonRoot}\n`);
     return 0;
   }
 

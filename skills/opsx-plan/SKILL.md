@@ -20,7 +20,7 @@ description: 创建 OpenSpec change 并生成规划产出物（proposal/design/s
 **边界约束：**
 - plan 只产出规划制品，不生成 `tasks.md`
 - plan 不写任何 gates、`audit-log.md`、`test-report.md`、`review-report.md`
-- 不要求在 plan 阶段执行 git 提交；只有用户明确要求时才提交
+- Git 检查和 checkpoint 判断按 `~/.opsx/common/git-lifecycle.md`；不把提交作为 plan 完成条件
 - 如请求明显涉及全栈、多模块、多 capability 或用户正在纠结是否拆分 change，应先转入 `opsx-slice`
 
 ## Change Root 解析
@@ -52,7 +52,8 @@ description: 创建 OpenSpec change 并生成规划产出物（proposal/design/s
 4. 消费对应 subchange 的 `proposal.md`，只为**当前选中的单一交付单元**做规划
 5. 先读 `.aiknowledge/codemap/index.md`，判断目标模块是否已有 codemap；已有则继续读对应 `<module>.md` 和必要的 `chains/*.md`，没有则先调用 `opsx-codemap`
 6. 读取 `.aiknowledge/pitfalls/index.md` 和相关领域的 `index.md`，在设计中规避已知陷阱
-7. 收集必要的上下文信息
+7. 按 `~/.opsx/common/git-lifecycle.md` 检查 change branch、metadata 和 dirty tree。
+8. 收集必要的上下文信息
 
 ## 流程
 
@@ -101,9 +102,9 @@ description: 创建 OpenSpec change 并生成规划产出物（proposal/design/s
 - 不要用“同一个 change 下很多 spec 文件”作为拆分依据；要用“是否仍然是一个交付单元”作为依据
 - 当 scope 已大到 proposal、design、tasks 任一环节明显失去可读性时，应优先拆 change，而不是继续追加 spec 或 task
 
-### 5. 可选提交
-- 如用户明确要求，可在规划制品确认后再执行 git 提交
-- 未获明确要求时，不把 git 提交视为 plan 的完成条件
+### 5. Git checkpoint
+- 规划制品确认后按 `~/.opsx/common/git-lifecycle.md` 判断是否建议 checkpoint。
+- 未获明确要求时，不自动执行 merge、rebase、push 或远端分支删除。
 
 ## 完成条件
 

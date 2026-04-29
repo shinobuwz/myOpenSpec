@@ -10,3 +10,4 @@ node "$REPO_ROOT/bin/opsx.mjs" install-skills
 echo ""
 echo "Global installation complete."
 echo "Agents skills: ${OPSX_AGENTS_SKILLS_HOME:-$HOME/.agents/skills}"
+echo "OPSX common: ${OPSX_COMMON_HOME:-$HOME/.opsx/common}"
