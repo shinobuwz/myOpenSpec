@@ -40,7 +40,7 @@ description: opsx-verify 通过后使用，用于在归档前审查已实现 cha
 
 ## 审查方式
 
-按 `opsx-subagent` reviewer worker contract 派发 1 个只读 reviewer。Codex 默认、Claude Code 兼容映射、controller boundary、只读写入边界和 fallback 均以 `opsx-subagent` 为准。
+按 `~/.opsx/common/subagent.md` reviewer worker contract 派发 1 个只读 reviewer。Codex 默认、Claude Code 兼容映射、controller boundary、只读写入边界和 fallback 均以 `~/.opsx/common/subagent.md` 为准。
 
 主 agent 收集 diff、需求上下文、codemap/pitfalls 摘要后启动 reviewer，并负责写 `review-report.md` 与 `gates.review`。reviewer 只读代码和文档，不做修改。
 

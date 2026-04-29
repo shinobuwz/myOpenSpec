@@ -52,7 +52,6 @@ function countLines(text) {
 
 function detectDuplicates(skill) {
   const findings = [];
-  const canonicalSubagent = skill.name === "opsx-subagent";
 
   const copiesStageResultSchema =
     /"version"\s*:\s*1/.test(skill.text) &&
@@ -72,15 +71,14 @@ function detectDuplicates(skill) {
   }
 
   const copiesSubagentMapping =
-    !canonicalSubagent &&
-    (/Codex 默认/.test(skill.text) && /Claude Code 兼容/.test(skill.text) && /spawn_agent\(agent_type=/.test(skill.text) && /Task tool/.test(skill.text));
+    /Codex 默认/.test(skill.text) && /Claude Code 兼容/.test(skill.text) && /spawn_agent\(agent_type=/.test(skill.text) && /Task tool/.test(skill.text);
 
   if (copiesSubagentMapping) {
     findings.push({
       kind: "subagent-platform-mapping",
       name: skill.name,
       path: skill.path,
-      message: "Subagent platform mapping should be referenced from skills/opsx-subagent/SKILL.md instead of copied.",
+      message: "Subagent platform mapping should be referenced from ~/.opsx/common/subagent.md instead of copied.",
     });
   }
 

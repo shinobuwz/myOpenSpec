@@ -1,6 +1,6 @@
 # Implement Worker Contract
 
-主 agent 可按 `opsx-subagent` contract 派发 implementation worker。共享 artifact 仍由主 agent 串行写入。
+主 agent 可按 `~/.opsx/common/subagent.md` contract 派发 implementation worker。共享 artifact 仍由主 agent 串行写入。
 
 ## Worker 输入
 

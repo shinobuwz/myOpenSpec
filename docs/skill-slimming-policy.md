@@ -36,7 +36,7 @@ Reference 文件应围绕单一主题命名，使用 kebab-case，例如 `review
 
 | 契约 | Canonical source | `SKILL.md` 中的写法 |
 |------|------------------|---------------------|
-| subagent 平台映射、controller boundary、fallback | `skills/opsx-subagent/SKILL.md` | “按 `opsx-subagent` contract 执行” |
+| subagent 平台映射、controller boundary、fallback | `skills/common/subagent.md`，安装到 `~/.opsx/common/subagent.md` | “按 `~/.opsx/common/subagent.md` contract 执行” |
 | StageResult schema、audit-log 格式 | `docs/stage-packet-protocol.md` | “输出 StageResult，格式见协议文档” |
 | `.aiknowledge` lifecycle、source_refs、日志、tombstone | `.aiknowledge/README.md` | “写入前读取 `.aiknowledge/README.md`” |
 | 通用 skill 设计准则 | `../agent-standards/references/skill-design.md` | 仅导航，不复制规则正文 |
@@ -72,7 +72,7 @@ opsx-explore -> opsx-slice -> opsx-plan -> opsx-plan-review
 
 - 行数高。
 - 包含 prompt/template/example/lifecycle 长正文。
-- 重复 `opsx-subagent`、StageResult、`.aiknowledge` lifecycle 等 canonical contract。
+- 重复 `~/.opsx/common/subagent.md`、StageResult、`.aiknowledge` lifecycle 等 canonical contract。
 - 后续 workflow skills 会频繁引用它。
 
 迁移时保留原 frontmatter 的 `name` 和 `description`，保持中文正文风格，命令、路径、JSON key 保持原语言。

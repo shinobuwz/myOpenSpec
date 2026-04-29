@@ -264,7 +264,6 @@ test("touched skill descriptions avoid workflow step summaries", async () => {
     "opsx-tasks",
     "opsx-review",
     "opsx-explore",
-    "opsx-subagent",
   ];
 
   for (const name of touched) {
@@ -278,7 +277,7 @@ test("touched skill descriptions avoid workflow step summaries", async () => {
 });
 
 test("subagent contract is codex-first with claude compatibility", async () => {
-  const text = await skill("opsx-subagent");
+  const text = await common("subagent.md");
 
   assert.match(text, /spawn_agent\(agent_type="worker"/);
   assert.match(text, /spawn_agent\(agent_type="explorer"/);
@@ -294,11 +293,11 @@ test("subagent contract is codex-first with claude compatibility", async () => {
 });
 
 test("subagent contract owns dispatch classes and model recommendations", async () => {
-  const text = await skill("opsx-subagent");
+  const text = await common("subagent.md");
 
   assert.match(text, /职责分离/);
   assert.match(text, /workflow skill 负责定义/);
-  assert.match(text, /opsx-subagent.*负责定义.*默认模型/s);
+  assert.match(text, /~\/\.opsx\/common\/subagent\.md.*负责定义.*默认模型/s);
   assert.match(text, /retrieval-explorer/);
   assert.match(text, /implementation-worker/);
   assert.match(text, /gate-reviewer/);
@@ -313,10 +312,10 @@ test("subagent contract owns dispatch classes and model recommendations", async 
 });
 
 test("subagent contract owns roster lifecycle and capacity policy", async () => {
-  const text = await skill("opsx-subagent");
-  const lifecycle = await readFile("skills/opsx-subagent/references/lifecycle.md", "utf8");
+  const text = await common("subagent.md");
+  const lifecycle = await common("subagent-lifecycle.md");
 
-  assert.match(text, /references\/lifecycle\.md/);
+  assert.match(text, /~\/\.opsx\/common\/subagent-lifecycle\.md/);
   assert.match(text, /Agent Roster/);
   assert.match(text, /list-all subagents API/);
   assert.match(text, /spawn_agent/);
@@ -360,7 +359,7 @@ test("workflow subagent users reference the central contract", async () => {
   for (const name of contractUsers) {
     const text = await skill(name);
 
-    assert.match(text, /opsx-subagent/, `${name} should reference opsx-subagent`);
+    assert.match(text, /~\/\.opsx\/common\/subagent\.md/, `${name} should reference the common subagent contract`);
     assert.match(text, /主 agent|main agent/, `${name} should preserve controller ownership`);
   }
 });
@@ -381,7 +380,7 @@ test("workflow subagent wording avoids claude-only dispatch semantics", async ()
     const usesClaudeDispatch = /subagent_type|Task tool|Agent tool/.test(text);
 
     if (usesClaudeDispatch) {
-      assert.match(text, /opsx-subagent/, `${name} must pair platform dispatch wording with central contract`);
+      assert.match(text, /~\/\.opsx\/common\/subagent\.md/, `${name} must pair platform dispatch wording with central contract`);
     }
   }
 });

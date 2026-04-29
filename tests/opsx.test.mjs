@@ -160,6 +160,8 @@ test("install-skills syncs opsx skills and common contracts globally", async () 
     assert.equal(existsSync(path.join(target, "opsx-old")), false);
     assert.equal(existsSync(path.join(target, "custom-skill", "SKILL.md")), true);
     assert.equal(existsSync(path.join(common, "git-lifecycle.md")), true);
+    assert.equal(existsSync(path.join(common, "subagent.md")), true);
+    assert.equal(existsSync(path.join(common, "subagent-lifecycle.md")), true);
     assert.equal(existsSync(path.join(common, "stale.md")), false);
     assert.match(capture.stdout, /OPSX common contracts/);
   } finally {
@@ -210,6 +212,9 @@ test("npm package publishes canonical skills and runtime without claude source d
   assert.equal(files.has("runtime/schemas/spec-driven/templates/proposal.md"), true);
   assert.equal(files.has("skills/opsx-plan/SKILL.md"), true);
   assert.equal(files.has("skills/common/git-lifecycle.md"), true);
+  assert.equal(files.has("skills/common/subagent.md"), true);
+  assert.equal(files.has("skills/common/subagent-lifecycle.md"), true);
+  assert.equal(files.has("skills/opsx-subagent/SKILL.md"), false);
   assert.equal([...files].some((file) => file.startsWith(".claude/")), false);
 });
 

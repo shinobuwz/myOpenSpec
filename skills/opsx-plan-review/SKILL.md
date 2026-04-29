@@ -43,7 +43,7 @@ description: 规划审查：检查 specs 需求是否完整进入 design。在 p
 
 ## 审查方式
 
-按 `opsx-subagent` reviewer worker contract 派发 1 个只读 reviewer。Codex 默认、Claude Code 兼容映射、controller boundary、只读写入边界和 fallback 均以 `opsx-subagent` 为准。
+按 `~/.opsx/common/subagent.md` reviewer worker contract 派发 1 个只读 reviewer。Codex 默认、Claude Code 兼容映射、controller boundary、只读写入边界和 fallback 均以 `~/.opsx/common/subagent.md` 为准。
 
 reviewer 只读权威产物并输出 StageResult JSON，schema 见 `docs/stage-packet-protocol.md`。主 agent 负责汇总追踪矩阵、追加 `audit-log.md`、写入 `.openspec.yaml` gates；reviewer 不得直接写 gates 或宣称整个 change 可进入下一阶段。
 

@@ -49,7 +49,7 @@ description: 按 tasks.md 逐项实施，每项强制 TDD 循环。当 OpenSpec 
 
 ## Worker 策略
 
-按 `opsx-subagent` implementation worker contract 执行。Codex 默认、Claude Code 兼容映射、controller boundary、status 和 fallback 均以 `opsx-subagent` 为准；主 agent 保留 controller 权限。
+按 `~/.opsx/common/subagent.md` implementation worker contract 执行。Codex 默认、Claude Code 兼容映射、controller boundary、status 和 fallback 均以 `~/.opsx/common/subagent.md` 为准；主 agent 保留 controller 权限。
 
 `opsx-implement` 默认串行（serial-by-default）。只有任务簇独立、写入集合不重叠（disjoint write sets）、明确 file ownership、依赖顺序清楚，且不并发修改 public interface、migration、schema、config、package/build scripts 时，才允许多个 workers。
 

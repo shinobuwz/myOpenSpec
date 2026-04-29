@@ -47,6 +47,8 @@ test -f "$SKILLS_HOME/opsx-fast/SKILL.md"
 test ! -e "$SKILLS_HOME/opsx-old"
 test -f "$SKILLS_HOME/custom-skill/SKILL.md"
 test -f "$COMMON_HOME/git-lifecycle.md"
+test -f "$COMMON_HOME/subagent.md"
+test -f "$COMMON_HOME/subagent-lifecycle.md"
 test ! -e "$COMMON_HOME/stale.md"
 
 echo "Global local tarball install OK: $TARBALL"

@@ -26,7 +26,7 @@ test("skill slimming checker reports current inventory without failing baseline"
   assert.equal(result.status, 0, result.stderr);
   const payload = JSON.parse(result.stdout);
 
-  assert.equal(payload.summary.totalSkills, 17);
+  assert.equal(payload.summary.totalSkills, 16);
   assert.ok(payload.summary.totalLines < 3200);
   assert.ok(payload.skills.some((entry) => entry.name === "opsx-explore" && entry.lines <= 180));
   assert.ok(payload.skills.every((entry) => entry.path.endsWith("/SKILL.md")));
@@ -37,7 +37,7 @@ test("guidance skills use thin entries with reference navigation", async () => {
     "opsx-explore": {
       maxLines: 180,
       references: ["workflow.md", "conversation-patterns.md", "codemap-first.md"],
-      mustKeep: [/只读/, /禁止.*写.*产品代码/, /opsx-subagent/, /codemap-first|codemap/],
+      mustKeep: [/只读/, /禁止.*写.*产品代码/, /~\/\.opsx\/common\/subagent\.md/, /codemap-first|codemap/],
     },
     "opsx-knowledge": {
       maxLines: 160,
@@ -87,22 +87,22 @@ test("gate and reviewer skills use thin entries with canonical references", asyn
     "opsx-plan-review": {
       maxLines: 120,
       references: ["reviewer-prompt.md", "audit-gate.md"],
-      mustKeep: [/强制关卡/, /spec.*design|spec↔plan/, /opsx-subagent/, /docs\/stage-packet-protocol\.md/, /gates\.plan-review/, /opsx-tasks/],
+      mustKeep: [/强制关卡/, /spec.*design|spec↔plan/, /~\/\.opsx\/common\/subagent\.md/, /docs\/stage-packet-protocol\.md/, /gates\.plan-review/, /opsx-tasks/],
     },
     "opsx-task-analyze": {
       maxLines: 120,
       references: ["reviewer-prompt.md", "audit-gate.md"],
-      mustKeep: [/强制关卡/, /plan.*tasks|plan↔tasks/, /opsx-subagent/, /docs\/stage-packet-protocol\.md/, /gates\.task-analyze/, /opsx-implement/],
+      mustKeep: [/强制关卡/, /plan.*tasks|plan↔tasks/, /~\/\.opsx\/common\/subagent\.md/, /docs\/stage-packet-protocol\.md/, /gates\.task-analyze/, /opsx-implement/],
     },
     "opsx-verify": {
       maxLines: 130,
       references: ["reviewer-prompt.md", "fresh-evidence.md"],
-      mustKeep: [/没有当前轮验证证据/, /Spec Compliance Review/, /VERIFY_SPEC_COMPLIANCE/, /opsx-subagent/, /docs\/stage-packet-protocol\.md/, /gates\.verify/, /opsx-review/],
+      mustKeep: [/没有当前轮验证证据/, /Spec Compliance Review/, /VERIFY_SPEC_COMPLIANCE/, /~\/\.opsx\/common\/subagent\.md/, /docs\/stage-packet-protocol\.md/, /gates\.verify/, /opsx-review/],
     },
     "opsx-review": {
       maxLines: 130,
       references: ["risk-taxonomy.md", "reviewer-prompt.md"],
-      mustKeep: [/code quality \/ release risk review/, /VERIFY_DRIFT/, /opsx-verify.*Spec Compliance Review/, /opsx-subagent/, /review-report\.md/, /gates\.review/, /opsx-archive/],
+      mustKeep: [/code quality \/ release risk review/, /VERIFY_DRIFT/, /opsx-verify.*Spec Compliance Review/, /~\/\.opsx\/common\/subagent\.md/, /review-report\.md/, /gates\.review/, /opsx-archive/],
     },
   };
 
@@ -172,7 +172,7 @@ test("implementation and archive skills keep worker guidance in references", asy
         /disjoint write sets/i,
         /共享 artifact.*串行写入|串行.*共享 artifact/,
         /没有证据的验收标准不得勾选/,
-        /opsx-subagent/,
+        /~\/\.opsx\/common\/subagent\.md/,
         /opsx-verify/,
       ],
     },
@@ -185,7 +185,7 @@ test("implementation and archive skills keep worker guidance in references", asy
         /顶层 `openspec\/changes\/archive\/<archive-dir>\/`/,
         /如果 `<archive-slug>` 已经以 `YYYY-MM-DD-` 开头/,
         /active_subchange/,
-        /opsx-subagent/,
+        /~\/\.opsx\/common\/subagent\.md/,
         /opsx-knowledge/,
         /opsx-codemap/,
       ],

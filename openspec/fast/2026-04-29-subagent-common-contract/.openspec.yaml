@@ -1,0 +1,34 @@
+schema: fast
+kind: fast
+id: 2026-04-29-subagent-common-contract
+source_type: lite
+created: 2026-04-29
+status: in_progress
+attempts:
+  count: 0
+  max_fast_attempts: 3
+test_strategy:
+  mode: direct
+  reason: "公共 workflow contract 迁移，不改变运行时业务行为；用静态契约测试和安装测试确认引用、打包和同步结果。"
+  alternative_verification: "运行 workflow discipline、skill slimming、install-skills/package 相关测试，以及本地安装脚本。"
+gates:
+  classify:
+    status: pass
+    at: "2026-04-29T19:20:00+08:00"
+  preflight:
+    status: pass
+    at: "2026-04-29T19:20:00+08:00"
+  tdd-strategy:
+    status: pass
+    at: "2026-04-29T19:20:00+08:00"
+  verify:
+    status: pass
+    at: "2026-04-29T20:17:00+08:00"
+  review:
+    status:
+    at:
+fallback:
+  trigger:
+  status:
+  route:
+  reason:

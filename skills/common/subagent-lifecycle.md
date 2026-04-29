@@ -55,7 +55,7 @@ Unknown UI-only agents are not manageable resources. 如果 roster 没有记录�
       "role": "explorer",
       "model": "gpt-5.3-codex",
       "status": "closed",
-      "scope": ["skills/opsx-subagent/SKILL.md"],
+      "scope": ["skills/common/subagent.md"],
       "write_scope": [],
       "reuse_policy": "reusable",
       "close_policy": "close-after-consumed",

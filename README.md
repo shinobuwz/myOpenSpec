@@ -54,6 +54,7 @@ openspec/
 ```
 
 Runtime scripts and skill templates are distributed by the npm package. They are not copied into every target repository.
+Common workflow contracts such as `git-lifecycle.md`, `subagent.md`, and `subagent-lifecycle.md` are installed under `~/.opsx/common`.
 
 ## Source Layout
 

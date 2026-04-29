@@ -13,6 +13,7 @@
 - 是否拆成多个 change，优先在 `opsx-slice` 和 `opsx-plan` 的 proposal/specs 初稿后判断；`opsx-task-analyze` 只做超大 change 的兜底拦截。
 - 共享状态保持最小化：可从权威产物稳定重建的内容，不应再缓存成中间知识。
 - Git 生命周期规则集中安装在 `~/.opsx/common/git-lifecycle.md`；各节点强制检查 Git 状态，但只在命中 checkpoint 条件时建议提交。
+- Subagent 派发规则集中安装在 `~/.opsx/common/subagent.md`；需要 worker / reviewer / explorer 的节点引用公共 contract，不维护可直接触发的 `opsx-subagent` skill。
 
 ## 公用知识如何共享
 
@@ -23,7 +24,8 @@
 
 2. **公共 workflow contract**
    - `~/.opsx/common/git-lifecycle.md` 保存 change branch、checkpoint、gate 失败修正、archive merge 和分支清理规则。
-   - 这类文件不是可触发 skill，由 `opsx install-skills` 从包内 `skills/common/` 安装，只由 `opsx-*` skills 引用，避免多个节点复制同一套 Git 判断逻辑。
+   - `~/.opsx/common/subagent.md` 和 `~/.opsx/common/subagent-lifecycle.md` 保存 subagent 平台映射、职责类型、controller boundary、roster、复用、关闭和容量规则。
+   - 这类文件不是可触发 skill，由 `opsx install-skills` 从包内 `skills/common/` 安装，只由 `opsx-*` skills 引用，避免多个节点复制同一套公共判断逻辑。
 
 3. **长期共享知识**
    - `.aiknowledge/codemap/` 保存模块地图、关键文件和跨模块链路，供 `explore`、`slice`、`plan`、`implement`、`fast` 复用。
