@@ -4,7 +4,7 @@ created_at: 2026-04-13
 created_from: metadata-backfill
 last_verified_at: 2026-04-28
 last_verified_by: opsx-archive
-verification_basis: changes-status-detail + thin-npm-opsx archive + aiknowledge-lifecycle change + opsx-lite-workflow archive + superpowers-discipline archive + subagent-workflow-adapter archive + subagent-smoke-eval archive + workflow-skill-adoption archive + parallel-worker-policy archive + skill-md-slimming archive + guidance-skill-slimming archive + gate-workflow-skill-slimming archive
+verification_basis: changes-status-detail + thin-npm-opsx archive + aiknowledge-lifecycle change + opsx-lite-workflow archive + superpowers-discipline archive + subagent-workflow-adapter archive + subagent-smoke-eval archive + workflow-skill-adoption archive + parallel-worker-policy archive + skill-md-slimming archive + guidance-skill-slimming archive + gate-workflow-skill-slimming archive + subagent-dispatch-model-policy archive + subagent-roster-lifecycle-policy archive
 applies_to:
   - skills
   - skills/opsx-*/references
@@ -33,11 +33,15 @@ source_refs:
   - change:2026-04-28-skill-md-slimming/01-slimming-structure
   - change:2026-04-28-skill-md-slimming/02-migrate-guidance-skills
   - change:2026-04-28-skill-md-slimming/03-migrate-gate-skills
+  - change:2026-04-28-subagent-dispatch-model-policy
+  - change:2026-04-28-subagent-roster-lifecycle-policy
   - review-report:openspec/changes/archive/2026-04-28-subagent-workflow-adapter-02-workflow-skill-adoption/review-report.md
   - review-report:openspec/changes/archive/2026-04-28-subagent-workflow-adapter-03-parallel-worker-policy/review-report.md
   - review-report:openspec/changes/archive/2026-04-28-skill-md-slimming-01-slimming-structure/review-report.md
   - review-report:openspec/changes/archive/2026-04-28-skill-md-slimming-02-migrate-guidance-skills/review-report.md
   - review-report:openspec/changes/archive/2026-04-28-skill-md-slimming-03-migrate-gate-skills/review-report.md
+  - review-report:openspec/changes/archive/2026-04-28-subagent-dispatch-model-policy/review-report.md
+  - review-report:openspec/changes/archive/2026-04-28-subagent-roster-lifecycle-policy/review-report.md
 superseded_by:
 ---
 
@@ -55,7 +59,7 @@ OpenSpec 工作流的单一真相源。所有 skill 以 Markdown 文件存放于
 | `opsx-plan` | 为当前 resolved change root 生成/修订 specs + design，必要时小修 proposal | 无 |
 | `opsx-continue` | 恢复中断的当前 change；group 场景下先按 active_subchange，否则按 suggested_focus / recommended_order / 唯一 subchange 路由 | 无 |
 | `opsx-lite` | 轻量小改动工作流，不创建正式 change，记录 lite-run 事实留档；范围扩大时升级到 slice→plan | 无 |
-| `opsx-subagent` | Codex 默认、Claude 兼容的 subagent 派发契约；统一 worker/reviewer/explorer 的角色边界、写入边界、status 和 fallback 规则 | 无 |
+| `opsx-subagent` | Codex 默认、Claude 兼容的 subagent 派发契约；统一 worker/reviewer/explorer 的角色边界、dispatch class、默认模型推荐、roster lifecycle、写入边界、status 和 fallback 规则 | 无 |
 | `opsx-plan-review` | spec↔plan 一致性审查（关卡1），硬性门控；通过 `opsx-subagent` reviewer contract 派遣 1 个只读 reviewer，输出 StageResult JSON，写 audit-log.md | design 已生成 |
 | `opsx-tasks` | 将 design+specs 转化为带 TDD 标签、bite-sized、可执行验证方法的 tasks.md | `gates.plan-review` |
 | `opsx-task-analyze` | plan↔tasks 一致性审查（关卡2），硬性门控；通过 `opsx-subagent` reviewer contract 执行只读审查 | tasks 已生成 + plan-review 已通过 |
@@ -114,6 +118,8 @@ plan ───────────────────→ proposal → s
 - `opsx changes list` 与 `opsx changes status` 语义必须分离：`list` 只列 active changes，`status` 读取 gates/reports/tasks 并给出 next-step 诊断
 - `opsx-plan-review`、`opsx-task-analyze`、`opsx-verify` 遵循 Stage Packet Protocol v2：派遣 subagent 直接读取权威产物文件 → 输出 StageResult JSON → 主 agent 追加写 `audit-log.md`；无 context/ JSON 文件，无 StagePacket 组装步骤
 - subagent 文案以 `opsx-subagent` 为 canonical contract：Codex 默认使用 `spawn_agent`，Claude Code 兼容映射为 `Task` tool；主 agent 保留 controller 权限，subagent 不写 gates 或最终完成声明。
+- `opsx-subagent` 按 dispatch class 维护默认模型推荐：简单检索走 `retrieval-explorer`，明确实现走 `implementation-worker`，gate/release 审查走 `gate-reviewer`，归档后知识维护走 `maintenance-worker`，长上下文审计走 `long-running-auditor`；具体 prompt 仍由触发的 workflow skill 注入。
+- `opsx-subagent` 的 Agent Roster 是主 agent 运行态责任；Codex 没有 skill 可调用的 list-all subagents API，roster 只能来自 `spawn_agent`、`wait_agent`、notification 和 `close_agent`。运行态 JSON 位于 `.opsx/subagents/*.json` 且不作为 gate 依据，change 级摘要位于 `subagent-roster.md`。
 - 会派发 subagent 的 workflow skills（implement、plan-review、task-analyze、verify、review、explore、archive follow-up）必须显式引用 `opsx-subagent`，只保留自身 stage 的输入、输出、gate 和产物规则；禁止在各 skill 中维护另一套 Claude-only 或平台分叉的派发说明。
 - `opsx-implement` 的 implementation workers 是 serial-by-default / 默认串行；只有任务簇独立、disjoint write sets、明确 file ownership 且不并发修改 public interface、migration、schema、config、package/build scripts 时，主 agent 才能派发多个 workers。共享 artifact（`tasks.md`、`test-report.md`、`.openspec.yaml`、`audit-log.md`、`review-report.md`）始终由主 agent 串行写入。
 - `skills/*/SKILL.md` 应保持薄入口，只保留触发条件、执行入口、gate 和关键安全约束；长流程、模板、示例和可复用公共契约迁入 `references/` 或 canonical skill/doc，通过渐进披露按需读取。

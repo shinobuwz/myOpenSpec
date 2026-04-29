@@ -12,8 +12,12 @@ applies_to:
 source_refs:
   - change:2026-04-28-subagent-workflow-adapter/01-subagent-contract
   - change:2026-04-28-subagent-workflow-adapter/02-workflow-skill-adoption
+  - change:2026-04-28-subagent-dispatch-model-policy
+  - change:2026-04-28-subagent-roster-lifecycle-policy
   - review-report:openspec/changes/archive/2026-04-28-subagent-workflow-adapter-01-subagent-contract/review-report.md
   - review-report:openspec/changes/archive/2026-04-28-subagent-workflow-adapter-02-workflow-skill-adoption/review-report.md
+  - review-report:openspec/changes/archive/2026-04-28-subagent-dispatch-model-policy/review-report.md
+  - review-report:openspec/changes/archive/2026-04-28-subagent-roster-lifecycle-policy/review-report.md
 superseded_by:
 merged_from:
 deprecated_reason:
@@ -53,13 +57,19 @@ Subagent 派发是横切契约，不是某个单独 workflow stage 的业务规�
 + - main agent is controller
 + - shared artifacts are written serially
 + - reviewer results return to StageResult / audit-log / review-report
++ - dispatch classes map work categories to default model tiers
++ - main agent maintains Agent Roster from spawn/wait/notification/close events
 ```
 
 ## 要点
 
 平台适配、controller 权限、写入边界、status 和 fallback 应集中在 `opsx-subagent` contract；其他 workflow skill 只引用 contract，避免复制一整套 subagent 派发规则。
 
+后续扩展同样应落在中心 contract：具体 workflow skill 只注入 stage prompt；`opsx-subagent` 维护 dispatch class、模型推荐、roster lifecycle、复用和关闭策略。Codex 当前没有可供 skill 调用的 list-all subagents API，不能把 UI 中的 agent 列表当作可查询事实源；主 agent 必须基于自己可观测的 spawn/wait/notification/close 事件维护运行态 roster。
+
 ## 来源
 
 change: 2026-04-28-subagent-workflow-adapter/01-subagent-contract
 change: 2026-04-28-subagent-workflow-adapter/02-workflow-skill-adoption
+change: 2026-04-28-subagent-dispatch-model-policy
+change: 2026-04-28-subagent-roster-lifecycle-policy

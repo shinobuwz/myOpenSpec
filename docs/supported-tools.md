@@ -33,7 +33,9 @@ OPSX 的 canonical skill 文案以 Codex 为默认解释，同时保留 Claude C
 
 OPSX 不依赖 Claude 的 named agent registry，也不维护单独的 Codex prompt 产物。需要 reviewer / implementer 时，主 agent 将 skill 内的 prompt 模板或上下文填入 `message` 后派发；Claude Code 可用同一段 prompt 作为 `Task` 内容。
 
-详细的 controller 权限、写入边界、status 处理、reviewer 结果和 fallback 规则由 `opsx-subagent` 作为 canonical contract 维护。
+职责类型和默认模型推荐也由 `opsx-subagent` 维护。当前约定是：简单检索和证据摘要走 `retrieval-explorer` / `gpt-5.3-codex`，明确实现任务走 `implementation-worker` / `gpt-5.4`，gate 或发布风险审查走 `gate-reviewer` / `gpt-5.5`，长上下文审计走 `long-running-auditor` / `gpt-5.2`。具体 prompt 仍由触发的 workflow skill 注入。
+
+详细的 controller 权限、写入边界、status 处理、reviewer 结果、模型升级/降级和 fallback 规则由 `opsx-subagent` 作为 canonical contract 维护。
 
 ## 安装方式
 

@@ -227,6 +227,59 @@ test("subagent contract is codex-first with claude compatibility", async () => {
   assert.match(text, /fallback/);
 });
 
+test("subagent contract owns dispatch classes and model recommendations", async () => {
+  const text = await skill("opsx-subagent");
+
+  assert.match(text, /职责分离/);
+  assert.match(text, /workflow skill 负责定义/);
+  assert.match(text, /opsx-subagent.*负责定义.*默认模型/s);
+  assert.match(text, /retrieval-explorer/);
+  assert.match(text, /implementation-worker/);
+  assert.match(text, /gate-reviewer/);
+  assert.match(text, /maintenance-worker/);
+  assert.match(text, /long-running-auditor/);
+  assert.match(text, /gpt-5\.3-codex/);
+  assert.match(text, /gpt-5\.4/);
+  assert.match(text, /gpt-5\.5/);
+  assert.match(text, /gpt-5\.2/);
+  assert.match(text, /用户明确指定模型时优先使用/);
+  assert.match(text, /运行环境不支持推荐模型时/);
+});
+
+test("subagent contract owns roster lifecycle and capacity policy", async () => {
+  const text = await skill("opsx-subagent");
+  const lifecycle = await readFile("skills/opsx-subagent/references/lifecycle.md", "utf8");
+
+  assert.match(text, /references\/lifecycle\.md/);
+  assert.match(text, /Agent Roster/);
+  assert.match(text, /list-all subagents API/);
+  assert.match(text, /spawn_agent/);
+  assert.match(text, /wait_agent/);
+  assert.match(text, /subagent notification/);
+  assert.match(text, /close_agent/);
+  assert.match(text, /Pre-Spawn Check/);
+  assert.match(text, /completed no-reuse/);
+  assert.match(text, /gate-reviewer.*不复用/s);
+  assert.match(text, /不要为了释放容量随意关闭 running agent/);
+  assert.match(text, /\.opsx\/subagents/);
+  assert.match(text, /subagent-roster\.md/);
+  assert.match(text, /不得作为 gate/);
+
+  assert.match(lifecycle, /Agent Roster/);
+  assert.match(lifecycle, /Pre-Spawn Check/);
+  assert.match(lifecycle, /Reuse Policy/);
+  assert.match(lifecycle, /Close Policy/);
+  assert.match(lifecycle, /Capacity Policy/);
+  assert.match(lifecycle, /completed no-reuse|completed_no_reuse/);
+  assert.match(lifecycle, /gate-reviewer.*不复用/s);
+  assert.match(lifecycle, /不要为了释放容量随意关闭 running agent/);
+  assert.match(lifecycle, /\.opsx\/subagents\/<session-id>\.json/);
+  assert.match(lifecycle, /\.opsx\/subagents\/current\.json/);
+  assert.match(lifecycle, /"version": 1/);
+  assert.match(lifecycle, /openspec\/changes\/<change>\/subagent-roster\.md/);
+  assert.match(lifecycle, /不得作为 OpenSpec gate 通过依据/);
+});
+
 test("workflow subagent users reference the central contract", async () => {
   const contractUsers = [
     "opsx-implement",

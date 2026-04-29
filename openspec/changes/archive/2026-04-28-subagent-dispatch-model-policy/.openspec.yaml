@@ -1,0 +1,9 @@
+schema: spec-driven
+created: 2026-04-28
+capabilities:
+  - subagent-dispatch-policy
+gates:
+  plan-review: "2026-04-28T10:20:06Z"
+  task-analyze: "2026-04-28T10:20:47Z"
+  verify: "2026-04-28T12:32:26Z"
+  review: "2026-04-28T10:23:23Z"

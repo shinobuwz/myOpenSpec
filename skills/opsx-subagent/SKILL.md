@@ -7,6 +7,37 @@ description: Codex 默认、Claude 兼容的 OPSX subagent 派发契约；用于
 
 这个 skill 是 OPSX subagent 规则的 canonical contract。其他 `opsx-*` workflow skill 需要说明 subagent 派发、角色边界、结果处理或平台适配时，应引用本 contract，而不是在各自文件里复制一整套规则。
 
+## 职责分离
+
+具体 workflow skill 负责定义“要做什么”：
+
+- `opsx-plan-review`、`opsx-task-analyze`、`opsx-verify`、`opsx-review` 提供 reviewer prompt、审查维度和 StageResult 要求。
+- `opsx-implement` 提供 task、TDD 循环、文件所有权和验证命令。
+- `opsx-explore` 提供调查问题、codemap-first 范围和只读约束。
+- `opsx-archive` 提供 knowledge / codemap follow-up 上下文和写入边界。
+
+`opsx-subagent` 负责定义“派给哪类 subagent、用什么默认模型档位、主 agent 如何收口”。不要把具体 stage prompt 复制到这里；这里维护职责类型、平台映射、模型选择、写入边界和 fallback。
+
+## Dispatch Classes
+
+主 agent 先按工作内容选择 dispatch class，再由对应 workflow skill 注入具体 prompt。用户明确指定模型时优先使用；运行环境不支持推荐模型时，回退到可用默认 subagent 模型并说明。
+
+| Dispatch class | 典型工作 | Codex 默认 | 推荐模型 | reasoning | 写入 |
+|----------------|----------|------------|----------|-----------|------|
+| `retrieval-explorer` | 简单检索、`rg`/glob、跨文件读取、证据摘要、日志或 diff 摘要 | `spawn_agent(agent_type="explorer", model="gpt-5.3-codex", reasoning_effort="low")` | `gpt-5.3-codex` | low | 只读 |
+| `implementation-worker` | 按明确 task 实现、补测试、机械重构、局部修复 | `spawn_agent(agent_type="worker", model="gpt-5.4", reasoning_effort="medium")` | `gpt-5.4` | medium | 明确文件所有权内可写 |
+| `gate-reviewer` | plan-review、task-analyze、verify、release-risk review | `spawn_agent(agent_type="worker", model="gpt-5.5", reasoning_effort="medium")` | `gpt-5.5` | medium/high | 只读 |
+| `maintenance-worker` | 归档后的 knowledge / codemap 更新、文档索引刷新 | `spawn_agent(agent_type="worker", model="gpt-5.3-codex", reasoning_effort="medium")` | `gpt-5.3-codex` | medium | 授权的 `.aiknowledge/` 条目 |
+| `long-running-auditor` | 大上下文审计、长链路调查、跨模块一致性盘点 | `spawn_agent(agent_type="worker", model="gpt-5.2", reasoning_effort="medium")` | `gpt-5.2` | medium | 默认只读 |
+
+模型升级 / 降级规则：
+
+- 简单检索、证据收集、日志整理优先用 `retrieval-explorer`，不要占用强模型。
+- 明确实现任务默认用 `implementation-worker`；只有跨架构、高风险并发、迁移、schema 或公共接口变更时升级到 `gpt-5.5`。
+- gate/release reviewer 默认用 `gate-reviewer`，因为它影响后续 gate；非常小的 artifact-only review 可降到 `gpt-5.4`，但不能降到 economy 档。
+- 长上下文、长时间运行且不需要最终设计判断的审计用 `long-running-auditor`。
+- 安全、发布、归档、外部写操作的最终判断始终留在主 agent；不能因为 subagent 使用强模型就下放 controller 权限。
+
 ## 平台映射
 
 OPSX 默认按 Codex 解释 subagent 语义，并保留 Claude Code 等价映射。
@@ -21,6 +52,18 @@ OPSX 默认按 Codex 解释 subagent 语义，并保留 Claude Code 等价映射
 | 任务状态跟踪 | `update_plan` | `TodoWrite` |
 
 Codex 没有 Claude 风格 named agent registry。需要特定 reviewer 或 implementer 时，主 agent 读取对应 prompt 模板或 skill 片段，填充上下文后放入 `message`。
+
+Claude Code 不暴露同样的模型覆盖语义时，仍按 dispatch class 的职责边界派发；模型选择作为推荐，不应破坏工具兼容性。
+
+## Lifecycle / Roster
+
+详细规则见 `references/lifecycle.md`。主 agent 必须维护会话内 Agent Roster；Codex 当前没有可供 skill 调用的 list-all subagents API，roster 只能来自 `spawn_agent`、`wait_agent`、subagent notification 和 `close_agent` 的可观测结果。
+
+每次 `spawn_agent` 前必须执行 Pre-Spawn Check：检查 running agents、completed reusable agents、completed no-reuse agents 和 capacity pressure。线程接近上限时，先关闭结果已消费的 completed no-reuse agents，再派发新的 subagent。
+
+复用和关闭按 dispatch class 决定：`retrieval-explorer` 和 `maintenance-worker` 可条件复用；`implementation-worker` 仅在同一 task cluster 与 file ownership 下复用；`gate-reviewer` 默认不复用，StageResult 或 review result 被主 agent 消费后关闭。不要为了释放容量随意关闭 running agent。
+
+运行态 JSON roster 写入 `.opsx/subagents/<session-id>.json`；拿不到稳定 session id 时使用 `.opsx/subagents/current.json`。该 JSON 是可覆盖的调度辅助，不得作为 gate 通过依据。人类可读摘要写入 `openspec/changes/<change>/subagent-roster.md`，只记录关键 spawn/reuse/close/capacity 事件，不替代 `audit-log.md`、`review-report.md`、`test-report.md` 或 `.openspec.yaml` gates。
 
 ## Controller Boundary
 
