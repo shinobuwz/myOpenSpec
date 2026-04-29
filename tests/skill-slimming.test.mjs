@@ -26,7 +26,7 @@ test("skill slimming checker reports current inventory without failing baseline"
   assert.equal(result.status, 0, result.stderr);
   const payload = JSON.parse(result.stdout);
 
-  assert.equal(payload.summary.totalSkills, 18);
+  assert.equal(payload.summary.totalSkills, 17);
   assert.ok(payload.summary.totalLines < 3200);
   assert.ok(payload.skills.some((entry) => entry.name === "opsx-explore" && entry.lines <= 180));
   assert.ok(payload.skills.every((entry) => entry.path.endsWith("/SKILL.md")));

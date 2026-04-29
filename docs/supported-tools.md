@@ -69,7 +69,6 @@ opsx init-project -p /path/to/repo
 | `opsx-fast` | 统一快速通道，使用 `source_type: lite | bugfix` 标记低风险小改动或明确缺陷修复来源 |
 | `opsx-knowledge` | 独立沉淀可复用经验 |
 | `opsx-plan` | 创建变更并生成 proposal / specs / design |
-| `opsx-continue` | 恢复中断的当前 change，并路由到下一合法步骤 |
 | `opsx-subagent` | Codex 默认、Claude 兼容的 subagent 派发契约 |
 | `opsx-verify` | 验证实现与制品是否一致 |
 | `opsx-archive` | 归档已完成的变更 |
@@ -83,7 +82,7 @@ opsx init-project -p /path/to/repo
 | `opsx-codemap` | 维护 `.aiknowledge/codemap/` |
 | `opsx-auto-drive` | 自动驱动完整工作流 |
 
-推荐直接在对话中点名 skill，例如“请使用 `opsx-slice` 先判断怎么拆”、“请使用 `opsx-plan` 创建一个新变更”、“请使用 `opsx-continue` 恢复当前 change”或“继续用 `opsx-implement` 完成剩余任务”。
+推荐直接在对话中点名 skill，例如“请使用 `opsx-slice` 先判断怎么拆”、“请使用 `opsx-plan` 创建一个新变更”或“继续用 `opsx-implement` 完成剩余任务”。恢复中断的 change 时，先运行 `opsx changes status` 查看 `Next:`，再点名对应 skill。
 
 ---
 

@@ -1,16 +1,16 @@
 # Skill Slimming Inventory
 
-Baseline captured on 2026-04-28 from `skills/opsx-*/SKILL.md`. This file now reflects the state after `2026-04-29-opsx-fast-workflow`.
+Baseline captured on 2026-04-28 from `skills/opsx-*/SKILL.md`. This file now reflects the state after the 2026-04-29 recovery-skill removal.
 
 ## Summary
 
 | Metric | Value |
 |--------|------:|
-| OPSX skills | 18 |
-| Total `SKILL.md` lines | 1367 |
+| OPSX skills | 17 |
+| Total `SKILL.md` lines | 1241 |
 | Over 240 lines | 0 |
 | 181-240 lines | 0 |
-| 121-180 lines | 2 |
+| 121-180 lines | 1 |
 | 120 lines or fewer | 16 |
 | Oversized at current checker threshold `>180` | 0 |
 | Duplicate canonical contract candidates | 0 |
@@ -35,18 +35,17 @@ Baseline captured on 2026-04-28 from `skills/opsx-*/SKILL.md`. This file now ref
 | `opsx-implement` | 78 | Done in 03 | Worker contract and execution rules moved to `references/`; gates, serial-by-default, shared artifact ownership, and evidence rules remain visible. |
 | `opsx-archive` | 74 | Done in 03 | Archive routing and follow-up worker prompts moved to `references/`; verify/review gates, grouped subchange rules, and fast archive root remain visible. |
 | `opsx-plan` | 119 | Healthy | Keep concise; avoid copying slice or task rules. |
-| `opsx-continue` | 131 | Acceptable | State routing detail remains centralized; consider splitting only if route matrix grows. |
 | `opsx-subagent` | 174 | Canonical source | This is the canonical subagent contract; density is expected. Do not split unless it becomes hard to scan. |
 
 ## Validation Targets
 
-`node scripts/check-skill-slimming.mjs --json --fail-on-duplicates` after fast workflow:
+`node scripts/check-skill-slimming.mjs --json --fail-on-duplicates` after recovery-skill removal:
 
-- `totalSkills`: 18
-- `totalLines`: 1367
+- `totalSkills`: 17
+- `totalLines`: 1241
 - `oversized`: 0
 - `duplicates`: 0
 
 ## Remaining Risk
 
-No current `SKILL.md` exceeds the checker threshold or copies detected canonical contracts. The two largest remaining entries, `opsx-continue` and `opsx-subagent`, are intentionally dense: `opsx-continue` owns routing state, and `opsx-subagent` is the canonical contract other skills reference.
+No current `SKILL.md` exceeds the checker threshold or copies detected canonical contracts. `opsx-subagent` remains intentionally dense because it is the canonical contract other skills reference.

@@ -133,7 +133,7 @@ AI：正在处理任务...
 
 - `opsx-plan-review`、`opsx-task-analyze`、`opsx-verify` 是强制关卡。
 - 涉及全栈、多模块、多 capability 时，先使用 `opsx-slice` 再进入 `opsx-plan`。
-- `opsx-continue` 用于恢复中断的 change；如果你传入父 change，它会先看 `active_subchange`，否则再按 `suggested_focus` / `recommended_order` / 唯一 subchange 路由。
+- 恢复中断的 change 时，先运行 `opsx changes -p /path/to/repo status` 查看当前 `Next:`，再点名对应的 `opsx-*` skill；父 change 的默认 subchange 仍由 `opsx changes resolve` 按 `active_subchange` / `suggested_focus` / `recommended_order` / 唯一 subchange 解析。
 - grouped change 执行 `opsx-archive` 时，默认归档的是当前 resolved subchange，目标应为顶层 `openspec/changes/archive/<archive-dir>/`；`<archive-dir>` 由 `<group>-<subchange>` 计算，若已带 `YYYY-MM-DD-` 前缀则不再重复加日期。不要在活动 group 下创建 `subchanges/archive/`。归档后父 group 只保留 `.openspec.group.yaml` 与 `subchanges/`；如果最后一个 subchange 也已归档，则直接删除父 group。
 - 当前仓库不再维护 `.claude/commands/opsx/`。
 - 项目内只保留 `openspec/` 状态；通用 runtime 由全局 `opsx` npm 包提供。

@@ -26,7 +26,7 @@ After that, tell the agent to use the relevant skill, for example:
 请使用 opsx-slice 判断是否需要拆分 change
 请使用 opsx-fast 处理低风险小改动或明确 bugfix
 请使用 opsx-plan 创建一个新变更
-请使用 opsx-continue 恢复当前 change
+先运行 opsx changes status 查看当前 change 的 Next，再使用对应 skill
 ```
 
 ## Commands

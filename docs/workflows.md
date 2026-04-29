@@ -32,8 +32,8 @@
 
    | 文件 | 写入者 | 消费者 | 说明 |
    |------|--------|--------|------|
-   | `.openspec.group.yaml` | slice / continue / archive | slice / plan / continue | 父 change 的最小拓扑与路由状态；保存 `execution_mode`、`recommended_order`、`suggested_focus` 及可选 `active_subchange` |
-   | `.openspec.yaml` | slice / plan / plan-review / task-analyze / verify / review | continue / tasks / implement / verify / review / archive / report | subchange 的 common config；只保存 schema / gates 等最小状态 |
+   | `.openspec.group.yaml` | slice / archive | slice / plan / changes helper | 父 change 的最小拓扑与路由状态；保存 `execution_mode`、`recommended_order`、`suggested_focus` 及可选 `active_subchange` |
+   | `.openspec.yaml` | slice / plan / plan-review / task-analyze / verify / review | changes helper / tasks / implement / verify / review / archive / report | subchange 的 common config；只保存 schema / gates 等最小状态 |
    | `test-report.md` | opsx-tdd（红/绿/重构追加） | opsx-verify（检查存在性与完整性） | TDD 任务的实时测试留档；无 TDD 任务时不产出 |
    | `audit-log.md` | opsx-plan-review、opsx-task-analyze、opsx-verify（追加） | opsx-report（渲染 HTML） | 各 gate stage 链路正确性校验留档；pass 和 fail 均追加写入 |
    | `review-report.md` | opsx-review（追加） | opsx-report（渲染 HTML） | 代码审查结论留档；与结构符合性审查分开存放 |
@@ -184,7 +184,7 @@ AI：已归档，知识与 codemap 已更新
 | 需求模糊，先聊思路 | `opsx-explore` |
 | 全栈 / 多模块需求，先判断怎么拆 | `opsx-slice` |
 | 创建新 change | `opsx-plan` |
-| 恢复中断的当前 change | `opsx-continue` |
+| 恢复中断的当前 change | `opsx changes status` 查看 `Next:` 后使用对应 skill |
 | 低风险小改动或明确缺陷修复 | `opsx-fast` |
 | 开始主线实施 | `opsx-implement` |
 | 做最终一致性检查 | `opsx-verify` |
@@ -192,6 +192,6 @@ AI：已归档，知识与 codemap 已更新
 
 ## 注意
 
-- 当前仓库没有独立的 `opsx-sync`、`opsx-onboard`、`opsx-bulk-archive` skill。
-- `opsx-continue` 不再维护独立状态机；它只读取 group/subchange 的真实文件状态和 `gates.*` 来恢复流程。
+- 当前仓库没有独立的 `opsx-sync`、`opsx-onboard`、`opsx-bulk-archive` 或恢复专用 skill。
+- `opsx changes status` 是恢复中断 workflow 的状态入口；它只显示真实文件状态和下一步建议，不替代具体 `opsx-*` skill。
 - 如需判断当前真相源，请优先看 `skills/opsx-*/SKILL.md`。

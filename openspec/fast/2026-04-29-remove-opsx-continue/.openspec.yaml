@@ -1,0 +1,34 @@
+schema: fast
+kind: fast
+id: 2026-04-29-remove-opsx-continue
+source_type: lite
+created: 2026-04-29
+status: verified
+attempts:
+  count: 0
+  max_fast_attempts: 3
+test_strategy:
+  mode: characterization-first
+  reason: "删除 workflow skill 入口前，先用现有回归测试确认当前文档和路由基线。"
+  alternative_verification: "运行 targeted tests 覆盖 supported tools、workflow discipline 和 change helper next-step 行为。"
+gates:
+  classify:
+    status: pass
+    at: "2026-04-29T00:00:00+08:00"
+  preflight:
+    status: pass
+    at: "2026-04-29T00:00:00+08:00"
+  tdd-strategy:
+    status: pass
+    at: "2026-04-29T00:00:00+08:00"
+  verify:
+    status: pass
+    at: "2026-04-29T16:27:00+08:00"
+  review:
+    status:
+    at:
+fallback:
+  trigger:
+  status:
+  route:
+  reason:
