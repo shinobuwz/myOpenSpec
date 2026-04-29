@@ -5,7 +5,7 @@
 ## 最短路径
 
 ```text
-1. 安装全局入口       npm install -g @shinobuwz/opsx && opsx install-skills
+1. 安装全局入口       npm install -g @shinobuwz/opsx
 2. 初始化项目状态     opsx init-project -p /path/to/repo
 3. 复杂需求先切分     请使用 `opsx-slice` 判断是否需要多个 change
 4. 规划变更           请使用 `opsx-plan` 创建一个新变更
@@ -14,7 +14,7 @@
 7. 验证与归档         请使用 `opsx-verify` -> `opsx-review` -> `opsx-archive`
 ```
 
-从源码 checkout 调试时，可运行 `./scripts/install-global.sh` 安装当前工作区 `skills/` 下的 canonical skills。仓库级 `scripts/install-repos.sh` 只把 `skills/opsx-*` 同步成目标仓库 `.claude/skills/opsx-*` adapter，不复制 runtime 或模板。
+全局 npm 安装会通过 best-effort `postinstall` 自动同步 `~/.agents/skills/opsx-*` 和 `~/.opsx/common`。如果安装脚本被禁用、需要手动刷新，或从源码 checkout 调试，可运行 `opsx install-skills` 或 `./scripts/install-global.sh`。仓库级 `scripts/install-repos.sh` 只把 `skills/opsx-*` 同步成目标仓库 `.claude/skills/opsx-*` adapter，不复制 runtime 或模板。
 
 ## 目录结构
 
@@ -41,6 +41,7 @@ OPSX 包源码自身的目录边界是：
 bin/        npm launcher
 runtime/    通用 helper、schemas 和 templates
 skills/     opsx-* skill 源码真相源，common/ 打包安装到 ~/.opsx/common
+runtime/    schemas/templates 是 CLI 内置模板资源
 ```
 
 ## 关键制品
@@ -134,6 +135,7 @@ AI：正在处理任务...
 - `opsx-plan-review`、`opsx-task-analyze`、`opsx-verify` 是强制关卡。
 - Git 生命周期规则安装在 `~/.opsx/common/git-lifecycle.md`；默认开 change 使用分支，关键 checkpoint 建议提交，归档前必须确认 merge 状态或记录 pending reason。
 - Subagent 派发规则安装在 `~/.opsx/common/subagent.md`，生命周期与容量策略安装在 `~/.opsx/common/subagent-lifecycle.md`；这些是公共 contract，不作为可直接触发的 skill。
+- Runtime schema templates 保留在包内 `runtime/schemas`；需要初始化 fast item 时使用 `opsx fast init <id> --source-type lite|bugfix`，不要在 skill 中硬编码模板路径。
 - 涉及全栈、多模块、多 capability 时，先使用 `opsx-slice` 再进入 `opsx-plan`。
 - 恢复中断的 change 时，先运行 `opsx changes -p /path/to/repo status` 查看当前 `Next:`，再点名对应的 `opsx-*` skill；父 change 的默认 subchange 仍由 `opsx changes resolve` 按 `active_subchange` / `suggested_focus` / `recommended_order` / 唯一 subchange 解析。
 - grouped change 执行 `opsx-archive` 时，默认归档的是当前 resolved subchange，目标应为顶层 `openspec/changes/archive/<archive-dir>/`；`<archive-dir>` 由 `<group>-<subchange>` 计算，若已带 `YYYY-MM-DD-` 前缀则不再重复加日期。不要在活动 group 下创建 `subchanges/archive/`。归档后父 group 只保留 `.openspec.group.yaml` 与 `subchanges/`；如果最后一个 subchange 也已归档，则直接删除父 group。

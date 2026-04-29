@@ -9,11 +9,13 @@ import { homedir } from "node:os";
 export function usage() {
   return `Usage:
   opsx changes [--project <path>] <command> [...args]
+  opsx fast [--project <path>] init <id> --source-type <lite|bugfix>
   opsx install-skills
   opsx init-project --project <path>
 
 Commands:
   changes         Run OpenSpec change helper operations
+  fast            Initialize fast item artifacts from package templates
   install-skills  Install OPSX skills and common contracts globally
   init-project    Initialize project-local openspec state
 `;
@@ -166,6 +168,159 @@ function runChanges(args, projectRoot, io) {
   return result.status ?? 1;
 }
 
+function todayString(now = new Date()) {
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const day = String(now.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function assertSafeFastId(id) {
+  if (!id || id === "." || id === ".." || id.includes("/") || id.includes("\\") || id.includes("..")) {
+    throw new Error(`Invalid fast item id: ${id}`);
+  }
+}
+
+function parseFastInitArgs(args) {
+  if (args[0] !== "init") {
+    throw new Error(`Unknown fast command: ${args[0] ?? ""}`);
+  }
+
+  const id = args[1];
+  let sourceType;
+
+  for (let index = 2; index < args.length; index += 1) {
+    const arg = args[index];
+    if (arg === "--source-type") {
+      index += 1;
+      sourceType = args[index];
+    } else {
+      throw new Error(`Unknown fast init argument: ${arg}`);
+    }
+  }
+
+  if (!id) {
+    throw new Error("fast init requires an id");
+  }
+  if (!["lite", "bugfix"].includes(sourceType)) {
+    throw new Error("fast init requires --source-type lite|bugfix");
+  }
+
+  return { id, sourceType };
+}
+
+function readTemplate(schema, templateName) {
+  const templatePath = path.join(packageRoot(), "runtime", "schemas", schema, "templates", templateName);
+  if (!fs.existsSync(templatePath)) {
+    throw new Error(`template not found: ${templatePath}`);
+  }
+
+  return fs.readFileSync(templatePath, "utf8");
+}
+
+function fillTemplate(text, { id, sourceType, created }) {
+  return text
+    .replaceAll("<id>", id)
+    .replaceAll("YYYY-MM-DD", created)
+    .replace("- source_type: lite", `- source_type: ${sourceType}`);
+}
+
+function fastStateYaml({ id, sourceType, created }) {
+  return [
+    "schema: fast",
+    "kind: fast",
+    `id: ${id}`,
+    `source_type: ${sourceType}`,
+    `created: ${created}`,
+    "status: in_progress",
+    "attempts:",
+    "  count: 0",
+    "  max_fast_attempts: 3",
+    "test_strategy:",
+    "  mode:",
+    "  reason:",
+    "  alternative_verification:",
+    "gates:",
+    "  classify:",
+    "    status:",
+    "    at:",
+    "  preflight:",
+    "    status:",
+    "    at:",
+    "  tdd-strategy:",
+    "    status:",
+    "    at:",
+    "  verify:",
+    "    status:",
+    "    at:",
+    "  review:",
+    "    status:",
+    "    at:",
+    "fallback:",
+    "  trigger:",
+    "  status:",
+    "  route:",
+    "  reason:",
+    "",
+  ].join("\n");
+}
+
+export function initFastItem({ projectRoot, id, sourceType, now = new Date() } = {}) {
+  if (!projectRoot) {
+    throw new Error("projectRoot is required");
+  }
+  assertSafeFastId(id);
+  if (!["lite", "bugfix"].includes(sourceType)) {
+    throw new Error("sourceType must be lite or bugfix");
+  }
+
+  const created = todayString(now);
+  const fastRoot = path.join(projectRoot, "openspec", "fast", id);
+  if (fs.existsSync(fastRoot)) {
+    throw new Error(`fast item already exists: ${fastRoot}`);
+  }
+
+  fs.mkdirSync(fastRoot, { recursive: true });
+  fs.writeFileSync(
+    path.join(fastRoot, "item.md"),
+    fillTemplate(readTemplate("fast", "item.md"), { id, sourceType, created }),
+    "utf8",
+  );
+  fs.writeFileSync(
+    path.join(fastRoot, "evidence.md"),
+    fillTemplate(readTemplate("fast", "evidence.md"), { id, sourceType, created }),
+    "utf8",
+  );
+  fs.writeFileSync(path.join(fastRoot, ".openspec.yaml"), fastStateYaml({ id, sourceType, created }), "utf8");
+
+  const createdFiles = ["item.md", "evidence.md", ".openspec.yaml"];
+  if (sourceType === "bugfix") {
+    fs.writeFileSync(
+      path.join(fastRoot, "root-cause.md"),
+      fillTemplate(readTemplate("fast", "root-cause.md"), { id, sourceType, created }),
+      "utf8",
+    );
+    createdFiles.push("root-cause.md");
+  }
+
+  return { fastRoot, createdFiles };
+}
+
+function runFast(args, projectRoot, io) {
+  try {
+    const { id, sourceType } = parseFastInitArgs(args);
+    const result = initFastItem({ projectRoot, id, sourceType });
+    io.stdout.write(`Initialized fast item: ${result.fastRoot}\n`);
+    for (const file of result.createdFiles) {
+      io.stdout.write(`- ${file}\n`);
+    }
+    return 0;
+  } catch (error) {
+    io.stderr.write(`${error instanceof Error ? error.message : String(error)}\n`);
+    return 1;
+  }
+}
+
 export async function main(argv = process.argv.slice(2), io = {}) {
   const stdout = io.stdout ?? process.stdout;
   const stderr = io.stderr ?? process.stderr;
@@ -185,6 +340,12 @@ export async function main(argv = process.argv.slice(2), io = {}) {
     const { project, args } = parseProjectOption(argv.slice(1));
     const projectRoot = resolveProjectRoot({ project });
     return runChanges(args, projectRoot, { stdout, stderr });
+  }
+
+  if (command === "fast") {
+    const { project, args } = parseProjectOption(argv.slice(1));
+    const projectRoot = resolveProjectRoot({ project });
+    return runFast(args, projectRoot, { stdout, stderr });
   }
 
   if (command === "init-project") {

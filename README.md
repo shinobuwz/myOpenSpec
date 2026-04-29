@@ -10,8 +10,9 @@ It does not recreate the old full OpenSpec CLI, profile system, workflow selecto
 
 ```bash
 npm install -g @shinobuwz/opsx
-opsx install-skills
 ```
+
+Global install runs a best-effort `postinstall` sync for OPSX skills and common contracts. If install scripts are disabled or you need to refresh later, run `opsx install-skills`.
 
 Initialize a project:
 
@@ -36,6 +37,7 @@ opsx --help
 opsx changes -p /path/to/repo list
 opsx changes -p /path/to/repo init 2026-04-27-add-feature spec-driven
 opsx changes -p /path/to/repo resolve 2026-04-27-add-feature
+opsx fast -p /path/to/repo init 2026-04-29-small-fix --source-type lite
 opsx install-skills
 opsx init-project -p /path/to/repo
 ```
@@ -54,7 +56,7 @@ openspec/
 ```
 
 Runtime scripts and skill templates are distributed by the npm package. They are not copied into every target repository.
-Common workflow contracts such as `git-lifecycle.md`, `subagent.md`, and `subagent-lifecycle.md` are installed under `~/.opsx/common`.
+Common workflow contracts such as `git-lifecycle.md`, `subagent.md`, and `subagent-lifecycle.md` are installed under `~/.opsx/common`. Runtime schema templates stay inside package `runtime/schemas` and are materialized by `opsx` CLI commands such as `opsx fast init`.
 
 ## Source Layout
 

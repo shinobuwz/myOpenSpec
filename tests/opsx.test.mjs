@@ -7,11 +7,16 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 
 import {
+  initFastItem,
   main,
   parseProjectOption,
   resolveProjectRoot,
   usage,
 } from "../bin/opsx.mjs";
+import {
+  runPostinstall,
+  shouldRunPostinstall,
+} from "../bin/postinstall.mjs";
 
 function createIo() {
   let stdout = "";
@@ -32,6 +37,7 @@ test("help lists supported thin subcommands", async () => {
 
   assert.equal(code, 0);
   assert.match(capture.stdout, /changes/);
+  assert.match(capture.stdout, /fast/);
   assert.match(capture.stdout, /install-skills/);
   assert.match(capture.stdout, /init-project/);
   assert.equal(capture.stderr, "");
@@ -164,6 +170,7 @@ test("install-skills syncs opsx skills and common contracts globally", async () 
     assert.equal(existsSync(path.join(common, "subagent-lifecycle.md")), true);
     assert.equal(existsSync(path.join(common, "stale.md")), false);
     assert.match(capture.stdout, /OPSX common contracts/);
+    assert.doesNotMatch(capture.stdout, /OPSX templates/);
   } finally {
     if (oldEnv === undefined) {
       delete process.env.OPSX_AGENTS_SKILLS_HOME;
@@ -177,6 +184,114 @@ test("install-skills syncs opsx skills and common contracts globally", async () 
     }
     await rm(target, { recursive: true, force: true });
     await rm(common, { recursive: true, force: true });
+  }
+});
+
+test("postinstall runs skill sync only for global or explicit installs", async () => {
+  const target = await mkdtemp(path.join(tmpdir(), "opsx-postinstall-skills-"));
+  const common = await mkdtemp(path.join(tmpdir(), "opsx-postinstall-common-"));
+  let stdout = "";
+  let stderr = "";
+  const io = {
+    stdout: { write: (value) => { stdout += value; } },
+    stderr: { write: (value) => { stderr += value; } },
+  };
+
+  try {
+    assert.equal(shouldRunPostinstall({}), false);
+    assert.equal(shouldRunPostinstall({ npm_config_global: "true" }), true);
+    assert.equal(shouldRunPostinstall({ npm_config_location: "global" }), true);
+    assert.equal(shouldRunPostinstall({ OPSX_POSTINSTALL: "1" }), true);
+    assert.equal(shouldRunPostinstall({ npm_config_global: "true", OPSX_SKIP_POSTINSTALL: "1" }), false);
+
+    assert.equal(runPostinstall({
+      env: {
+        npm_config_global: "true",
+        OPSX_AGENTS_SKILLS_HOME: target,
+        OPSX_COMMON_HOME: common,
+      },
+      ...io,
+    }), 0);
+
+    assert.equal(existsSync(path.join(target, "opsx-plan", "SKILL.md")), true);
+    assert.equal(existsSync(path.join(common, "git-lifecycle.md")), true);
+    assert.equal(existsSync(path.join(common, "subagent.md")), true);
+    assert.equal(existsSync(path.join(common, "subagent-lifecycle.md")), true);
+    assert.match(stdout, /OPSX skills/);
+    assert.match(stdout, /OPSX common contracts/);
+    assert.doesNotMatch(stdout, /OPSX templates/);
+    assert.equal(stderr, "");
+  } finally {
+    await rm(target, { recursive: true, force: true });
+    await rm(common, { recursive: true, force: true });
+  }
+});
+
+test("postinstall failures are non-fatal", () => {
+  let stderr = "";
+  const code = runPostinstall({
+    env: {
+      npm_config_global: "true",
+      OPSX_AGENTS_SKILLS_HOME: "",
+      OPSX_COMMON_HOME: "",
+    },
+    stdout: { write: () => {} },
+    stderr: { write: (value) => { stderr += value; } },
+  });
+
+  assert.equal(code, 0);
+  assert.match(stderr, /OPSX postinstall skipped/);
+});
+
+test("fast init creates lite fast artifacts from package templates", async () => {
+  const repo = await mkdtemp(path.join(tmpdir(), "opsx-fast-lite-"));
+  try {
+    const result = initFastItem({
+      projectRoot: repo,
+      id: "demo-fast",
+      sourceType: "lite",
+      now: new Date(2026, 3, 29),
+    });
+    const fastRoot = path.join(repo, "openspec", "fast", "demo-fast");
+
+    assert.equal(result.fastRoot, fastRoot);
+    assert.equal(existsSync(path.join(fastRoot, "item.md")), true);
+    assert.equal(existsSync(path.join(fastRoot, "evidence.md")), true);
+    assert.equal(existsSync(path.join(fastRoot, ".openspec.yaml")), true);
+    assert.equal(existsSync(path.join(fastRoot, "root-cause.md")), false);
+    assert.match(await readFile(path.join(fastRoot, "item.md"), "utf8"), /Fast Item：demo-fast/);
+    assert.match(await readFile(path.join(fastRoot, "item.md"), "utf8"), /source_type: lite/);
+    assert.match(await readFile(path.join(fastRoot, ".openspec.yaml"), "utf8"), /created: 2026-04-29/);
+  } finally {
+    await rm(repo, { recursive: true, force: true });
+  }
+});
+
+test("fast init creates root cause artifact for bugfix source", async () => {
+  const repo = await mkdtemp(path.join(tmpdir(), "opsx-fast-bugfix-"));
+  const capture = createIo();
+
+  try {
+    assert.equal(await main(["fast", "-p", repo, "init", "demo-bug", "--source-type", "bugfix"], capture.io), 0);
+    const fastRoot = path.join(repo, "openspec", "fast", "demo-bug");
+
+    assert.equal(existsSync(path.join(fastRoot, "root-cause.md")), true);
+    assert.match(await readFile(path.join(fastRoot, "item.md"), "utf8"), /source_type: bugfix/);
+    assert.match(capture.stdout, /Initialized fast item/);
+    assert.match(capture.stdout, /root-cause\.md/);
+  } finally {
+    await rm(repo, { recursive: true, force: true });
+  }
+});
+
+test("fast init rejects unsafe identifiers and existing items", async () => {
+  const repo = await mkdtemp(path.join(tmpdir(), "opsx-fast-reject-"));
+  try {
+    assert.equal(await main(["fast", "-p", repo, "init", "../bad", "--source-type", "lite"], createIo().io), 1);
+    assert.equal(await main(["fast", "-p", repo, "init", "demo", "--source-type", "lite"], createIo().io), 0);
+    assert.equal(await main(["fast", "-p", repo, "init", "demo", "--source-type", "lite"], createIo().io), 1);
+  } finally {
+    await rm(repo, { recursive: true, force: true });
   }
 });
 
@@ -207,6 +322,7 @@ test("npm package publishes canonical skills and runtime without claude source d
   const files = new Set(pack.files.map((file) => file.path));
 
   assert.equal(files.has("bin/opsx.mjs"), true);
+  assert.equal(files.has("bin/postinstall.mjs"), true);
   assert.equal(files.has("runtime/bin/changes.sh"), true);
   assert.equal(files.has("runtime/schemas/spec-driven/schema.yaml"), true);
   assert.equal(files.has("runtime/schemas/spec-driven/templates/proposal.md"), true);

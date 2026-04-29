@@ -10,7 +10,7 @@ description: "统一快速通道。适用于低风险小改动或边界明确的
 ## 职责
 
 1. 判定请求是否适合 fast。
-2. 创建或打开 `openspec/fast/<id>/`。
+2. 创建或打开 `openspec/fast/<id>/`；新建时调用 `opsx fast init <id> --source-type lite|bugfix`。
 3. 写入 `source_type: lite | bugfix`；该字段只表示需求来源，不表示两套流程。
 4. 在 patch 前完成中文 preflight 和 TDD 策略记录。
 5. 需要测试先行时转入 `opsx-tdd`；实现后转入 `opsx-verify`、按需 `opsx-review`、最后 `opsx-archive`。
@@ -20,7 +20,7 @@ description: "统一快速通道。适用于低风险小改动或边界明确的
 
 读取：
 - 用户请求和已有 fast item。
-- `runtime/schemas/fast/templates/`。
+- 新建 fast item 时使用 `opsx fast init <id> --source-type lite|bugfix`，不直接读取模板路径。
 - 命中的 `.aiknowledge/codemap/` 和 `.aiknowledge/pitfalls/`（按需）。
 
 写入：

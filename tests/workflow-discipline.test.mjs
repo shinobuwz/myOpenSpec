@@ -12,11 +12,19 @@ async function common(name) {
 
 test("fast bugfix source requires root cause before fixes", async () => {
   const text = await skill("opsx-fast");
+  const itemSchema = await readFile("skills/opsx-fast/references/item-schema.md", "utf8");
 
   assert.match(text, /source_type: lite \| bugfix/);
   assert.match(text, /根因假设/);
   assert.match(text, /假设证据/);
   assert.match(text, /三次|3 次/);
+  assert.match(text, /opsx fast init <id> --source-type lite\|bugfix/);
+  assert.match(itemSchema, /opsx fast init <id> --source-type lite\|bugfix/);
+  assert.match(itemSchema, /runtime\/schemas/);
+  assert.doesNotMatch(text, /runtime\/schemas\/fast\/templates/);
+  assert.doesNotMatch(itemSchema, /runtime\/schemas\/fast\/templates/);
+  assert.doesNotMatch(text, /~\/\.opsx\/templates/);
+  assert.doesNotMatch(itemSchema, /~\/\.opsx\/templates/);
 });
 
 test("codemap active chains route lightweight and bugfix work through opsx-fast", async () => {

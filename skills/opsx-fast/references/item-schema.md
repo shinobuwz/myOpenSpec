@@ -1,6 +1,6 @@
 # Fast Item Schema
 
-fast item 位于 `openspec/fast/<id>/`。初始化时使用 `runtime/schemas/fast/templates/` 中的模板。
+fast item 位于 `openspec/fast/<id>/`。初始化时调用 `opsx fast init <id> --source-type lite|bugfix`，由 CLI 从包内 `runtime/schemas` materialize 模板；skill 不直接引用模板路径。
 
 ## `.openspec.yaml`
 
