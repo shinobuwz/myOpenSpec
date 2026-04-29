@@ -2,7 +2,7 @@
 
 `.aiknowledge` 是给 agent 渐进式加载的长期知识库。它分为三层：
 
-1. **Source references（来源引用）**：事实来源的稳定引用。默认使用 `change:<id>`、`commit:<sha>`、`audit-log:<path>`、`review-report:<path>` 等现有产物作为来源，不复制一份 raw source。
+1. **Source references（来源引用）**：事实来源的稳定引用。默认使用 `change:<id>`、`fast:<id>`、`commit:<sha>`、`audit-log:<path>`、`review-report:<path>` 等现有产物作为来源，不复制一份 raw source。
 2. **LLM-maintained wiki（模型维护知识层）**：可维护知识层，包括 `codemap/` 和 `pitfalls/`。这层可以更新、合并、废弃，但必须保留来源和审计记录。
 3. **Schema / guardrails（结构与护栏）**：本文件、各级 `index.md`、skill 规则和 lint 自检，约束 agent 如何维护知识。
 
@@ -19,7 +19,7 @@
 ├── logs/
 │   └── YYYY-MM.md            # append-only 月度审计日志
 ├── lite-runs/
-│   └── YYYY-MM/              # opsx-lite 小改动事实留档
+│   └── YYYY-MM/              # 历史 lite-run 留档；新增运行状态写 openspec/fast/
 ├── codemap/                  # 架构地图
 └── pitfalls/                 # 经验知识库
 ```
@@ -41,14 +41,15 @@
 ---
 status: active
 created_at: YYYY-MM-DD
-created_from: change:<change-id> | commit:<sha> | source:<source-id> | metadata-backfill
+created_from: change:<change-id> | fast:<fast-id> | commit:<sha> | source:<source-id> | metadata-backfill
 last_verified_at: YYYY-MM-DD
-last_verified_by: opsx-knowledge | opsx-codemap | opsx-archive | opsx-bugfix
+last_verified_by: opsx-knowledge | opsx-codemap | opsx-archive | opsx-fast
 verification_basis: archive | bugfix | review | repository-audit | codemap-refresh
 applies_to:
   - path/or/module
 source_refs:
   - change:<change-id>
+  - fast:<fast-id>
   - commit:<sha>
 superseded_by:
 merged_from:
@@ -60,20 +61,21 @@ deprecated_reason:
 
 ## 来源引用
 
-OpenSpec change 本身就是默认事实来源。知识条目的 `source_refs` 应优先引用：
+OpenSpec change 和 fast item 本身就是默认事实来源。知识条目的 `source_refs` 应优先引用：
 
 - `change:<id>`：首选，包含 proposal/design/spec/tasks/audit/test/review 等上下文。
+- `fast:<id>`：快速工作项来源，包含 item/evidence/root-cause/test/audit/review 等上下文。
 - `commit:<sha>`：代码事实来源。
 - `audit-log:<path>`：stage 决策来源。
 - `test-report:<path>`：验证事实来源。
 - `review-report:<path>`：审查事实来源。
-- `lite-run:<id>`：`opsx-lite` 小改动事实留档。
+- `lite-run:<id>`：历史 lite-run 事实留档；仅用于追溯旧记录，新增工作流状态不再使用。
 
 不要为了“raw source”重复复制 change 内容。只有来源无法稳定定位且确实需要保留时，才考虑新增单独摘录；当前仓库不建立默认 `sources/` 标准路径。
 
-## Lite Runs（轻量运行记录）
+## Lite Runs（历史轻量运行记录）
 
-`opsx-lite` 不创建正式 OpenSpec change。它把小改动事实记录到 `.aiknowledge/lite-runs/YYYY-MM/<run-id>.md`。
+`.aiknowledge/lite-runs/` 仅保留历史 `opsx-lite` 事实记录。新增快速工作项必须写入 `openspec/fast/<id>/`，并通过 `fast:<id>` 作为知识来源引用。
 
 lite-run 只记录实际发生的事实，自然语言默认使用中文：
 - 意图
@@ -83,7 +85,7 @@ lite-run 只记录实际发生的事实，自然语言默认使用中文：
 - 风险
 - 知识沉淀
 
-lite-run 不包含 proposal/design/spec/tasks/gates，不参与 `opsx changes status`。
+lite-run 不包含 proposal/design/spec/tasks/gates，不参与当前状态流；不要新增 lite-run 承接 workflow runtime 状态。
 
 ## 生命周期操作
 

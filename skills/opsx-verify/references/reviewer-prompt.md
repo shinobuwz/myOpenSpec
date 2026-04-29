@@ -10,6 +10,8 @@
 - `test-report.md`（如存在）
 - `tasks.md` 中"涉及文件"列出的代码、测试、skill、docs 文件
 
+`target_kind: fast` 时读取 fast artifacts：`item.md`、`evidence.md`、`root-cause.md`（如存在）、`test-report.md` 和相关 diff；不要求 specs/design/tasks 或 formal artifacts。
+
 ## 审查维度
 
 ### 0. Spec Compliance Review (`VERIFY_SPEC_COMPLIANCE`)
@@ -32,12 +34,12 @@
 
 ### 2. 正确性 (`VERIFY_CORRECTNESS`)
 
-- 无 specs 时在 summary 中注明跳过。
+- 无 specs 时在 summary 中注明跳过；fast target 没有 specs 属于正常情况。
 - 有 specs 时读取需求场景，通过实现文件验证行为证据。
 
 ### 3. 一致性 (`VERIFY_CONSISTENCY`)
 
-- 无 design 时在 summary 中注明跳过。
+- 无 design 时在 summary 中注明跳过；fast target 没有 design 属于正常情况。
 - 有 design 时检查关键决策是否被实现遵循。
 
 ### 4. 测试留档 (`VERIFY_TEST_REPORT`)

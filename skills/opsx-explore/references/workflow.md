@@ -55,7 +55,7 @@ opsx changes list
 
 探索结束可能有三种结果：
 
-- 收敛到低风险小改动：建议 `opsx-lite`。
+- 收敛到低风险小改动或明确缺陷修复：建议 `opsx-fast`。
 - 收敛到正式变更：必须先 `opsx-slice`，由 slice 定义交付边界，再进入 `opsx-plan`。
 - 只澄清了问题：总结已知事实、未决问题和后续建议。
 
@@ -64,7 +64,7 @@ opsx changes list
 ```text
 探索已收敛，下一步按范围选择：
 
--> opsx-lite  （低风险小改动）
+-> opsx-fast  （快速工作项：低风险小改动或明确缺陷修复）
 -> opsx-slice （正式变更：切分判定，定义交付边界）
    slice 完成后再进入 opsx-plan
 ```

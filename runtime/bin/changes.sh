@@ -40,6 +40,7 @@ usage() {
   opsx changes [-p <project>] set-mode <group-name> <serial|parallel|mixed>
   opsx changes [-p <project>] set-order <group-name> <sub1,sub2,...>
   opsx changes [-p <project>] resolve <change-name|group-name|group/subchange>
+  opsx changes [-p <project>] resolve-fast <fast-id>
 EOF
 }
 
@@ -60,7 +61,7 @@ abs_existing_dir() {
 find_project_root() {
   local dir="$1"
   while true; do
-    if [ -f "$dir/openspec/config.yaml" ] || [ -d "$dir/openspec/changes" ]; then
+    if [ -f "$dir/openspec/config.yaml" ] || [ -d "$dir/openspec/changes" ] || [ -d "$dir/openspec/fast" ]; then
       printf "%s\n" "$dir"
       return 0
     fi
@@ -81,6 +82,7 @@ fi
 
 PROJECT_ROOT="$(find_project_root "$(abs_existing_dir "$PROJECT_ROOT")")"
 CHANGES_DIR="$PROJECT_ROOT/openspec/changes"
+FAST_DIR="$PROJECT_ROOT/openspec/fast"
 SCHEMAS_DIR="$RUNTIME_DIR/schemas"
 
 if [ ! -d "$SCHEMAS_DIR" ] && [ -d "$PROJECT_ROOT/.claude/opsx/schemas" ]; then
@@ -93,6 +95,10 @@ fi
 
 ensure_changes_dir() {
   mkdir -p "$CHANGES_DIR"
+}
+
+ensure_fast_dir() {
+  mkdir -p "$FAST_DIR"
 }
 
 schema_exists() {
@@ -332,6 +338,97 @@ gate_value() {
 
   local value
   value="$(awk -v key="$key" '
+    function trim(value) {
+      sub(/^[[:space:]]*/, "", value)
+      sub(/[[:space:]]*$/, "", value)
+      gsub(/^"/, "", value)
+      gsub(/"$/, "", value)
+      return value
+    }
+    function emit(value) {
+      print value
+      emitted = 1
+      exit
+    }
+    {
+      raw = $0
+      if (raw ~ /^[^[:space:]][^:]*:/) {
+        top = raw
+        sub(/:.*/, "", top)
+        in_gates = (top == "gates")
+        in_key = 0
+        candidate = ""
+        next
+      }
+
+      if (!in_gates) {
+        next
+      }
+
+      if (in_key && raw ~ /^[[:space:]][[:space:]][^[:space:]][^:]*:/) {
+        if (candidate != "") {
+          emit(candidate)
+        }
+        in_key = 0
+        candidate = ""
+      }
+
+      line = raw
+      sub(/^[[:space:]]*/, "", line)
+      split(line, parts, ":")
+      field = parts[1]
+
+      if (field == key) {
+        rest = line
+        sub(/^[^:]+:[[:space:]]*/, "", rest)
+        rest = trim(rest)
+        if (rest != "") {
+          emit(rest)
+        }
+        in_key = 1
+        candidate = ""
+        next
+      }
+
+      if (in_key && (field == "status" || field == "at")) {
+        rest = line
+        sub(/^[^:]+:[[:space:]]*/, "", rest)
+        rest = trim(rest)
+        if (rest != "") {
+          if (field == "status") {
+            emit(rest)
+          }
+          if (candidate == "") {
+            candidate = rest
+          }
+        }
+      }
+    }
+    END {
+      if (!emitted && candidate != "") {
+        print candidate
+      }
+    }
+  ' "$file")"
+
+  if [ -n "$value" ]; then
+    printf "%s\n" "$value"
+  else
+    echo "missing"
+  fi
+}
+
+yaml_value() {
+  local dir="$1"
+  local key="$2"
+  local file="$dir/.openspec.yaml"
+  if [ ! -f "$file" ]; then
+    echo "missing"
+    return 0
+  fi
+
+  local value
+  value="$(awk -v key="$key" '
     {
       line = $0
       sub(/^[[:space:]]*/, "", line)
@@ -388,11 +485,51 @@ next_step() {
   fi
 }
 
+fast_next_step() {
+  local dir="$1"
+  local status
+  status="$(yaml_value "$dir" "status")"
+  case "$status" in
+    blocked) echo "opsx-explore"; return 0 ;;
+    escalated) echo "opsx-slice"; return 0 ;;
+  esac
+
+  if [ "$(gate_value "$dir" "classify")" = "missing" ]; then
+    echo "opsx-fast classify"
+  elif [ "$(gate_value "$dir" "preflight")" = "missing" ]; then
+    echo "opsx-fast preflight"
+  elif [ "$(gate_value "$dir" "tdd-strategy")" = "missing" ]; then
+    echo "opsx-fast tdd-strategy"
+  elif [ "$(gate_value "$dir" "verify")" = "missing" ]; then
+    echo "opsx-verify"
+  else
+    local review_required
+    review_required="$(yaml_value "$dir" "review_required")"
+    if [ "$review_required" = "false" ]; then
+      echo "opsx-archive"
+    elif [ "$(gate_value "$dir" "review")" = "missing" ]; then
+      echo "opsx-review"
+    else
+      echo "opsx-archive"
+    fi
+  fi
+}
+
 print_change() {
   local dir="$1"
   local name
   name="$(basename "$dir")"
   printf "  %-40s  [%s]\n" "$name" "$(change_stage_summary "$dir")"
+}
+
+print_fast() {
+  local dir="$1"
+  local name
+  name="$(basename "$dir")"
+  local source_type status
+  source_type="$(yaml_value "$dir" "source_type")"
+  status="$(yaml_value "$dir" "status")"
+  printf "  %-40s  [fast source=%s status=%s next=%s]\n" "$name" "${source_type:-missing}" "${status:-missing}" "$(fast_next_step "$dir")"
 }
 
 print_group() {
@@ -426,30 +563,48 @@ print_group() {
 }
 
 list_changes() {
-  if [ ! -d "$CHANGES_DIR" ]; then
-    echo "无活动变更"
-    return 0
-  fi
-
   local active=()
-  while IFS= read -r -d '' d; do
-    [[ "$(basename "$d")" == "archive" ]] && continue
-    active+=("$d")
-  done < <(find "$CHANGES_DIR" -mindepth 1 -maxdepth 1 -type d -not -name "archive" -print0 | sort -z)
+  if [ -d "$CHANGES_DIR" ]; then
+    while IFS= read -r -d '' d; do
+      [[ "$(basename "$d")" == "archive" ]] && continue
+      active+=("$d")
+    done < <(find "$CHANGES_DIR" -mindepth 1 -maxdepth 1 -type d -not -name "archive" -print0 | sort -z)
+  fi
 
-  if [ ${#active[@]} -eq 0 ]; then
+  local fast_active=()
+  if [ -d "$FAST_DIR" ]; then
+    while IFS= read -r -d '' d; do
+      [[ "$(basename "$d")" == "archive" ]] && continue
+      [ -f "$d/.openspec.yaml" ] || continue
+      fast_active+=("$d")
+    done < <(find "$FAST_DIR" -mindepth 1 -maxdepth 1 -type d -not -name "archive" -print0 | sort -z)
+  fi
+
+  if [ ${#active[@]} -eq 0 ] && [ ${#fast_active[@]} -eq 0 ]; then
     echo "无活动变更"
     return 0
   fi
 
-  echo "活动变更 (${#active[@]}):"
-  for d in "${active[@]}"; do
-    if is_group_dir "$d"; then
-      print_group "$d"
-    else
-      print_change "$d"
+  if [ ${#active[@]} -gt 0 ]; then
+    echo "活动变更 (${#active[@]}):"
+    for d in "${active[@]}"; do
+      if is_group_dir "$d"; then
+        print_group "$d"
+      else
+        print_change "$d"
+      fi
+    done
+  fi
+
+  if [ ${#fast_active[@]} -gt 0 ]; then
+    if [ ${#active[@]} -gt 0 ]; then
+      echo
     fi
-  done
+    echo "活动 fast items (${#fast_active[@]}):"
+    for d in "${fast_active[@]}"; do
+      print_fast "$d"
+    done
+  fi
 }
 
 print_status_change() {
@@ -471,6 +626,29 @@ print_status_change() {
   printf "%s    test-report.md:   %s\n" "$indent" "$(yes_no_file "$dir/test-report.md")"
   printf "%s    review-report.md: %s\n" "$indent" "$(yes_no_file "$dir/review-report.md")"
   printf "%s  Next: %s\n" "$indent" "$(next_step "$dir")"
+}
+
+print_status_fast() {
+  local dir="$1"
+  local indent="${2:-}"
+  local name
+  name="$(basename "$dir")"
+
+  printf "%sFast: %s\n" "$indent" "$name"
+  printf "%s  Source type: %s\n" "$indent" "$(yaml_value "$dir" "source_type")"
+  printf "%s  Status: %s\n" "$indent" "$(yaml_value "$dir" "status")"
+  printf "%s  Gates:\n" "$indent"
+  printf "%s    classify:     %s\n" "$indent" "$(gate_value "$dir" "classify")"
+  printf "%s    preflight:    %s\n" "$indent" "$(gate_value "$dir" "preflight")"
+  printf "%s    tdd-strategy: %s\n" "$indent" "$(gate_value "$dir" "tdd-strategy")"
+  printf "%s    verify:       %s\n" "$indent" "$(gate_value "$dir" "verify")"
+  printf "%s    review:       %s\n" "$indent" "$(gate_value "$dir" "review")"
+  printf "%s  Reports:\n" "$indent"
+  printf "%s    evidence.md:      %s\n" "$indent" "$(yes_no_file "$dir/evidence.md")"
+  printf "%s    audit-log.md:     %s\n" "$indent" "$(yes_no_file "$dir/audit-log.md")"
+  printf "%s    test-report.md:   %s\n" "$indent" "$(yes_no_file "$dir/test-report.md")"
+  printf "%s    review-report.md: %s\n" "$indent" "$(yes_no_file "$dir/review-report.md")"
+  printf "%s  Next: %s\n" "$indent" "$(fast_next_step "$dir")"
 }
 
 print_status_group() {
@@ -501,33 +679,60 @@ print_status_group() {
 status_changes() {
   echo "Project: $PROJECT_ROOT"
 
-  if [ ! -d "$CHANGES_DIR" ]; then
-    echo
-    echo "Active changes: 0"
-    return 0
-  fi
-
   local active=()
-  while IFS= read -r -d '' d; do
-    [[ "$(basename "$d")" == "archive" ]] && continue
-    active+=("$d")
-  done < <(find "$CHANGES_DIR" -mindepth 1 -maxdepth 1 -type d -not -name "archive" -print0 | sort -z)
+  if [ -d "$CHANGES_DIR" ]; then
+    while IFS= read -r -d '' d; do
+      [[ "$(basename "$d")" == "archive" ]] && continue
+      active+=("$d")
+    done < <(find "$CHANGES_DIR" -mindepth 1 -maxdepth 1 -type d -not -name "archive" -print0 | sort -z)
+  fi
 
   echo
   echo "Active changes: ${#active[@]}"
-  if [ ${#active[@]} -eq 0 ]; then
+
+  local d
+  if [ ${#active[@]} -gt 0 ]; then
+    for d in "${active[@]}"; do
+      echo
+      if is_group_dir "$d"; then
+        print_status_group "$d"
+      else
+        print_status_change "$d"
+      fi
+    done
+  fi
+
+  local fast_active=()
+  if [ -d "$FAST_DIR" ]; then
+    while IFS= read -r -d '' d; do
+      [[ "$(basename "$d")" == "archive" ]] && continue
+      [ -f "$d/.openspec.yaml" ] || continue
+      fast_active+=("$d")
+    done < <(find "$FAST_DIR" -mindepth 1 -maxdepth 1 -type d -not -name "archive" -print0 | sort -z)
+  fi
+
+  if [ ${#fast_active[@]} -gt 0 ]; then
+    echo
+    echo "Active fast items: ${#fast_active[@]}"
+    for d in "${fast_active[@]}"; do
+      echo
+      print_status_fast "$d"
+    done
+  fi
+}
+
+resolve_fast_target_dir() {
+  local target="$1"
+  validate_component "fast item" "$target"
+
+  local candidate="$FAST_DIR/$target"
+  if [ -f "$candidate/.openspec.yaml" ]; then
+    (cd "$candidate" && pwd -P)
     return 0
   fi
 
-  local d
-  for d in "${active[@]}"; do
-    echo
-    if is_group_dir "$d"; then
-      print_status_group "$d"
-    else
-      print_status_change "$d"
-    fi
-  done
+  echo "错误: 找不到 fast item '$target'" >&2
+  return 1
 }
 
 init_change() {
@@ -731,6 +936,10 @@ case "$command" in
   resolve)
     shift
     resolve_target_dir "${1:-}"
+    ;;
+  resolve-fast)
+    shift
+    resolve_fast_target_dir "${1:-}"
     ;;
   -h|--help|help)
     usage

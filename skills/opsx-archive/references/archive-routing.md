@@ -2,10 +2,16 @@
 
 ## 归档目录
 
-先创建顶层 archive 目录：
+`target_kind: change` 先创建顶层 archive 目录：
 
 ```bash
 mkdir -p openspec/changes/archive
+```
+
+`target_kind: fast` 先创建 fast archive 目录：
+
+```bash
+mkdir -p openspec/fast/archive
 ```
 
 计算 slug：
@@ -26,12 +32,35 @@ mkdir -p openspec/changes/archive
 openspec/changes/archive/<archive-dir>/
 ```
 
+fast item 目标路径：
+
+```text
+openspec/fast/archive/<archive-dir>/
+```
+
 目标已存在时失败，不覆盖。
+
+## Gate 判定
+
+`target_kind: change` 归档前必须已通过 `verify` 和 `review` 两个 gates。
+
+`target_kind: fast` 归档前必须已通过 `verify` gate。fast item 的 `review_required` 控制是否需要 review gate：
+
+- `review_required: true` 或未声明：必须已通过 `review` gate。
+- `review_required: false`：不要求 `review` gate，可在 verify 通过后归档。
+
+gate 缺失时拒绝归档，不通过用户确认绕过。
 
 ## 移动
 
 ```bash
 mv <resolved-change-root> openspec/changes/archive/<archive-dir>
+```
+
+fast item 移动：
+
+```bash
+mv <resolved-fast-root> openspec/fast/archive/<archive-dir>
 ```
 
 subchange 必须移动 resolved subchange root，不能移动父 group。

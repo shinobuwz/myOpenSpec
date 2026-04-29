@@ -7,7 +7,7 @@
 OpenSpec 围绕四个原则构建：
 
 ```
-灵活而非僵化       — 主线强门控，旁路保持轻量
+灵活而非僵化       — 主线强门控，fast 快速通道保持轻量但可验证
 迭代而非瀑布       — 边构建边学习，逐步完善
 简单而非复杂       — 轻量级设置，最小化仪式感
 棕地优先           — 适用于现有代码库，不限于绿地项目
@@ -15,7 +15,7 @@ OpenSpec 围绕四个原则构建：
 
 ### 为什么这些原则重要
 
-**灵活而非僵化。** OpenSpec 当前采用“强主线 + 明确旁路”的方式保持灵活性。默认主线要求按 `plan -> plan-review -> tasks -> task-analyze -> implement -> verify -> review -> archive` 推进；但对探索、bugfix、恢复中断等场景，仍提供独立 skill 作为旁路，而不是让主线本身变得含糊。
+**灵活而非僵化。** OpenSpec 当前采用“强主线 + 明确快速通道”的方式保持灵活性。默认主线要求按 `plan -> plan-review -> tasks -> task-analyze -> implement -> verify -> review -> archive` 推进；低风险小改动和边界明确的缺陷修复走 `opsx-fast`，用更少制品保留 preflight、TDD 策略、验证证据和失败回退。
 
 **迭代而非瀑布。** 需求会变化。理解会加深。开始时看似不错的方法在查看代码库后可能不再适用。OpenSpec 拥抱这一现实。
 
@@ -25,21 +25,19 @@ OpenSpec 围绕四个原则构建：
 
 ## 整体架构
 
-OpenSpec 当前将工作组织在一个主区域中：
+OpenSpec 当前将工作组织在两个区域中：
 
 ```
 ┌──────────────────────────────────────────────────────────────────┐
 │                        openspec/                                 │
 │                                                                  │
-│                  ┌───────────────────────────────┐               │
-│                  │         changes/              │               │
-│                  │                               │               │
-│                  │  活动变更 + 已归档变更           │               │
-│                  │  每个变更 = 一个文件夹           │               │
-│                  │  包含 proposal/design/tasks/   │               │
-│                  │  specs 等制品                  │               │
-│                  │                               │               │
-│                  └───────────────────────────────┘               │
+│        ┌───────────────────────┐    ┌────────────────────────┐  │
+│        │       changes/        │    │         fast/          │  │
+│        │                       │    │                        │  │
+│        │  formal changes       │    │  active fast items     │  │
+│        │  proposal/design/     │    │  item/evidence/        │  │
+│        │  tasks/specs          │    │  root-cause            │  │
+│        └───────────────────────┘    └────────────────────────┘  │
 │                                                                  │
 └──────────────────────────────────────────────────────────────────┘
 ```
@@ -48,7 +46,9 @@ OpenSpec 当前将工作组织在一个主区域中：
 
 **变更（Changes）** 是 OpenSpec 的一等公民——每个 change 自带 proposal、specs、design、tasks 以及归档历史。
 
-这种组织方式的关键点是：所有消费方都围绕 change 目录工作。规划、关卡、实施、验证、审查都直接读取当前 change 的制品，而不是依赖项目级主规范目录。
+**Fast Items** 是快速通道工作项，位于 `openspec/fast/<id>/`。它们不生成 formal change 的 proposal/design/specs/tasks，而是记录中文 preflight、TDD 策略、验证证据和可选 bugfix 根因材料。
+
+这种组织方式的关键点是：消费方围绕真实目标目录工作。formal change 的规划、关卡、实施、验证、审查直接读取当前 change 制品；fast 流程直接读取 `item.md`、`evidence.md`、`root-cause.md`、`test-report.md` 和 gate 留档。
 
 ## 规范（Specs）
 
@@ -205,6 +205,30 @@ openspec/changes/2026-04-14-lucky-guess/
 每个 subchange 都是自包含的。父 change 只负责：
 - **切分结果**——有哪些 subchange、顺序如何、谁是当前焦点
 - **最小拓扑/路由状态**——execution_mode、recommended_order、suggested_focus，以及可选 active_subchange
+
+## Fast Items
+
+Fast item 是快速通道的最小工作项，用于低风险小改动或边界明确的缺陷修复。
+
+```text
+openspec/fast/2026-04-29-fix-status-copy/
+├── item.md
+├── .openspec.yaml
+├── evidence.md
+└── root-cause.md        # source_type: bugfix 必需
+```
+
+`source_type` 只能是 `lite` 或 `bugfix`，只表示需求来源，不代表两套流程。两者共用：
+
+```text
+classify → preflight → tdd-strategy → patch → verify → review? → archive
+```
+
+所有 fast item 在 patch 前必须记录中文共同 preflight：`意图`、`范围`、`预期影响`、`验证计划`、`升级检查`。bugfix 来源还必须记录：`现象`、`预期行为`、`观察/复现`、`根因假设`、`假设证据`、`回退触发条件`。
+
+fast 必须记录 TDD 策略。`test-first` 和 `characterization-first` 交给 `opsx-tdd`；`direct` 只适用于纯文字、注释、低风险模板等场景，并必须在 `evidence.md` 写明跳过 TDD 理由和替代验证。
+
+fast 不支持 group/subchange。一个请求需要拆分多个独立验证闭环时，创建多个 fast item；需要共享设计决策、跨模块协调或统一交付边界时，升级为 formal change。
 
 ### 为什么变更组织为文件夹
 
@@ -468,6 +492,16 @@ slice（复杂需求时） → proposal → specs → design → plan-review →
 ```
 
 最适合：大多数功能工作，希望在实施前完成需求、设计和任务的一致性检查。
+
+**fast**
+
+快速通道工作项：
+
+```text
+opsx-fast → item.md + .openspec.yaml + evidence.md → verify/review/archive
+```
+
+最适合：低风险小改动或边界明确的缺陷修复。fast schema 明确 `source_type`、`status`、`attempts`、`test_strategy`、`gates` 和 `fallback`，并禁止生成 formal change 的规划产物。
 
 ### 自定义模式
 

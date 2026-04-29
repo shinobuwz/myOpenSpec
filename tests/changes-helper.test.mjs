@@ -15,6 +15,14 @@ async function createRepo(prefix) {
   return repo;
 }
 
+async function createFastItem(repo, name, yaml = "schema: fast\nkind: fast\nsource_type: lite\nstatus: in_progress\n") {
+  const fastDir = path.join(repo, "openspec", "fast", name);
+  await mkdir(fastDir, { recursive: true });
+  await writeFile(path.join(fastDir, ".openspec.yaml"), yaml);
+  await writeFile(path.join(fastDir, "item.md"), "# Fast item\n");
+  return fastDir;
+}
+
 function run(args, options = {}) {
   return spawnSync("bash", [helper, ...args], {
     cwd: options.cwd ?? process.cwd(),
@@ -178,6 +186,162 @@ test("change helper status follows deterministic artifact and gate next-step mat
 
     await writeGates(["plan-review", "task-analyze", "verify", "review"]);
     await expectNext("opsx-archive");
+  } finally {
+    await rm(repo, { recursive: true, force: true });
+  }
+});
+
+test("change helper status lists active fast items alongside changes", async () => {
+  const repo = await createRepo("opsx-helper-fast-status-");
+  try {
+    assert.equal(run(["-p", repo, "init", "same-name", "spec-driven"]).status, 0);
+    await createFastItem(repo, "same-name");
+
+    const status = run(["-p", repo, "status"]);
+    assert.equal(status.status, 0, status.stderr);
+    assert.match(status.stdout, /Active changes: 1/);
+    assert.match(status.stdout, /Change: same-name/);
+    assert.match(status.stdout, /Active fast items: 1/);
+    assert.match(status.stdout, /Fast: same-name/);
+    assert.match(status.stdout, /Source type: lite/);
+    assert.match(status.stdout, /Next: opsx-fast classify/);
+  } finally {
+    await rm(repo, { recursive: true, force: true });
+  }
+});
+
+test("change helper list shows fast items when no formal changes exist", async () => {
+  const repo = await createRepo("opsx-helper-fast-only-list-");
+  try {
+    await createFastItem(repo, "only-fast");
+
+    const list = run(["-p", repo, "list"]);
+    assert.equal(list.status, 0, list.stderr);
+    assert.match(list.stdout, /活动 fast items \(1\):/);
+    assert.match(list.stdout, /only-fast/);
+    assert.doesNotMatch(list.stdout, /^无活动变更$/m);
+  } finally {
+    await rm(repo, { recursive: true, force: true });
+  }
+});
+
+test("change helper computes fast next step from fast gates", async () => {
+  const repo = await createRepo("opsx-helper-fast-next-");
+  const fastDir = await createFastItem(repo, "matrix");
+
+  async function writeFastYaml({ gates = [], reviewRequired = true } = {}) {
+    const lines = [
+      "schema: fast",
+      "kind: fast",
+      "source_type: bugfix",
+      "status: in_progress",
+      `review_required: ${reviewRequired ? "true" : "false"}`,
+    ];
+    if (gates.length > 0) {
+      lines.push("gates:");
+      for (const key of gates) {
+        lines.push(`  ${key}: "2026-04-29T10:00:00+08:00"`);
+      }
+    }
+    lines.push("");
+    await writeFile(path.join(fastDir, ".openspec.yaml"), lines.join("\n"));
+  }
+
+  async function expectNext(step) {
+    const status = run(["-p", repo, "status"]);
+    assert.equal(status.status, 0, status.stderr);
+    assert.match(status.stdout, new RegExp(`Next: ${step}`));
+  }
+
+  try {
+    await expectNext("opsx-fast classify");
+
+    await writeFastYaml({ gates: ["classify"] });
+    await expectNext("opsx-fast preflight");
+
+    await writeFastYaml({ gates: ["classify", "preflight"] });
+    await expectNext("opsx-fast tdd-strategy");
+
+    await writeFastYaml({ gates: ["classify", "preflight", "tdd-strategy"] });
+    await expectNext("opsx-verify");
+
+    await writeFastYaml({ gates: ["classify", "preflight", "tdd-strategy", "verify"], reviewRequired: true });
+    await expectNext("opsx-review");
+
+    await writeFastYaml({ gates: ["classify", "preflight", "tdd-strategy", "verify"], reviewRequired: false });
+    await expectNext("opsx-archive");
+  } finally {
+    await rm(repo, { recursive: true, force: true });
+  }
+});
+
+test("change helper computes fast next step from nested fast gate schema", async () => {
+  const repo = await createRepo("opsx-helper-fast-nested-gates-");
+  const fastDir = await createFastItem(repo, "nested");
+
+  try {
+    await writeFile(
+      path.join(fastDir, ".openspec.yaml"),
+      [
+        "schema: fast",
+        "kind: fast",
+        "source_type: lite",
+        "status: in_progress",
+        "review_required: false",
+        "gates:",
+        "  classify:",
+        "    status: pass",
+        "    at: \"2026-04-29T10:00:00+08:00\"",
+        "  preflight:",
+        "    status: pass",
+        "    at: \"2026-04-29T10:01:00+08:00\"",
+        "  tdd-strategy:",
+        "    status: pass",
+        "    at: \"2026-04-29T10:02:00+08:00\"",
+        "  verify:",
+        "    status: pass",
+        "    at: \"2026-04-29T10:03:00+08:00\"",
+        "  review:",
+        "    status:",
+        "    at:",
+        "",
+      ].join("\n"),
+    );
+
+    const status = run(["-p", repo, "status"]);
+    assert.equal(status.status, 0, status.stderr);
+    assert.match(status.stdout, /verify:\s+pass/);
+    assert.match(status.stdout, /Next: opsx-archive/);
+  } finally {
+    await rm(repo, { recursive: true, force: true });
+  }
+});
+
+test("change helper resolves fast items explicitly and keeps same-name changes separate", async () => {
+  const repo = await createRepo("opsx-helper-fast-resolve-");
+  try {
+    assert.equal(run(["-p", repo, "init", "same-name", "spec-driven"]).status, 0);
+    await createFastItem(repo, "same-name");
+
+    const change = run(["-p", repo, "resolve", "same-name"]);
+    assert.equal(change.status, 0, change.stderr);
+    assert.equal(change.stdout.trim(), await realpath(path.join(repo, "openspec", "changes", "same-name")));
+
+    const fast = run(["-p", repo, "resolve-fast", "same-name"]);
+    assert.equal(fast.status, 0, fast.stderr);
+    assert.equal(fast.stdout.trim(), await realpath(path.join(repo, "openspec", "fast", "same-name")));
+  } finally {
+    await rm(repo, { recursive: true, force: true });
+  }
+});
+
+test("change helper rejects unsafe fast identifiers", async () => {
+  const repo = await createRepo("opsx-helper-fast-safety-");
+  try {
+    for (const candidate of ["/tmp/escape", "../escape", ".hidden", "parent/child"]) {
+      const result = run(["-p", repo, "resolve-fast", candidate]);
+      assert.notEqual(result.status, 0, candidate);
+    }
   } finally {
     await rm(repo, { recursive: true, force: true });
   }

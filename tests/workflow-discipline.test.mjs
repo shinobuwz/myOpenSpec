@@ -6,22 +6,32 @@ async function skill(name) {
   return readFile(`skills/${name}/SKILL.md`, "utf8");
 }
 
-test("bugfix skill requires root cause before fixes", async () => {
-  const text = await skill("opsx-bugfix");
+test("fast bugfix source requires root cause before fixes", async () => {
+  const text = await skill("opsx-fast");
 
-  assert.match(text, /没有根因，不允许修复/);
-  assert.match(text, /形成单一假设/);
-  assert.match(text, /连续 3 次修复失败/);
+  assert.match(text, /source_type: lite \| bugfix/);
+  assert.match(text, /根因假设/);
+  assert.match(text, /假设证据/);
+  assert.match(text, /三次|3 次/);
 });
 
-test("verify and lite require fresh verification evidence before completion claims", async () => {
+test("codemap active chains route lightweight and bugfix work through opsx-fast", async () => {
+  const text = await readFile(".aiknowledge/codemap/index.md", "utf8");
+
+  assert.match(text, /opsx-fast 快速通道 \| active/);
+  assert.match(text, /lite \/ bugfix/);
+  assert.doesNotMatch(text, /\| bugfix 旁路 \| active \|/);
+});
+
+test("verify and fast require fresh verification evidence before completion claims", async () => {
   const verify = await skill("opsx-verify");
-  const lite = await skill("opsx-lite");
+  const fast = await skill("opsx-fast");
 
   assert.match(verify, /没有当前轮验证证据/);
   assert.match(verify, /不允许宣称完成、通过、已修复或可归档/);
-  assert.match(lite, /没有当前轮验证证据/);
-  assert.match(lite, /已修改但未验证/);
+  assert.match(fast, /验证计划/);
+  assert.match(fast, /evidence\.md/);
+  assert.match(fast, /不得宣称完成|不能宣称完成/);
 });
 
 test("tasks skill requires bite-sized executable tasks", async () => {
@@ -101,22 +111,22 @@ test("proposal generation contracts default to Chinese artifact prose", async ()
   assert.doesNotMatch(schema, /\*\*Impact\*\*/);
 });
 
-test("aiknowledge logs and lite-runs default to Chinese prose", async () => {
+test("aiknowledge logs and historical lite-runs default to Chinese prose", async () => {
   const lifecycle = await readFile(".aiknowledge/README.md", "utf8");
   const liteReadme = await readFile(".aiknowledge/lite-runs/README.md", "utf8");
-  const lite = await skill("opsx-lite");
+  const fastItem = await readFile("runtime/schemas/fast/templates/item.md", "utf8");
+  const fastEvidence = await readFile("runtime/schemas/fast/templates/evidence.md", "utf8");
   const log = await readFile(".aiknowledge/logs/2026-04.md", "utf8");
   const liteRunFiles = (await readdir(".aiknowledge/lite-runs/2026-04"))
     .filter((name) => name.endsWith(".md"));
 
-  for (const text of [lifecycle, liteReadme, lite]) {
+  for (const text of [lifecycle, liteReadme, fastItem]) {
     assert.match(text, /默认使用中文/);
     assert.match(text, /意图/);
     assert.match(text, /范围/);
-    assert.match(text, /变更/);
+    assert.match(text, /变更|预期影响/);
     assert.match(text, /验证/);
-    assert.match(text, /风险/);
-    assert.match(text, /知识沉淀/);
+    assert.match(text, /风险|升级检查|TDD/);
     assert.doesNotMatch(text, /^- Intent$/m);
     assert.doesNotMatch(text, /^- Scope$/m);
     assert.doesNotMatch(text, /^- Changes$/m);
@@ -130,6 +140,12 @@ test("aiknowledge logs and lite-runs default to Chinese prose", async () => {
     assert.doesNotMatch(text, /^## Risks$/m);
     assert.doesNotMatch(text, /^## Knowledge$/m);
   }
+
+  assert.match(fastEvidence, /默认使用中文/);
+  assert.match(fastEvidence, /命令证据/);
+  assert.match(fastEvidence, /人工观察证据/);
+  assert.match(fastEvidence, /跳过 TDD 理由/);
+  assert.match(fastEvidence, /被否定的尝试/);
 
   assert.doesNotMatch(log, /^- summary: [A-Za-z]/m);
   assert.doesNotMatch(log, /^- reason: [A-Za-z]/m);
@@ -190,11 +206,35 @@ test("verify owns spec compliance and review owns release risk", async () => {
   assert.doesNotMatch(review, /两段审查顺序/);
 });
 
+test("reusable skills support fast targets without formal artifacts", async () => {
+  const tdd = await skill("opsx-tdd");
+  const verify = await skill("opsx-verify");
+  const verifyPrompt = await readFile("skills/opsx-verify/references/reviewer-prompt.md", "utf8");
+  const review = await skill("opsx-review");
+  const report = await skill("opsx-report");
+  const reportSources = await readFile("skills/opsx-report/references/stage-data-sources.md", "utf8");
+
+  assert.match(tdd, /target_kind: fast/);
+  assert.match(tdd, /fast root.*test-report\.md|test-report\.md.*fast root/s);
+
+  assert.match(verify, /target_kind: fast/);
+  assert.match(verify, /item\.md/);
+  assert.match(verify, /evidence\.md/);
+  assert.match(verifyPrompt, /fast artifacts/);
+  assert.match(verifyPrompt, /不要求 specs\/design\/tasks|不要求.*formal artifacts/);
+
+  assert.match(review, /target_kind: fast/);
+  assert.match(review, /不要求.*proposal\/design\/specs\/tasks|不要求.*formal artifacts/s);
+
+  assert.match(report, /target_kind: fast/);
+  assert.match(reportSources, /fast item/);
+  assert.match(reportSources, /缺少 specs\/design\/tasks.*不中断|不中断.*specs\/design\/tasks/s);
+});
+
 test("touched skill descriptions avoid workflow step summaries", async () => {
   const touched = [
-    "opsx-bugfix",
+    "opsx-fast",
     "opsx-verify",
-    "opsx-lite",
     "opsx-tasks",
     "opsx-review",
     "opsx-explore",

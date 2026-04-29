@@ -23,7 +23,7 @@
 
 用于 archive 后，变更涉及模块有代码或架构事实变化。
 
-1. 形成 `source_refs`：`change:<name>`、`audit-log:<path>`、`test-report:<path>`、`review-report:<path>`。
+1. 形成 `source_refs`：`change:<name>`、`fast:<id>`、`audit-log:<path>`、`test-report:<path>`、`review-report:<path>`。
 2. 读取受影响模块文档和必要代码。
 3. 判断职责、关键文件、隐式约束或 chain 是否漂移。
 4. 只刷新变更涉及的部分，并更新 frontmatter verification 字段。

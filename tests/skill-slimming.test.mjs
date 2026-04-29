@@ -26,7 +26,7 @@ test("skill slimming checker reports current inventory without failing baseline"
   assert.equal(result.status, 0, result.stderr);
   const payload = JSON.parse(result.stdout);
 
-  assert.equal(payload.summary.totalSkills, 19);
+  assert.equal(payload.summary.totalSkills, 18);
   assert.ok(payload.summary.totalLines < 3200);
   assert.ok(payload.skills.some((entry) => entry.name === "opsx-explore" && entry.lines <= 180));
   assert.ok(payload.skills.every((entry) => entry.path.endsWith("/SKILL.md")));
@@ -49,10 +49,10 @@ test("guidance skills use thin entries with reference navigation", async () => {
       references: ["lifecycle-workflow.md", "templates.md"],
       mustKeep: [/\.aiknowledge\/README\.md/, /index-first|先读.*index/, /月度日志/, /codemap-only|只写.*codemap/],
     },
-    "opsx-lite": {
-      maxLines: 140,
-      references: ["workflow.md", "lite-run-template.md"],
-      mustKeep: [/低风险/, /升级.*opsx-slice/, /fresh verification evidence|fresh evidence/, /默认使用中文/],
+    "opsx-fast": {
+      maxLines: 120,
+      references: ["route.md", "item-schema.md", "gate-profile.md", "escalation.md"],
+      mustKeep: [/source_type/, /lite.*bugfix/s, /preflight/, /TDD|tdd/, /三次|3 次/, /opsx-tdd/, /opsx-verify/],
     },
     "opsx-slice": {
       maxLines: 135,
@@ -63,11 +63,6 @@ test("guidance skills use thin entries with reference navigation", async () => {
       maxLines: 130,
       references: ["engine-loop.md", "record-templates.md"],
       mustKeep: [/目标/, /量化/, /停止|卡住/, /summary\.md/],
-    },
-    "opsx-bugfix": {
-      maxLines: 100,
-      references: ["workflow.md"],
-      mustKeep: [/根因/, /连续 3 次|3 次/, /opsx-knowledge|知识/],
     },
   };
 

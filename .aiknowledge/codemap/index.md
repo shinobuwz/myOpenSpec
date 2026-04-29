@@ -19,6 +19,6 @@
 | 链路 | 状态 | 最近复核 | 涉及模块 | 说明 |
 |------|------|----------|----------|------|
 | spec-driven 主流程 | active | 2026-04-13 | openspec-skills | plan→plan-review→tasks→task-analyze→implement→verify→review→archive |
-| bugfix 旁路 | active | 2026-04-13 | openspec-skills | bugfix（跳过规划，直接修复） |
+| opsx-fast 快速通道 | active | 2026-04-29 | openspec-skills | lite / bugfix 需求来源共用 fast 流程；跳过 formal planning，但保留 preflight、TDD 策略、verify/review/archive 门控 |
 | skill 分发 | active | 2026-04-27 | openspec-skills → skill-sync | skill 文件变更后通过 opsx install-skills 安装到全局，或通过 sync.sh 同步项目 adapter |
 | [stage-packet 数据流](chains/stage-packet-flow.md) | superseded | 2026-04-14 | openspec-skills, stage-packet-protocol | ~~已废弃：原 Packet/run-report-data.json 流已被 audit-log.md 直读模式替代~~ |

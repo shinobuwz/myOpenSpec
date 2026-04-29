@@ -1,0 +1,90 @@
+name: fast
+version: 1
+description: 统一快速通道 schema；source_type 只表示 lite 或 bugfix 需求来源，共用同一套 fast 流程。
+root: openspec/fast/<id>
+source_type:
+  enum:
+    - lite
+    - bugfix
+  description: 需求来源类型，不代表两套流程。
+status:
+  enum:
+    - in_progress
+    - blocked
+    - escalated
+    - verified
+    - archived
+attempts:
+  count:
+    type: integer
+    minimum: 0
+  max_fast_attempts:
+    type: integer
+    default: 3
+test_strategy:
+  mode:
+    enum:
+      - test-first
+      - characterization-first
+      - direct
+  reason:
+    type: string
+  alternative_verification:
+    type: string
+  direct_requires_skip_reason: true
+gates:
+  classify:
+    required: true
+  preflight:
+    required: true
+    blocks_patch_until_passed: true
+  tdd-strategy:
+    required: true
+    blocks_patch_until_passed: true
+  verify:
+    required_for_archive: true
+  review:
+    required_when_risk_review_needed: true
+fallback:
+  trigger:
+    enum:
+      - third_failed_attempt
+      - scope_exceeded
+      - unclear_boundary
+      - unclear_test_strategy
+      - ""
+  status:
+    enum:
+      - blocked
+      - escalated
+      - ""
+  route:
+    enum:
+      - opsx-explore
+      - opsx-slice
+      - ""
+  reason:
+    type: string
+artifacts:
+  - id: item
+    generates: item.md
+    template: item.md
+    required: true
+  - id: state
+    generates: .openspec.yaml
+    required: true
+  - id: evidence
+    generates: evidence.md
+    template: evidence.md
+    required: true
+  - id: root-cause
+    generates: root-cause.md
+    template: root-cause.md
+    required_when:
+      source_type: bugfix
+forbidden_artifacts:
+  - proposal.md
+  - design.md
+  - specs/
+  - tasks.md
+archive_root: openspec/fast/archive/<id>

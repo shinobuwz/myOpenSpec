@@ -34,7 +34,7 @@
 ---
 status: active
 created_at: YYYY-MM-DD
-created_from: change:<name>
+created_from: change:<name> | fast:<id>
 last_verified_at: YYYY-MM-DD
 last_verified_by: opsx-codemap
 verification_basis: codemap-refresh
@@ -42,6 +42,7 @@ applies_to:
   - src/module
 source_refs:
   - change:<name>
+  - fast:<id>
 superseded_by:
 merged_from:
 deprecated_reason:
@@ -66,7 +67,7 @@ deprecated_reason:
 ---
 status: active
 created_at: YYYY-MM-DD
-created_from: change:<name>
+created_from: change:<name> | fast:<id>
 last_verified_at: YYYY-MM-DD
 last_verified_by: opsx-codemap
 verification_basis: codemap-refresh
@@ -74,6 +75,7 @@ applies_to:
   - src/module-a
 source_refs:
   - change:<name>
+  - fast:<id>
 superseded_by:
 merged_from:
 deprecated_reason:

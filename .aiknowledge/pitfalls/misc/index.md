@@ -29,3 +29,4 @@
 | proposal-contract-default-language | [Proposal contracts must declare the default language](proposal-contract-default-language.md) | active | 2026-04-28 | opsx, proposal, skill, schema, language |
 | skill-entry-files-should-stay-thin | [Skill 入口文件应保持薄入口](skill-entry-files-should-stay-thin.md) | active | 2026-04-28 | opsx, skill-design, progressive-disclosure, references |
 | aiknowledge-records-default-language | [`.aiknowledge` 事实记录必须声明默认中文](aiknowledge-records-default-language.md) | active | 2026-04-28 | aiknowledge, lite-run, audit-log, skill, language |
+| skill-frontmatter-description-quote-colon | [SKILL.md frontmatter description 含冒号时必须加引号](skill-frontmatter-description-quote-colon.md) | active | 2026-04-29 | opsx, skill, yaml, frontmatter |

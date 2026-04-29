@@ -37,14 +37,15 @@
 ---
 status: active
 created_at: YYYY-MM-DD
-created_from: metadata-backfill | change:<name> | commit:<sha>
+created_from: metadata-backfill | change:<name> | fast:<id> | commit:<sha>
 last_verified_at: YYYY-MM-DD
-last_verified_by: opsx-knowledge | opsx-archive | opsx-bugfix
-verification_basis: archive | bugfix | review | repository-audit
+last_verified_by: opsx-knowledge | opsx-archive | opsx-fast
+verification_basis: archive | fast | review | repository-audit
 applies_to:
   - module/or/path
 source_refs:
   - change:<name>
+  - fast:<id>
 superseded_by:
 merged_from:
 deprecated_reason:

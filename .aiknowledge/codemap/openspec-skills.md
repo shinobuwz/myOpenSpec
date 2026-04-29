@@ -2,9 +2,9 @@
 status: active
 created_at: 2026-04-13
 created_from: metadata-backfill
-last_verified_at: 2026-04-28
+last_verified_at: 2026-04-29
 last_verified_by: opsx-archive
-verification_basis: changes-status-detail + thin-npm-opsx archive + aiknowledge-lifecycle change + opsx-lite-workflow archive + superpowers-discipline archive + subagent-workflow-adapter archive + subagent-smoke-eval archive + workflow-skill-adoption archive + parallel-worker-policy archive + skill-md-slimming archive + guidance-skill-slimming archive + gate-workflow-skill-slimming archive + subagent-dispatch-model-policy archive + subagent-roster-lifecycle-policy archive
+verification_basis: changes-status-detail + thin-npm-opsx archive + aiknowledge-lifecycle change + opsx-lite-workflow archive + superpowers-discipline archive + subagent-workflow-adapter archive + subagent-smoke-eval archive + workflow-skill-adoption archive + parallel-worker-policy archive + skill-md-slimming archive + guidance-skill-slimming archive + gate-workflow-skill-slimming archive + subagent-dispatch-model-policy archive + subagent-roster-lifecycle-policy archive + 2026-04-29-opsx-fast-workflow archive
 applies_to:
   - skills
   - skills/opsx-*/references
@@ -42,15 +42,17 @@ source_refs:
   - review-report:openspec/changes/archive/2026-04-28-skill-md-slimming-03-migrate-gate-skills/review-report.md
   - review-report:openspec/changes/archive/2026-04-28-subagent-dispatch-model-policy/review-report.md
   - review-report:openspec/changes/archive/2026-04-28-subagent-roster-lifecycle-policy/review-report.md
+  - change:2026-04-29-opsx-fast-workflow
+  - review-report:openspec/changes/archive/2026-04-29-opsx-fast-workflow/review-report.md
 superseded_by:
 ---
 
 # openspec-skills
 
 ## 职责
-OpenSpec 工作流的单一真相源。所有 skill 以 Markdown 文件存放于 `skills/<name>/SKILL.md`，由 `opsx install-skills` 分发到全局 `~/.agents/skills`，必要时由 `scripts/sync.sh` 分发为项目 adapter `.claude/skills/<name>/SKILL.md`。通用 change runtime 位于 `runtime/bin/changes.sh`，其中 `list` 是紧凑清单，`status` 是项目级诊断视图。Skill 入口瘦身政策位于 `docs/skill-slimming-policy.md`，当前库存位于 `docs/skill-slimming-inventory.md`，检查脚本为 `scripts/check-skill-slimming.mjs`；03 归档后 checker 输出为 `totalLines=1388`、`oversized=0`、`duplicates=0`。全部主要 OPSX workflow skills 已采用薄入口 + 同 skill `references/` 的渐进披露结构，包括 guidance、gate/reviewer、execution-support、implement 和 archive。可选模型 eval 位于 `scripts/eval-subagent-smoke.mjs` 与 `evals/subagent-smoke/`，用于手动验证 Codex subagent runtime trace，不参与默认 `npm test`。长期知识维护规则位于 `.aiknowledge/README.md`，审计入口索引为 `.aiknowledge/log.md`，月度日志位于 `.aiknowledge/logs/YYYY-MM.md`，`opsx-knowledge` 与 `opsx-codemap` 必须共享同一套 lifecycle 语义。
+OpenSpec 工作流的单一真相源。所有 skill 以 Markdown 文件存放于 `skills/<name>/SKILL.md`，由 `opsx install-skills` 分发到全局 `~/.agents/skills`，必要时由 `scripts/sync.sh` 分发为项目 adapter `.claude/skills/<name>/SKILL.md`。通用 change runtime 位于 `runtime/bin/changes.sh`，其中 `list` 是紧凑清单，`status` 是项目级诊断视图；`openspec/fast/` 是统一快速通道运行态，`source_type: lite | bugfix` 只表示需求来源。Skill 入口瘦身政策位于 `docs/skill-slimming-policy.md`，当前库存位于 `docs/skill-slimming-inventory.md`，检查脚本为 `scripts/check-skill-slimming.mjs`；当前 checker 输出为 `totalLines=1372`、`oversized=0`、`duplicates=0`。全部主要 OPSX workflow skills 已采用薄入口 + 同 skill `references/` 的渐进披露结构，包括 guidance、gate/reviewer、execution-support、implement 和 archive。可选模型 eval 位于 `scripts/eval-subagent-smoke.mjs` 与 `evals/subagent-smoke/`，用于手动验证 Codex subagent runtime trace，不参与默认 `npm test`。长期知识维护规则位于 `.aiknowledge/README.md`，审计入口索引为 `.aiknowledge/log.md`，月度日志位于 `.aiknowledge/logs/YYYY-MM.md`，`opsx-knowledge` 与 `opsx-codemap` 必须共享同一套 lifecycle 语义。
 
-## Skill 清单（19 个）
+## Skill 清单（18 个）
 
 | Skill | 角色 | 前置关卡 |
 |-------|------|----------|
@@ -58,7 +60,7 @@ OpenSpec 工作流的单一真相源。所有 skill 以 Markdown 文件存放于
 | `opsx-slice` | 创建父 change + subchanges，初始化每个 subchange 的 proposal，并定义执行拓扑（execution_mode / recommended_order / 可选 suggested_focus） | 无 |
 | `opsx-plan` | 为当前 resolved change root 生成/修订 specs + design，必要时小修 proposal | 无 |
 | `opsx-continue` | 恢复中断的当前 change；group 场景下先按 active_subchange，否则按 suggested_focus / recommended_order / 唯一 subchange 路由 | 无 |
-| `opsx-lite` | 轻量小改动工作流，不创建正式 change，记录 lite-run 事实留档；范围扩大时升级到 slice→plan | 无 |
+| `opsx-fast` | 统一快速通道；用 `source_type: lite \| bugfix` 标记需求来源，共用 preflight、TDD 策略、验证证据、失败回退和归档流程 | 无 |
 | `opsx-subagent` | Codex 默认、Claude 兼容的 subagent 派发契约；统一 worker/reviewer/explorer 的角色边界、dispatch class、默认模型推荐、roster lifecycle、写入边界、status 和 fallback 规则 | 无 |
 | `opsx-plan-review` | spec↔plan 一致性审查（关卡1），硬性门控；通过 `opsx-subagent` reviewer contract 派遣 1 个只读 reviewer，输出 StageResult JSON，写 audit-log.md | design 已生成 |
 | `opsx-tasks` | 将 design+specs 转化为带 TDD 标签、bite-sized、可执行验证方法的 tasks.md | `gates.plan-review` |
@@ -68,8 +70,7 @@ OpenSpec 工作流的单一真相源。所有 skill 以 Markdown 文件存放于
 | `opsx-verify` | Spec compliance + 四维验证（完整性/正确性/一致性/测试留档），要求 fresh evidence 支撑完成声明，通过 `opsx-subagent` reviewer contract 派遣 1 个只读 reviewer 输出 StageResult JSON | 实施完成 |
 | `opsx-review` | 独立代码审查，聚焦 code quality / release risk；通过 `opsx-subagent` reviewer contract 审查，发现 compliance drift 时路由回 verify | `gates.verify` 已通过 |
 | `opsx-report` | 读取 `audit-log.md`、`test-report.md`、`review-report.md` 及产出物文件，渲染 self-contained HTML RunReport | 无（按需触发） |
-| `opsx-archive` | 归档变更 + knowledge + codemap + git；归档后的 knowledge/codemap worker 通过 `opsx-subagent` contract 限定写入边界 | `gates.verify` + `gates.review` |
-| `opsx-bugfix` | 精简 bugfix 流程：定位→根因调查→单一假设→测试策略→修复→验证→经验沉淀 | 无 |
+| `opsx-archive` | 归档变更或 fast item + knowledge + codemap + git；归档后的 knowledge/codemap worker 通过 `opsx-subagent` contract 限定写入边界 | `gates.verify` + `gates.review` |
 | `opsx-codemap` | 维护 `.aiknowledge/codemap/` 架构认知地图 | 无（独立工具） |
 | `opsx-knowledge` | 经验沉淀到 `.aiknowledge/pitfalls/` | 无（独立工具） |
 | `opsx-auto-drive` | 自动驱动引擎，AI 自主执行完整工作流循环 | 无（编排层） |
@@ -99,13 +100,20 @@ plan ───────────────────→ proposal → s
                            ▼
                          verify ─────────── (关卡3: tasks↔code)
                            │
-                         review ─────────── (代码审查)
+                        review ─────────── (代码审查)
                            │
                          archive ──→ 归档 + knowledge + codemap + git
 ```
 
-**旁路流程**：
-- `bugfix`：跳过规划，直接 定位→修复→验证→经验沉淀
+**快速通道**：
+- `fast`：跳过 formal planning artifacts，但必须记录 `item.md`、`.openspec.yaml`、`evidence.md`；`source_type: bugfix` 还需要 `root-cause.md`
+- `source_type: lite | bugfix` 只表示需求来源，不分裂流程
+- preflight 字段：`意图`、`范围`、`预期影响`、`验证计划`、`升级检查`
+- bugfix 补充字段：`现象`、`预期行为`、`观察/复现`、`根因假设`、`假设证据`、`回退触发条件`
+- fast 必须记录 TDD 策略；`direct` 必须记录跳过 TDD 理由和替代验证
+- 三次失败后停止 patch，状态置为 `blocked` 或 `escalated`，路由 `opsx-explore` 或 `opsx-slice`
+
+**旁路/独立工具**：
 - `codemap` / `knowledge`：独立维护工具，不参与主流程
 - `auto-drive`：编排层，自主驱动上述完整循环
 
@@ -123,12 +131,12 @@ plan ───────────────────→ proposal → s
 - 会派发 subagent 的 workflow skills（implement、plan-review、task-analyze、verify、review、explore、archive follow-up）必须显式引用 `opsx-subagent`，只保留自身 stage 的输入、输出、gate 和产物规则；禁止在各 skill 中维护另一套 Claude-only 或平台分叉的派发说明。
 - `opsx-implement` 的 implementation workers 是 serial-by-default / 默认串行；只有任务簇独立、disjoint write sets、明确 file ownership 且不并发修改 public interface、migration、schema、config、package/build scripts 时，主 agent 才能派发多个 workers。共享 artifact（`tasks.md`、`test-report.md`、`.openspec.yaml`、`audit-log.md`、`review-report.md`）始终由主 agent 串行写入。
 - `skills/*/SKILL.md` 应保持薄入口，只保留触发条件、执行入口、gate 和关键安全约束；长流程、模板、示例和可复用公共契约迁入 `references/` 或 canonical skill/doc，通过渐进披露按需读取。
-- guidance-heavy skills 已迁移：`opsx-explore/references/` 承载探索 workflow、对话模式和 codemap-first 细节；`opsx-knowledge/references/` 与 `opsx-codemap/references/` 承载 `.aiknowledge` lifecycle 流程和模板；`opsx-lite`、`opsx-slice`、`opsx-auto-drive`、`opsx-bugfix` 的长模板和详细流程也在各自 `references/`。
+- guidance-heavy skills 已迁移：`opsx-explore/references/` 承载探索 workflow、对话模式和 codemap-first 细节；`opsx-knowledge/references/` 与 `opsx-codemap/references/` 承载 `.aiknowledge` lifecycle 流程和模板；`opsx-fast`、`opsx-slice`、`opsx-auto-drive` 的长模板和详细流程也在各自 `references/`。
 - gate/reviewer 和执行支撑 skills 已迁移：`opsx-plan-review`、`opsx-task-analyze`、`opsx-verify`、`opsx-review`、`opsx-tasks`、`opsx-tdd`、`opsx-report`、`opsx-implement`、`opsx-archive` 的长 prompt、审查维度、模板、risk taxonomy、worker contract 和 archive routing 均位于各自 `references/` 或 canonical docs。
 - `scripts/check-skill-slimming.mjs` 是 skill 瘦身的仓库级静态检查入口，用于报告 oversized `SKILL.md` 和重复公共契约候选；`docs/skill-slimming-inventory.md` 必须与脚本输出一致，03 后 oversized 与 duplicate candidates 均为 0。
 - `opsx-verify` 拥有 Spec Compliance Review；`opsx-review` 不重复完整 compliance，只审查 code quality / release risk，发现明显需求遗漏或范围外实现时输出 `VERIFY_DRIFT` 并路由回 verify。
-- `opsx-bugfix` 在修复前必须说明 root cause 与证据；同一问题连续 3 次修复失败时停止叠加补丁并重新审视假设或架构。
-- `opsx-verify` 与 `opsx-lite` 的完成声明必须基于当前轮 fresh verification evidence；未验证只能说明待验证，不能宣称通过。
+- `opsx-fast` 的 `source_type: bugfix` 在修复前必须说明 root cause 与证据；同一 fast item 连续 3 次修复失败时停止叠加补丁并路由 `opsx-explore` 或 `opsx-slice`。
+- `opsx-verify` 与 `opsx-fast` 的完成声明必须基于当前轮 fresh verification evidence；未验证只能说明待验证，不能宣称通过。
 - `opsx-report` 从 `audit-log.md`（plan-review/verify）、`test-report.md`（tdd）、`review-report.md`（review）读取各 stage 决定，结合 `.openspec.yaml` gates 字段渲染 HTML；不读取 `run-report-data.json`
 - `opsx-knowledge` 和 `opsx-codemap` 在写入 `.aiknowledge/` 前必须读取 `.aiknowledge/README.md`；新增、更新、合并、废弃或 lint 修复后必须追加当前月度日志 `.aiknowledge/logs/YYYY-MM.md`
 - OpenSpec change、commit、audit-log、test-report 和 review-report 是默认事实来源；`codemap/` 与 `pitfalls/` 是 LLM 维护层，可以演化但必须保留 `source_refs`

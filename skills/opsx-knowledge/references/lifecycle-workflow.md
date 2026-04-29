@@ -20,7 +20,7 @@ pitfall 条目采用事件驱动维护：
 ## 新增或更新条目
 
 1. 收集上下文：用户输入、最近修改、测试结果、提交或 change 产物。
-2. 形成稳定 `source_refs`：`change:<name>`、`commit:<sha>`、`audit-log:<path>`、`test-report:<path>`、`review-report:<path>`。
+2. 形成稳定 `source_refs`：`change:<name>`、`fast:<id>`、`commit:<sha>`、`audit-log:<path>`、`test-report:<path>`、`review-report:<path>`。
 3. 读取领域 index，查找高度相似条目。
 4. 相似条目仍成立时刷新验证信息；不再成立时标记 `superseded` 或 `deprecated`。
 5. 新条目使用 kebab-case 文件名，写入 `.aiknowledge/pitfalls/<domain>/<slug>.md`。

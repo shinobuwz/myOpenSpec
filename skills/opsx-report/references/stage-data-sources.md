@@ -8,6 +8,8 @@
 4. 读取 `review-report.md` 获取 code-review 的最后一条 decision。
 5. 读取 `specs/`、`design.md`、`tasks.md` 渲染 trace 矩阵和 task 列表。
 
+fast item 读取 `item.md`、`evidence.md`、`root-cause.md`（如存在）作为上下文；缺少 specs/design/tasks 时对应板块显示"数据不可用"，不中断报告。
+
 ## Gate 状态
 
 - audit-log 中最后一条 stage decision 为 pass/pass_with_warnings：pass。
@@ -22,4 +24,4 @@
 - `audit-log.md` 不存在：相关 gate pending。
 - `test-report.md` 不存在：TDD 显示无数据或无 TDD 任务。
 - `review-report.md` 不存在：review 显示未执行。
-- specs/design/tasks 缺失：对应板块显示"数据不可用"。
+- specs/design/tasks 缺失：对应板块显示"数据不可用"；fast item 缺少这些 formal artifacts 属于正常降级。

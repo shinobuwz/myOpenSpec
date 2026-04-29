@@ -21,12 +21,12 @@
    - `openspec/config.yaml` 的 `context:` 和 `rules:` 会为规划类产出物提供统一约束。
 
 2. **长期共享知识**
-   - `.aiknowledge/codemap/` 保存模块地图、关键文件和跨模块链路，供 `explore`、`slice`、`plan`、`implement`、`bugfix` 复用。
-   - `.aiknowledge/pitfalls/` 保存可复用经验，供 `slice`、`plan`、`tdd`、`bugfix` 复用。
+   - `.aiknowledge/codemap/` 保存模块地图、关键文件和跨模块链路，供 `explore`、`slice`、`plan`、`implement`、`fast` 复用。
+   - `.aiknowledge/pitfalls/` 保存可复用经验，供 `slice`、`plan`、`tdd`、`fast` 复用。
    - `archive` 结束时会强制回写 `knowledge` 和 `codemap`，让后续 workflow 继续复用这些知识。
    - 这两类知识都采用**事件驱动 freshness 管理**：命中时复核、漂移时标记 `stale`、被推翻时标记 `superseded`，而不是按时间自动过期。
 
-3. **change 级运行状态与留档**
+3. **change / fast 级运行状态与留档**
 
    change 运行期间产生的共享文件：
 
@@ -40,6 +40,8 @@
    | `run-report.html` | opsx-report | 人工阅读 | self-contained HTML 报告，按需生成 |
 
    grouped change 场景下，父级只保留 `.openspec.group.yaml` 这个最小路由状态；subchange 下的 `proposal.md`、`specs/`、`design.md`、`tasks.md`、`test-report.md` 和代码本身仍是权威源。执行 `archive` 时，归档单元默认也是 resolved subchange root，目标落在顶层 `openspec/changes/archive/<archive-dir>/`；若 `<group>-<subchange>` 已带 `YYYY-MM-DD-` 前缀则不再重复加日期。不得在活动父 group 下创建 `subchanges/archive/`。若仍有剩余 subchange，父 group 会被清理为只剩 `.openspec.group.yaml` 与 `subchanges/`；若最后一个 subchange 也归档完成，则直接删除父 group 目录。
+
+   fast item 运行期间位于 `openspec/fast/<id>/`，最小文件为 `item.md`、`.openspec.yaml`、`evidence.md`；`source_type: bugfix` 还需要 `root-cause.md`。fast 不创建 `proposal.md`、`design.md`、`specs/` 或 `tasks.md`，完成后归档到 `openspec/fast/archive/<id>/`。
 
    **Gate Review Protocol**（详见 `docs/stage-packet-protocol.md`）：
 
@@ -111,38 +113,30 @@ opsx-plan
 - 功能边界已经明确
 - 只需要快速进入规划和实现
 
-### 4. 轻量小改动
+### 4. 快速通道
 
 ```text
-opsx-lite
--> lite-run
+opsx-fast
+-> opsx-tdd?
+-> opsx-verify
+-> opsx-review?
+-> opsx-archive
 ```
 
 适合：
 
 - 低风险文档、skill 文案、脚本或配置小修
+- 现象明确、影响范围小、边界清楚的缺陷修复
 - 不需要 proposal / design / spec / tasks
-- 可以用明确命令快速验证
+- 可以在 patch 前明确 preflight 和 TDD 策略
 
-如果发现多模块、新 capability、设计取舍、兼容性风险或测试策略不明确，应升级为：
+`opsx-fast` 使用 `source_type: lite | bugfix` 标记需求来源；二者只是来源类型，不是两套流程。共同 preflight 必须记录 `意图`、`范围`、`预期影响`、`验证计划`、`升级检查`；bugfix 来源还要记录 `现象`、`预期行为`、`观察/复现`、`根因假设`、`假设证据`、`回退触发条件`。
 
-```text
-opsx-slice
--> opsx-plan
-```
-
-### 5. 明确缺陷修复
+fast 必须记录 TDD 策略。涉及可测试行为时使用 `opsx-tdd`；选择 `direct` 时必须写明跳过 TDD 理由和替代验证。三次失败后停止继续 patch，将状态置为 `blocked` 或 `escalated`，并路由：
 
 ```text
-opsx-bugfix
--> opsx-knowledge
+opsx-explore 或 opsx-slice
 ```
-
-适合：
-
-- 现象明确
-- 影响范围小
-- 不值得新建完整 change 文档
 
 ## 强制关卡
 
@@ -191,11 +185,10 @@ AI：已归档，知识与 codemap 已更新
 | 全栈 / 多模块需求，先判断怎么拆 | `opsx-slice` |
 | 创建新 change | `opsx-plan` |
 | 恢复中断的当前 change | `opsx-continue` |
-| 低风险小改动 | `opsx-lite` |
+| 低风险小改动或明确缺陷修复 | `opsx-fast` |
 | 开始主线实施 | `opsx-implement` |
 | 做最终一致性检查 | `opsx-verify` |
 | 归档 | `opsx-archive` |
-| 快速修复 bug | `opsx-bugfix` |
 
 ## 注意
 

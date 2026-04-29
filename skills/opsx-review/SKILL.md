@@ -12,6 +12,7 @@ description: opsx-verify 通过后使用，用于在归档前审查已实现 cha
 - `<name>` 可以是单个 change、父 change 或 `group/subchange` 简写。
 - 执行前先运行 `opsx changes resolve <name>` 获取真实 change root。
 - 下文 `proposal.md`、`review-report.md`、`.openspec.yaml` 均指 resolved change root。
+- `target_kind: fast` 时，使用 `opsx changes resolve-fast <id>` 获取 fast root；读取 `item.md`、`evidence.md`、`root-cause.md`（如存在）作为风险上下文，不要求 formal artifacts。
 
 ## 输入 / 输出边界
 
@@ -19,6 +20,7 @@ description: opsx-verify 通过后使用，用于在归档前审查已实现 cha
 - `.openspec.yaml`
 - `git diff`
 - `proposal.md`、`design.md`、`specs/`（仅作为风险上下文）
+- fast target 的 `item.md`、`evidence.md`、`root-cause.md`（如存在）
 - 命中的 `.aiknowledge/codemap/` 和 `.aiknowledge/pitfalls/`
 - 既有 `review-report.md`（追加时）
 
