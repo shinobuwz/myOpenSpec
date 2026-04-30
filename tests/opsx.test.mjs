@@ -64,7 +64,7 @@ test("cli entrypoint runs when invoked through an npm-style symlink", async () =
     });
 
     assert.equal(result.status, 0, result.stderr);
-    assert.equal(result.stdout, "1.0.2\n");
+    assert.equal(result.stdout, "1.0.3\n");
   } finally {
     await rm(root, { recursive: true, force: true });
   }

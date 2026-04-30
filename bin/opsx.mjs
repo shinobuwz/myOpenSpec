@@ -332,7 +332,7 @@ export async function main(argv = process.argv.slice(2), io = {}) {
   }
 
   if (command === "--version" || command === "-v") {
-    stdout.write("1.0.2\n");
+    stdout.write("1.0.3\n");
     return 0;
   }
 

@@ -1,6 +1,6 @@
 {
   "name": "@shinobuwz/opsx",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Thin global launcher for OPSX workflows",
   "type": "module",
   "bin": {
