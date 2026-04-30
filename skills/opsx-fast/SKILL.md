@@ -11,10 +11,13 @@ description: "统一快速通道。适用于低风险小改动或边界明确的
 
 1. 判定请求是否适合 fast。
 2. 创建或打开 `openspec/fast/<id>/`；新建时调用 `opsx fast init <id> --source-type lite|bugfix`。
+   - 若 classify/preflight 判断会改代码、CLI/API 行为、发布制品、跨文件内容，或用户要求可追溯分支，必须改用 `opsx fast init <id> --source-type lite|bugfix --branch`。
+   - 不需要切分支时，必须在 `evidence.md` 记录判断理由。
 3. 写入 `source_type: lite | bugfix`；该字段只表示需求来源，不表示两套流程。
 4. 在 patch 前完成中文 preflight 和 TDD 策略记录。
 5. 需要测试先行时转入 `opsx-tdd`；实现后转入 `opsx-verify`、按需 `opsx-review`、最后 `opsx-archive`。
 6. 越界或三次失败时停止 patch，路由 `opsx-explore` 或 `opsx-slice`。
+7. 命中关键节点且存在当前 fast 相关变更时，使用 `opsx git checkpoint --message "<message>" --all` 或显式路径 checkpoint；commit hook/提交守卫失败时先处理守卫。
 
 ## 读写边界
 
@@ -44,6 +47,7 @@ description: "统一快速通道。适用于低风险小改动或边界明确的
 - 每个 fast item 必须记录 TDD 策略：`test-first`、`characterization-first` 或 `direct`。
 - `direct` 必须在 `evidence.md` 记录跳过 TDD 理由和替代验证。
 - 失败尝试达到 3 次后停止继续 patch，将状态置为 `blocked` 或 `escalated`。
+- 若 `.openspec.yaml` 记录 `git.branch_required: true` 或 `git.change_branch`，归档前必须由 `opsx-archive` 调用 `opsx git merge-back fast <id>` 合回 `git.base_branch`。
 
 ## 退出契约
 

@@ -101,6 +101,82 @@ ensure_fast_dir() {
   mkdir -p "$FAST_DIR"
 }
 
+git_available() {
+  command -v git >/dev/null 2>&1 && git -C "$PROJECT_ROOT" rev-parse --is-inside-work-tree >/dev/null 2>&1
+}
+
+git_current_branch() {
+  git -C "$PROJECT_ROOT" branch --show-current
+}
+
+git_status_short() {
+  git -C "$PROJECT_ROOT" status --short
+}
+
+git_branch_exists() {
+  local branch="$1"
+  git -C "$PROJECT_ROOT" show-ref --verify --quiet "refs/heads/$branch"
+}
+
+prepare_change_branch() {
+  local name="$1"
+  GIT_BASE_BRANCH=""
+  GIT_BASE_SHA=""
+  GIT_CHANGE_BRANCH=""
+  GIT_CREATED_AT=""
+
+  if ! git_available; then
+    return 0
+  fi
+
+  local dirty
+  dirty="$(git_status_short)"
+  if [ -n "$dirty" ]; then
+    echo "错误: Git 工作区不干净，不能为 change 创建 lifecycle 分支" >&2
+    echo "$dirty" >&2
+    exit 1
+  fi
+
+  local current_branch
+  current_branch="$(git_current_branch)"
+  if [ -z "$current_branch" ]; then
+    echo "错误: 当前处于 detached HEAD，不能为 change 创建 lifecycle 分支" >&2
+    exit 1
+  fi
+
+  GIT_BASE_BRANCH="$current_branch"
+  GIT_BASE_SHA="$(git -C "$PROJECT_ROOT" rev-parse HEAD)"
+  GIT_CHANGE_BRANCH="opsx/$name"
+  GIT_CREATED_AT="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+
+  if [ "$current_branch" != "$GIT_CHANGE_BRANCH" ]; then
+    if git_branch_exists "$GIT_CHANGE_BRANCH"; then
+      git -C "$PROJECT_ROOT" switch "$GIT_CHANGE_BRANCH" >/dev/null
+    else
+      git -C "$PROJECT_ROOT" switch -c "$GIT_CHANGE_BRANCH" >/dev/null
+    fi
+  fi
+}
+
+write_git_metadata() {
+  if [ -z "${GIT_CHANGE_BRANCH:-}" ]; then
+    return 0
+  fi
+
+  cat <<EOF
+git:
+  base_branch: $GIT_BASE_BRANCH
+  base_sha: $GIT_BASE_SHA
+  change_branch: $GIT_CHANGE_BRANCH
+  created_at: $GIT_CREATED_AT
+  last_checkpoint_sha:
+  branch_required: true
+  merged: false
+  merge_commit:
+  pending_merge_reason:
+EOF
+}
+
 schema_exists() {
   local schema="$1"
   [ -f "$SCHEMAS_DIR/$schema/schema.yaml" ]
@@ -745,13 +821,17 @@ init_change() {
     exit 1
   fi
 
+  prepare_change_branch "$name"
   ensure_changes_dir
   local change_dir="$CHANGES_DIR/$name"
   local meta_file="$change_dir/.openspec.yaml"
   mkdir -p "$change_dir/specs"
 
   if [ ! -f "$meta_file" ]; then
-    printf "schema: %s\ncreated: %s\n" "$schema" "$(date +%F)" > "$meta_file"
+    {
+      printf "schema: %s\ncreated: %s\n" "$schema" "$(date +%F)"
+      write_git_metadata
+    } > "$meta_file"
     echo "已初始化变更: openspec/changes/$name"
   else
     echo "变更已存在: openspec/changes/$name"

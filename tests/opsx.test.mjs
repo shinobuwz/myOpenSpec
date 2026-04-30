@@ -31,6 +31,21 @@ function createIo() {
   };
 }
 
+function git(repo, args) {
+  return spawnSync("git", args, {
+    cwd: repo,
+    encoding: "utf8",
+  });
+}
+
+async function initGitRepo(repo) {
+  assert.equal(git(repo, ["init", "-b", "main"]).status, 0);
+  assert.equal(git(repo, ["config", "user.email", "opsx@example.test"]).status, 0);
+  assert.equal(git(repo, ["config", "user.name", "OPSX Test"]).status, 0);
+  assert.equal(git(repo, ["add", "."]).status, 0);
+  assert.equal(git(repo, ["commit", "-m", "init"]).status, 0);
+}
+
 test("help lists supported thin subcommands", async () => {
   const capture = createIo();
   const code = await main(["--help"], capture.io);
@@ -279,6 +294,67 @@ test("fast init creates root cause artifact for bugfix source", async () => {
     assert.match(await readFile(path.join(fastRoot, "item.md"), "utf8"), /source_type: bugfix/);
     assert.match(capture.stdout, /Initialized fast item/);
     assert.match(capture.stdout, /root-cause\.md/);
+  } finally {
+    await rm(repo, { recursive: true, force: true });
+  }
+});
+
+test("fast init can opt into a local lifecycle branch", async () => {
+  const repo = await mkdtemp(path.join(tmpdir(), "opsx-fast-branch-"));
+  try {
+    assert.equal(await main(["init-project", "-p", repo], createIo().io), 0);
+    await initGitRepo(repo);
+
+    const capture = createIo();
+    assert.equal(await main(["fast", "-p", repo, "init", "demo-fast", "--source-type", "lite", "--branch"], capture.io), 0);
+
+    assert.equal(git(repo, ["branch", "--show-current"]).stdout.trim(), "fast/demo-fast");
+    const meta = await readFile(path.join(repo, "openspec", "fast", "demo-fast", ".openspec.yaml"), "utf8");
+    assert.match(meta, /git:/);
+    assert.match(meta, /base_branch: main/);
+    assert.match(meta, /change_branch: fast\/demo-fast/);
+    assert.match(meta, /branch_required: true/);
+  } finally {
+    await rm(repo, { recursive: true, force: true });
+  }
+});
+
+test("git merge-back merges a recorded lifecycle branch to its base branch", async () => {
+  const repo = await mkdtemp(path.join(tmpdir(), "opsx-merge-back-"));
+  try {
+    assert.equal(await main(["init-project", "-p", repo], createIo().io), 0);
+    await initGitRepo(repo);
+    assert.equal(await main(["fast", "-p", repo, "init", "demo-fast", "--source-type", "lite", "--branch"], createIo().io), 0);
+    await writeFile(path.join(repo, "feature.txt"), "feature\n");
+    assert.equal(git(repo, ["add", "."]).status, 0);
+    assert.equal(git(repo, ["commit", "-m", "feature"]).status, 0);
+
+    const capture = createIo();
+    assert.equal(await main(["git", "-p", repo, "merge-back", "fast", "demo-fast"], capture.io), 0, capture.stderr);
+
+    assert.equal(git(repo, ["branch", "--show-current"]).stdout.trim(), "main");
+    assert.equal(existsSync(path.join(repo, "feature.txt")), true);
+    const meta = await readFile(path.join(repo, "openspec", "fast", "demo-fast", ".openspec.yaml"), "utf8");
+    assert.match(meta, /merged: true/);
+    assert.match(meta, /merge_commit: [0-9a-f]{40}/);
+  } finally {
+    await rm(repo, { recursive: true, force: true });
+  }
+});
+
+test("git checkpoint commits selected lifecycle changes", async () => {
+  const repo = await mkdtemp(path.join(tmpdir(), "opsx-checkpoint-"));
+  try {
+    assert.equal(await main(["init-project", "-p", repo], createIo().io), 0);
+    await initGitRepo(repo);
+    await writeFile(path.join(repo, "checkpoint.txt"), "checkpoint\n");
+
+    const capture = createIo();
+    assert.equal(await main(["git", "-p", repo, "checkpoint", "--message", "checkpoint", "--all"], capture.io), 0, capture.stderr);
+
+    assert.equal(git(repo, ["status", "--short"]).stdout, "");
+    assert.equal(git(repo, ["log", "-1", "--pretty=%s"]).stdout.trim(), "checkpoint");
+    assert.match(capture.stdout, /Checkpoint committed:/);
   } finally {
     await rm(repo, { recursive: true, force: true });
   }

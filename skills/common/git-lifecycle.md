@@ -1,13 +1,16 @@
 # Git Lifecycle Contract
 
-本规则供 `opsx-slice`、`opsx-plan`、`opsx-implement`、`opsx-verify`、`opsx-review`、`opsx-archive` 引用。目标是让 change 生命周期和 Git 状态可追溯，但不把所有中间操作都强制提交。
+本规则供 `opsx-slice`、`opsx-plan`、`opsx-implement`、`opsx-verify`、`opsx-review`、`opsx-archive` 引用。目标是让 change 生命周期和 Git 状态可追溯；能由 `opsx` CLI 执行的门控必须调用 CLI，不只停留在文档约束。
 
 ## 基本原则
 
-- Git 检查是强制的，Git 提交是有条件的。
+- Git 检查是强制的。
+- 正式 change 的本地分支和关键节点 checkpoint 是强制的。
+- fast item 是否切分支由 classify/preflight 按实际风险判定；一旦判定需要分支，后续 merge-back 和 checkpoint 同正式 change。
 - 不在同一个 commit 中混入无关用户改动。
 - 不自动执行 destructive 操作，例如 `git reset --hard`、强制覆盖或删除未提交内容。
-- merge、rebase、push 和远端分支删除默认需要用户明确授权。
+- rebase、push 和远端分支删除默认需要用户明确授权。
+- archive merge-back 不是可选建议；只要 metadata 记录过 lifecycle branch，归档前必须执行 `opsx git merge-back <change|fast> <id>`。
 - OpenSpec artifact 和代码变更应能通过 branch、commit、gate 证据互相追溯。
 
 ## Metadata
@@ -21,12 +24,13 @@ git:
   change_branch: opsx/<change-id>
   created_at: <iso-time>
   last_checkpoint_sha: <sha>
+  branch_required: true
   merged: false
   merge_commit:
   pending_merge_reason:
 ```
 
-fast item 可选记录 `git` 字段；涉及代码修改时建议记录。
+fast item 可选记录 `git` 字段；涉及代码修改、CLI/API 行为、发布制品、跨文件修改或用户明确要求可追溯时，必须使用 `opsx fast init <id> --source-type <lite|bugfix> --branch` 或等价 CLI lifecycle 分支入口。
 
 ## Must Check
 
@@ -52,10 +56,10 @@ git rev-parse HEAD
 
 创建正式 change 时：
 
-- 如果当前仓库可用 Git，应记录 `base_branch` 和 `base_sha`。
-- 如果当前不在 change 分支，应建议创建 `opsx/<change-id>`。
+- 如果当前仓库可用 Git，`opsx changes init <change-id>` 必须在写入 artifact 前创建或切换到 `opsx/<change-id>` 本地分支，并记录 `base_branch`、`base_sha` 和 `change_branch`。
 - 若已有同名分支，应切换到该分支并检查工作区。
-- 不应在未确认的脏工作区上直接创建 change 分支，除非这些变更明确属于当前 change。
+- 不得在脏工作区上创建正式 change 分支；CLI 必须拒绝。
+- fast item 由 agent 在 classify/preflight 判断：需要分支时使用 `opsx fast init ... --branch` 创建 `fast/<id>`；不需要分支时可以保持当前分支，但必须在 evidence 中记录理由。
 
 ## Workspace Model
 
@@ -67,7 +71,7 @@ git rev-parse HEAD
 
 ## Checkpoint Policy
 
-命中以下条件时，应建议 checkpoint：
+命中以下条件时，必须及时 checkpoint；属于当前 change/fast 的变更无需另行征求用户同意：
 
 - `plan-review` 通过。
 - `task-analyze` 通过。
@@ -80,7 +84,19 @@ git rev-parse HEAD
 - 任一 gate 从 fail 或 blocking 进入 pass；checkpoint 说明必须包含失败摘要、修正范围和重新验证命令。
 - `archive` 完成。
 
-checkpoint 可以是 Git commit，也可以是 OpenSpec 证据记录。若存在代码变更，优先建议 Git commit。
+checkpoint 优先使用 Git commit。存在可提交变更时调用：
+
+```sh
+opsx git checkpoint --message "<message>" --all
+```
+
+或显式限定路径：
+
+```sh
+opsx git checkpoint --message "<message>" -- <path>...
+```
+
+如果 commit hook 或提交守卫失败，必须先处理守卫结果，不得绕过。
 
 推荐 commit message：
 
@@ -99,11 +115,11 @@ checkpoint 可以是 Git commit，也可以是 OpenSpec 证据记录。若存在
 
 ## Stage Usage
 
-- `opsx-plan`：初始化 `git` metadata，确认或建议 change branch，plan 完成后建议规划制品 checkpoint。
-- `opsx-implement`：启动前检查当前分支和 dirty tree，每个顶层 task 完成后执行 checkpoint 判断。
+- `opsx-plan`：初始化 `git` metadata，确认 change branch，plan 完成后执行规划制品 checkpoint。
+- `opsx-implement`：启动前检查当前分支和 dirty tree，每个顶层 task 完成后执行 checkpoint。
 - `opsx-verify`：检查 dirty tree 是否影响证据 freshness，记录验证时的 `HEAD` 和 diff 状态。
 - `opsx-review`：审查范围必须覆盖 `HEAD`、staged diff、unstaged diff，并声明是否存在未提交变更。
-- `opsx-archive`：归档前检查 dirty tree，确认 merge 状态或记录 `pending_merge_reason`，归档完成后建议 archive checkpoint。
+- `opsx-archive`：归档前检查 dirty tree；如果 `git.change_branch` 或 `git.branch_required: true` 存在，先执行 `opsx git merge-back <change|fast> <id>`，再归档；归档完成后执行 archive checkpoint。
 
 ## Archive Gate
 
@@ -115,7 +131,7 @@ git:
   merge_commit: <sha>
 ```
 
-或：
+或（仅允许没有 lifecycle branch 的 fast item，或 Git 不可用的环境）：
 
 ```yaml
 git:
@@ -123,7 +139,7 @@ git:
   pending_merge_reason: "<明确原因>"
 ```
 
-不得在既未合并、又没有 `pending_merge_reason` 的情况下静默归档。
+不得在既未合并、又没有 `pending_merge_reason` 的情况下静默归档；记录过 lifecycle branch 时不得用 `pending_merge_reason` 替代 merge-back，除非 merge 冲突或仓库状态阻塞并已明确写入原因。
 
 ## Branch Cleanup
 

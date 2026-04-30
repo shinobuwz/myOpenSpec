@@ -9,13 +9,16 @@ import { homedir } from "node:os";
 export function usage() {
   return `Usage:
   opsx changes [--project <path>] <command> [...args]
-  opsx fast [--project <path>] init <id> --source-type <lite|bugfix>
+  opsx fast [--project <path>] init <id> --source-type <lite|bugfix> [--branch]
+  opsx git [--project <path>] merge-back <change|fast> <id>
+  opsx git [--project <path>] checkpoint --message <message> (--all|-- <path...>)
   opsx install-skills
   opsx init-project --project <path>
 
 Commands:
   changes         Run OpenSpec change helper operations
   fast            Initialize fast item artifacts from package templates
+  git             Run OPSX git lifecycle gates
   install-skills  Install OPSX skills and common contracts globally
   init-project    Initialize project-local openspec state
 `;
@@ -86,6 +89,81 @@ export function resolveProjectRoot({
 
 function packageRoot() {
   return path.dirname(path.dirname(fileURLToPath(import.meta.url)));
+}
+
+function runGit(projectRoot, args, { allowFailure = false } = {}) {
+  const result = spawnSync("git", args, {
+    cwd: projectRoot,
+    encoding: "utf8",
+  });
+  if (!allowFailure && result.status !== 0) {
+    const detail = result.stderr || result.stdout || args.join(" ");
+    throw new Error(`git ${args.join(" ")} failed: ${detail.trim()}`);
+  }
+  return result;
+}
+
+function isGitRepo(projectRoot) {
+  return runGit(projectRoot, ["rev-parse", "--is-inside-work-tree"], { allowFailure: true }).status === 0;
+}
+
+function gitOutput(projectRoot, args) {
+  return runGit(projectRoot, args).stdout.trim();
+}
+
+function gitStatusShort(projectRoot) {
+  return gitOutput(projectRoot, ["status", "--short"]);
+}
+
+function branchExists(projectRoot, branch) {
+  return runGit(projectRoot, ["show-ref", "--verify", "--quiet", `refs/heads/${branch}`], { allowFailure: true }).status === 0;
+}
+
+function lifecycleBranchName(kind, id) {
+  return `${kind === "change" ? "opsx" : "fast"}/${id}`;
+}
+
+export function prepareLifecycleBranch({ projectRoot, kind, id, branchRequired = true } = {}) {
+  if (!projectRoot) {
+    throw new Error("projectRoot is required");
+  }
+  assertSafeFastId(id);
+  if (!["change", "fast"].includes(kind)) {
+    throw new Error("kind must be change or fast");
+  }
+  if (!isGitRepo(projectRoot)) {
+    if (branchRequired) {
+      throw new Error("Git lifecycle branch requires a git repository");
+    }
+    return undefined;
+  }
+
+  const dirty = gitStatusShort(projectRoot);
+  if (dirty) {
+    throw new Error(`Git workspace is not clean; cannot create lifecycle branch:\n${dirty}`);
+  }
+
+  const baseBranch = gitOutput(projectRoot, ["branch", "--show-current"]);
+  if (!baseBranch) {
+    throw new Error("Cannot create lifecycle branch from detached HEAD");
+  }
+  const baseSha = gitOutput(projectRoot, ["rev-parse", "HEAD"]);
+  const changeBranch = lifecycleBranchName(kind, id);
+
+  if (baseBranch !== changeBranch) {
+    if (branchExists(projectRoot, changeBranch)) {
+      runGit(projectRoot, ["switch", changeBranch]);
+    } else {
+      runGit(projectRoot, ["switch", "-c", changeBranch]);
+    }
+  }
+
+  return {
+    baseBranch,
+    baseSha,
+    changeBranch,
+    createdAt: new Date().toISOString(),
+  };
 }
 
 export function initProject(projectRoot) {
@@ -188,12 +266,15 @@ function parseFastInitArgs(args) {
 
   const id = args[1];
   let sourceType;
+  let branch = false;
 
   for (let index = 2; index < args.length; index += 1) {
     const arg = args[index];
     if (arg === "--source-type") {
       index += 1;
       sourceType = args[index];
+    } else if (arg === "--branch") {
+      branch = true;
     } else {
       throw new Error(`Unknown fast init argument: ${arg}`);
     }
@@ -206,7 +287,7 @@ function parseFastInitArgs(args) {
     throw new Error("fast init requires --source-type lite|bugfix");
   }
 
-  return { id, sourceType };
+  return { id, sourceType, branch };
 }
 
 function readTemplate(schema, templateName) {
@@ -225,7 +306,25 @@ function fillTemplate(text, { id, sourceType, created }) {
     .replace("- source_type: lite", `- source_type: ${sourceType}`);
 }
 
-function fastStateYaml({ id, sourceType, created }) {
+function gitStateYaml(git) {
+  if (!git) {
+    return [];
+  }
+  return [
+    "git:",
+    `  base_branch: ${git.baseBranch}`,
+    `  base_sha: ${git.baseSha}`,
+    `  change_branch: ${git.changeBranch}`,
+    `  created_at: ${git.createdAt}`,
+    "  last_checkpoint_sha:",
+    "  branch_required: true",
+    "  merged: false",
+    "  merge_commit:",
+    "  pending_merge_reason:",
+  ];
+}
+
+function fastStateYaml({ id, sourceType, created, git }) {
   return [
     "schema: fast",
     "kind: fast",
@@ -261,11 +360,12 @@ function fastStateYaml({ id, sourceType, created }) {
     "  status:",
     "  route:",
     "  reason:",
+    ...gitStateYaml(git),
     "",
   ].join("\n");
 }
 
-export function initFastItem({ projectRoot, id, sourceType, now = new Date() } = {}) {
+export function initFastItem({ projectRoot, id, sourceType, now = new Date(), branch = false } = {}) {
   if (!projectRoot) {
     throw new Error("projectRoot is required");
   }
@@ -275,6 +375,7 @@ export function initFastItem({ projectRoot, id, sourceType, now = new Date() } =
   }
 
   const created = todayString(now);
+  const git = branch ? prepareLifecycleBranch({ projectRoot, kind: "fast", id, branchRequired: true }) : undefined;
   const fastRoot = path.join(projectRoot, "openspec", "fast", id);
   if (fs.existsSync(fastRoot)) {
     throw new Error(`fast item already exists: ${fastRoot}`);
@@ -291,7 +392,7 @@ export function initFastItem({ projectRoot, id, sourceType, now = new Date() } =
     fillTemplate(readTemplate("fast", "evidence.md"), { id, sourceType, created }),
     "utf8",
   );
-  fs.writeFileSync(path.join(fastRoot, ".openspec.yaml"), fastStateYaml({ id, sourceType, created }), "utf8");
+  fs.writeFileSync(path.join(fastRoot, ".openspec.yaml"), fastStateYaml({ id, sourceType, created, git }), "utf8");
 
   const createdFiles = ["item.md", "evidence.md", ".openspec.yaml"];
   if (sourceType === "bugfix") {
@@ -308,11 +409,235 @@ export function initFastItem({ projectRoot, id, sourceType, now = new Date() } =
 
 function runFast(args, projectRoot, io) {
   try {
-    const { id, sourceType } = parseFastInitArgs(args);
-    const result = initFastItem({ projectRoot, id, sourceType });
+    const { id, sourceType, branch } = parseFastInitArgs(args);
+    const result = initFastItem({ projectRoot, id, sourceType, branch });
     io.stdout.write(`Initialized fast item: ${result.fastRoot}\n`);
     for (const file of result.createdFiles) {
       io.stdout.write(`- ${file}\n`);
+    }
+    return 0;
+  } catch (error) {
+    io.stderr.write(`${error instanceof Error ? error.message : String(error)}\n`);
+    return 1;
+  }
+}
+
+function parseNestedGitMetadata(text) {
+  const metadata = {};
+  const lines = text.split(/\r?\n/);
+  let inGit = false;
+  for (const line of lines) {
+    if (/^[^:\s][^:]*:/.test(line)) {
+      inGit = line.startsWith("git:");
+      continue;
+    }
+    if (!inGit) {
+      continue;
+    }
+    const match = line.match(/^  ([A-Za-z0-9_-]+):\s*(.*)$/);
+    if (match) {
+      metadata[match[1]] = match[2].replace(/^"|"$/g, "");
+    }
+  }
+  return metadata;
+}
+
+function updateNestedGitMetadata(filePath, updates) {
+  const lines = fs.readFileSync(filePath, "utf8").split(/\n/);
+  const gitIndex = lines.findIndex((line) => line === "git:");
+  if (gitIndex === -1) {
+    throw new Error(`Missing git metadata: ${filePath}`);
+  }
+
+  let end = lines.length;
+  for (let index = gitIndex + 1; index < lines.length; index += 1) {
+    if (/^[^:\s][^:]*:/.test(lines[index])) {
+      end = index;
+      break;
+    }
+  }
+
+  for (const [key, value] of Object.entries(updates)) {
+    const replacement = `  ${key}: ${value ?? ""}`;
+    let replaced = false;
+    for (let index = gitIndex + 1; index < end; index += 1) {
+      if (lines[index].startsWith(`  ${key}:`)) {
+        lines[index] = replacement;
+        replaced = true;
+        break;
+      }
+    }
+    if (!replaced) {
+      lines.splice(end, 0, replacement);
+      end += 1;
+    }
+  }
+
+  fs.writeFileSync(filePath, lines.join("\n"), "utf8");
+}
+
+function resolveLifecycleTarget(projectRoot, kind, id) {
+  if (kind === "fast") {
+    assertSafeFastId(id);
+    const fastRoot = path.join(projectRoot, "openspec", "fast", id);
+    const meta = path.join(fastRoot, ".openspec.yaml");
+    if (!fs.existsSync(meta)) {
+      throw new Error(`fast item not found: ${id}`);
+    }
+    return fastRoot;
+  }
+  if (kind === "change") {
+    const helper = path.join(packageRoot(), "runtime", "bin", "changes.sh");
+    const result = spawnSync("bash", [helper, "-p", projectRoot, "resolve", id], {
+      cwd: projectRoot,
+      encoding: "utf8",
+    });
+    if (result.status !== 0) {
+      throw new Error((result.stderr || result.stdout || `change not found: ${id}`).trim());
+    }
+    return result.stdout.trim();
+  }
+  throw new Error("merge-back target kind must be change or fast");
+}
+
+export function mergeBackLifecycleBranch({ projectRoot, kind, id } = {}) {
+  if (!projectRoot) {
+    throw new Error("projectRoot is required");
+  }
+  if (!isGitRepo(projectRoot)) {
+    throw new Error("merge-back requires a git repository");
+  }
+  const targetRoot = resolveLifecycleTarget(projectRoot, kind, id);
+  const metaPath = path.join(targetRoot, ".openspec.yaml");
+  const relativeMetaPath = path.relative(projectRoot, metaPath);
+  const metadata = parseNestedGitMetadata(fs.readFileSync(metaPath, "utf8"));
+  if (metadata.branch_required !== "true" && !metadata.change_branch) {
+    return { skipped: true, reason: "no lifecycle branch recorded" };
+  }
+  const { base_branch: baseBranch, change_branch: changeBranch } = metadata;
+  if (!baseBranch || !changeBranch) {
+    throw new Error(`Incomplete git metadata in ${relativeMetaPath}`);
+  }
+  const dirty = gitStatusShort(projectRoot);
+  if (dirty) {
+    throw new Error(`Git workspace is not clean; cannot merge back:\n${dirty}`);
+  }
+  if (!branchExists(projectRoot, changeBranch)) {
+    throw new Error(`Lifecycle branch not found: ${changeBranch}`);
+  }
+  if (!branchExists(projectRoot, baseBranch)) {
+    throw new Error(`Base branch not found: ${baseBranch}`);
+  }
+
+  const current = gitOutput(projectRoot, ["branch", "--show-current"]);
+  if (current !== changeBranch) {
+    runGit(projectRoot, ["switch", changeBranch]);
+  }
+
+  runGit(projectRoot, ["switch", baseBranch]);
+  runGit(projectRoot, ["merge", "--no-ff", changeBranch, "-m", `Merge ${changeBranch} for ${id}`]);
+  const mergeCommit = gitOutput(projectRoot, ["rev-parse", "HEAD"]);
+  updateNestedGitMetadata(path.join(projectRoot, relativeMetaPath), {
+    merged: "true",
+    merge_commit: mergeCommit,
+    pending_merge_reason: "",
+  });
+  return { skipped: false, baseBranch, changeBranch, mergeCommit };
+}
+
+function parseCheckpointArgs(args) {
+  let message;
+  let all = false;
+  const paths = [];
+  let pathMode = false;
+
+  for (let index = 0; index < args.length; index += 1) {
+    const arg = args[index];
+    if (pathMode) {
+      paths.push(arg);
+      continue;
+    }
+    if (arg === "--") {
+      pathMode = true;
+    } else if (arg === "--message" || arg === "-m") {
+      index += 1;
+      message = args[index];
+    } else if (arg === "--all") {
+      all = true;
+    } else {
+      throw new Error(`Unknown checkpoint argument: ${arg}`);
+    }
+  }
+
+  if (!message) {
+    throw new Error("checkpoint requires --message <message>");
+  }
+  if (all && paths.length > 0) {
+    throw new Error("checkpoint accepts either --all or explicit paths, not both");
+  }
+  if (!all && paths.length === 0) {
+    throw new Error("checkpoint requires --all or explicit paths after --");
+  }
+  return { message, all, paths };
+}
+
+export function createGitCheckpoint({ projectRoot, message, all = false, paths = [] } = {}) {
+  if (!projectRoot) {
+    throw new Error("projectRoot is required");
+  }
+  if (!message) {
+    throw new Error("message is required");
+  }
+  if (!isGitRepo(projectRoot)) {
+    throw new Error("checkpoint requires a git repository");
+  }
+
+  if (all) {
+    runGit(projectRoot, ["add", "-A"]);
+  } else if (paths.length > 0) {
+    runGit(projectRoot, ["add", "--", ...paths]);
+  } else {
+    throw new Error("checkpoint requires --all or explicit paths");
+  }
+
+  const staged = gitOutput(projectRoot, ["diff", "--cached", "--name-only"]);
+  if (!staged) {
+    return { skipped: true, reason: "no staged changes" };
+  }
+
+  runGit(projectRoot, ["commit", "-m", message]);
+  return {
+    skipped: false,
+    commit: gitOutput(projectRoot, ["rev-parse", "HEAD"]),
+  };
+}
+
+function runGitLifecycle(args, projectRoot, io) {
+  try {
+    const command = args[0];
+    if (command === "checkpoint") {
+      const options = parseCheckpointArgs(args.slice(1));
+      const result = createGitCheckpoint({ projectRoot, ...options });
+      if (result.skipped) {
+        io.stdout.write(`Checkpoint skipped: ${result.reason}\n`);
+      } else {
+        io.stdout.write(`Checkpoint committed: ${result.commit}\n`);
+      }
+      return 0;
+    }
+    if (command !== "merge-back") {
+      throw new Error(`Unknown git lifecycle command: ${command ?? ""}`);
+    }
+    const kind = args[1];
+    const id = args[2];
+    if (!kind || !id || args.length > 3) {
+      throw new Error("Usage: opsx git merge-back <change|fast> <id>");
+    }
+    const result = mergeBackLifecycleBranch({ projectRoot, kind, id });
+    if (result.skipped) {
+      io.stdout.write(`Merge-back skipped: ${result.reason}\n`);
+    } else {
+      io.stdout.write(`Merged ${result.changeBranch} into ${result.baseBranch}: ${result.mergeCommit}\n`);
     }
     return 0;
   } catch (error) {
@@ -346,6 +671,12 @@ export async function main(argv = process.argv.slice(2), io = {}) {
     const { project, args } = parseProjectOption(argv.slice(1));
     const projectRoot = resolveProjectRoot({ project });
     return runFast(args, projectRoot, { stdout, stderr });
+  }
+
+  if (command === "git") {
+    const { project, args } = parseProjectOption(argv.slice(1));
+    const projectRoot = resolveProjectRoot({ project });
+    return runGitLifecycle(args, projectRoot, { stdout, stderr });
   }
 
   if (command === "init-project") {

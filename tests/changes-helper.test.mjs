@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
 import { existsSync } from "node:fs";
-import { mkdtemp, mkdir, realpath, rm, writeFile } from "node:fs/promises";
+import { mkdtemp, mkdir, readFile, realpath, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 
@@ -31,6 +31,21 @@ function run(args, options = {}) {
   });
 }
 
+function git(repo, args) {
+  return spawnSync("git", args, {
+    cwd: repo,
+    encoding: "utf8",
+  });
+}
+
+async function initGitRepo(repo) {
+  assert.equal(git(repo, ["init", "-b", "main"]).status, 0);
+  assert.equal(git(repo, ["config", "user.email", "opsx@example.test"]).status, 0);
+  assert.equal(git(repo, ["config", "user.name", "OPSX Test"]).status, 0);
+  assert.equal(git(repo, ["add", "."]).status, 0);
+  assert.equal(git(repo, ["commit", "-m", "init"]).status, 0);
+}
+
 test("change helper accepts project flag before and after commands", async () => {
   const repo = await createRepo("opsx-helper-");
   try {
@@ -40,6 +55,43 @@ test("change helper accepts project flag before and after commands", async () =>
     const list = run(["list", "-p", repo], { cwd: tmpdir() });
     assert.equal(list.status, 0);
     assert.match(list.stdout, /demo/);
+  } finally {
+    await rm(repo, { recursive: true, force: true });
+  }
+});
+
+test("change init in a git repo creates a local change branch and metadata", async () => {
+  const repo = await createRepo("opsx-helper-git-change-");
+  try {
+    await initGitRepo(repo);
+
+    const result = run(["-p", repo, "init", "demo", "spec-driven"]);
+
+    assert.equal(result.status, 0, result.stderr);
+    assert.equal(git(repo, ["branch", "--show-current"]).stdout.trim(), "opsx/demo");
+
+    const meta = await readFile(path.join(repo, "openspec", "changes", "demo", ".openspec.yaml"), "utf8");
+    assert.match(meta, /git:/);
+    assert.match(meta, /base_branch: main/);
+    assert.match(meta, /change_branch: opsx\/demo/);
+    assert.match(meta, /branch_required: true/);
+    assert.match(meta, /merged: false/);
+  } finally {
+    await rm(repo, { recursive: true, force: true });
+  }
+});
+
+test("change init refuses to branch from a dirty git workspace", async () => {
+  const repo = await createRepo("opsx-helper-git-dirty-");
+  try {
+    await initGitRepo(repo);
+    await writeFile(path.join(repo, "dirty.txt"), "dirty\n");
+
+    const result = run(["-p", repo, "init", "demo", "spec-driven"]);
+
+    assert.notEqual(result.status, 0);
+    assert.match(result.stderr, /工作区不干净/);
+    assert.equal(git(repo, ["branch", "--show-current"]).stdout.trim(), "main");
   } finally {
     await rm(repo, { recursive: true, force: true });
   }

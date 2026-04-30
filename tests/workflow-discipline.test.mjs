@@ -207,7 +207,9 @@ test("workflow git lifecycle contract is centralized and referenced", async () =
   const archive = await skill("opsx-archive");
   const workflows = await readFile("docs/workflows.md", "utf8");
 
-  assert.match(contract, /Git 检查是强制的，Git 提交是有条件的/);
+  assert.match(contract, /正式 change 的本地分支和关键节点 checkpoint 是强制的/);
+  assert.match(contract, /opsx git checkpoint --message/);
+  assert.match(contract, /opsx git merge-back <change\|fast> <id>/);
   assert.match(contract, /任一 gate 从 fail 或 blocking 进入 pass/);
   assert.match(contract, /pending_merge_reason/);
   assert.match(contract, /git branch -d opsx\/<change-id>/);
